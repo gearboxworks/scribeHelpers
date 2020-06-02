@@ -3,7 +3,7 @@ package scribeLoader
 import (
 	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"os"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"text/template"
 )
 

@@ -1,7 +1,7 @@
 package helperGit
 
 import (
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"gopkg.in/src-d/go-git.v4"
 )
 

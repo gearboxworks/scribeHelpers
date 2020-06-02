@@ -1,6 +1,6 @@
 package helperSystem
 
-import "github.com/newclarity/scribe/ux"
+import "github.com/newclarity/scribeHelpers/ux"
 
 type HelperSystem TypeSystem
 func (p *HelperSystem) Reflect() *TypeSystem {

@@ -1,6 +1,6 @@
 package helperExample
 
-import "github.com/newclarity/scribe/ux"
+import "github.com/newclarity/scribeHelpers/ux"
 
 
 type HelperExample TypeExample

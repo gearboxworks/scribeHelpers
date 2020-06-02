@@ -3,7 +3,7 @@ package scribeLoader
 import (
 	"fmt"
 	"github.com/newclarity/scribeHelpers/helperExec"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"os/exec"
 	"strings"

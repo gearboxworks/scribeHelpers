@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"github.com/newclarity/scribeHelpers/helperPath"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"strings"
 	"text/template"
 )

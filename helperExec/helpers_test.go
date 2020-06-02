@@ -2,7 +2,7 @@ package helperExec
 
 import (
 	"github.com/davecgh/go-spew/spew"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"testing"
 )
 

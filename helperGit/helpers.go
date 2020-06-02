@@ -2,7 +2,7 @@ package helperGit
 
 import (
 	"github.com/newclarity/scribeHelpers/helperPath"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/tsuyoshiwada/go-gitcmd"
 )
 

@@ -2,7 +2,7 @@ package helperExec
 
 import (
 	"github.com/newclarity/scribeHelpers/helperTypes"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"io/ioutil"
 	"log"
 	"os"

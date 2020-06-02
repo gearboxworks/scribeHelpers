@@ -13,7 +13,7 @@ import (
 	"github.com/newclarity/scribeHelpers/helperSystem"
 	"github.com/newclarity/scribeHelpers/helperTypes"
 	"github.com/newclarity/scribeHelpers/helperUx"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"path/filepath"
 	"reflect"
 	"runtime"

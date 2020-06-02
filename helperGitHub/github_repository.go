@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/google/go-github/v31/github"
 	"github.com/newclarity/scribeHelpers/helperTypes"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 )
 
 

@@ -4,7 +4,7 @@ package helperCopy
 import (
 	"fmt"
 	"github.com/newclarity/scribeHelpers/helperTypes"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"os/exec"
 	"strings"
 	"syscall"

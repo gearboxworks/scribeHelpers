@@ -21,7 +21,7 @@ package scribeLoader
 import (
 	"bytes"
 	"fmt"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"go/ast"
 	"go/parser"
 	"go/token"

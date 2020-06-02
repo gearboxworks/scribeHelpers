@@ -3,7 +3,7 @@ package scribeLoader
 import (
 	"github.com/newclarity/scribeHelpers/helperPath"
 	"github.com/newclarity/scribeHelpers/helperRuntime"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"strings"
 )
 

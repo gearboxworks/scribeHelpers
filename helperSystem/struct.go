@@ -1,7 +1,7 @@
 package helperSystem
 
 import (
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 )
 
 type SystemGetter interface {

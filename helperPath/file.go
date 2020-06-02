@@ -2,7 +2,7 @@ package helperPath
 
 import (
 	"github.com/newclarity/scribeHelpers/helperPrompt"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"io/ioutil"
 	"os"
 	"strings"

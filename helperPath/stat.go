@@ -2,7 +2,7 @@ package helperPath
 
 import (
 	"fmt"
-	"github.com/newclarity/scribe/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"path/filepath"
 )
