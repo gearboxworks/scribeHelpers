@@ -1,0 +1,4 @@
+// +build darwin
+
+package helperExample
+
