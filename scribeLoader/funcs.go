@@ -1,4 +1,4 @@
-package loader
+package scribeLoader
 
 import (
 	"fmt"
@@ -288,14 +288,14 @@ func (at *ArgTemplate) CreateTemplate() (*template.Template, *ux.State) {
 
 	for range OnlyOnce {
 		// Define additional template functions.
-		at.State = helpers.DiscoverHelpers()
+		at.State = DiscoverHelpers()
 		if at.State.IsNotOk() {
 			break
 		}
 		at.LoadHelpers(at.State.Response.(template.FuncMap))
 
 		// Add inbuilt helpers.
-		at.Helpers["PrintHelpers"] = helpers.PrintHelpers
+		at.Helpers["PrintHelpers"] = PrintHelpers
 
 		t = template.New("JSON").Funcs(at.Helpers)
 	}
@@ -340,5 +340,5 @@ func (at *ArgTemplate) LoadHelpers(h template.FuncMap) *ux.State {
 
 
 func (at *ArgTemplate) PrintHelpers() {
-	_, _ = fmt.Fprintf(os.Stderr, helpers.PrintHelpers())
+	_, _ = fmt.Fprintf(os.Stderr, PrintHelpers())
 }

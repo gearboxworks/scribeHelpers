@@ -1,4 +1,4 @@
-package loader
+package scribeLoader
 
 import (
 	"fmt"
@@ -21,7 +21,6 @@ import (
 	"strings"
 	"text/template"
 )
-const OnlyOnce = "1"
 
 
 const HelperPrefix = "Helper"

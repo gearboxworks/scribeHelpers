@@ -1,4 +1,4 @@
-package loader
+package scribeLoader
 
 import (
 	"encoding/json"
