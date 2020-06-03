@@ -17,6 +17,8 @@ var Types = map[string]reflect.Type{
 	"SshAuthArgs": reflect.TypeOf((*SshAuthArgs)(nil)).Elem(),
 	"SshClientArgs": reflect.TypeOf((*SshClientArgs)(nil)).Elem(),
 	"StatusLine": reflect.TypeOf((*StatusLine)(nil)).Elem(),
+	"TypeMatchContainer": reflect.TypeOf((*TypeMatchContainer)(nil)).Elem(),
+	"TypeMatchImage": reflect.TypeOf((*TypeMatchImage)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{

@@ -1,6 +1,7 @@
 package helperPath
 
 import (
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"time"
@@ -46,9 +47,10 @@ func ReflectHelperOsPath(p *TypeOsPath) *HelperOsPath {
 }
 
 
-func New(debugMode bool) *TypeOsPath {
+func New(runtime *helperRuntime.TypeRuntime) *TypeOsPath {
+	runtime = runtime.EnsureNotNil()
+
 	p := &TypeOsPath{
-		State:         ux.NewState(debugMode),
 		_Path:         "",
 		_Filename:     "",
 		_Dirname:      "",
@@ -64,10 +66,11 @@ func New(debugMode bool) *TypeOsPath {
 		_Valid:        false,
 		_CanRemove:    false,
 		_CanOverwrite: false,
+
+		State:         ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	p.State.SetPackage("")
 	p.State.SetFunctionCaller()
-
 	return p
 }
 
@@ -83,7 +86,7 @@ func (p *TypeOsPath) IsNil() *ux.State {
 
 func (p *TypeOsPath) EnsureNotNil() *TypeOsPath {
 	if p == nil {
-		return New(true)
+		return New(nil)
 	}
 	return p
 }

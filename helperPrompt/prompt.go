@@ -2,8 +2,8 @@ package helperPrompt
 
 import (
 	"fmt"
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
-
 	// "golang.org/x/crypto/ssh/terminal"
 )
 
@@ -35,16 +35,17 @@ func UserPromptHidden(prompt string, args ...interface{}) string {
 
 
 // Dummy New()
-func New(debugFlag bool) *TypePrompt {
+func New(runtime *helperRuntime.TypeRuntime) *TypePrompt {
+	runtime = runtime.EnsureNotNil()
 
-	ret := TypePrompt{
+	p := TypePrompt{
 		string: "",
-
-		Debug: debugFlag,
-		State:  ux.NewState(debugFlag),
+		Debug:  runtime.Debug,
+		State:  ux.NewState(runtime.CmdName, runtime.Debug),
 	}
-
-	return &ret
+	p.State.SetPackage("")
+	p.State.SetFunctionCaller()
+	return &p
 }
 
 
@@ -59,7 +60,7 @@ func (p *TypePrompt) IsNil() *ux.State {
 
 func (p *TypePrompt) EnsureNotNil() *TypePrompt {
 	if p == nil {
-		return New(true)
+		return New(nil)
 	}
 	return p
 }

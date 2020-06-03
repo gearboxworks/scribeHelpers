@@ -8,7 +8,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
-	"github.com/newclarity/scribeHelpers/helperGear/gearConfig"
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"io"
 	"os"
@@ -23,7 +23,7 @@ type Container struct {
 
 	Summary      *types.Container
 	Details      *types.ContainerJSON
-	GearConfig   *gearConfig.GearConfig
+	//GearConfig   *gearConfig.GearConfig
 
 	_Parent      *DockerGear
 	Debug        bool
@@ -32,19 +32,23 @@ type Container struct {
 type Containers []Container
 
 
-func NewContainer(debugMode bool) *Container {
+func NewContainer(runtime *helperRuntime.TypeRuntime) *Container {
+	runtime = runtime.EnsureNotNil()
+
 	c := &Container{
 		ID:         "",
 		Name:       "",
 		Version:    "",
 		Summary:    nil,
 		Details:    nil,
-		GearConfig: &gearConfig.GearConfig{},
+		//GearConfig: nil,
 		_Parent:    nil,
-		State:      ux.NewState(debugMode),
-	}
-	c.Debug = debugMode
 
+		Debug:      runtime.Debug,
+		State:      ux.NewState(runtime.CmdName, runtime.Debug),
+	}
+	c.State.SetPackage("")
+	c.State.SetFunctionCaller()
 	return c
 }
 
@@ -52,7 +56,7 @@ func NewContainer(debugMode bool) *Container {
 func (i *Container) EnsureNotNil() *Container {
 	for range OnlyOnce {
 		if i == nil {
-			i = NewContainer(i.Debug)
+			i = NewContainer(nil)
 		}
 		i.State = i.State.EnsureNotNil()
 	}
@@ -129,9 +133,8 @@ func (c *Container) Status() *ux.State {
 
 		c.Summary = &containers[0]
 
-		c.GearConfig = gearConfig.New(c.Summary.Labels["gearbox.json"])
-		if c.GearConfig.State.IsError() {
-			c.State.SetState(c.GearConfig.State)
+		c.State = c.GearConfig.ParseJson(c.Summary.Labels["gearbox.json"])
+		if c.State.IsError() {
 			break
 		}
 

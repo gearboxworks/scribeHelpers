@@ -6,7 +6,7 @@ replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.2019071716
 
 replace github.com/newclarity/scribeHelpers/ux => ../ux
 
-// replace github.com/newclarity/scribeHelpers/helperGear/gearConfig => ../helperGear/gearConfig
+replace github.com/newclarity/scribeHelpers/helperGear => ../helperGear
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
@@ -24,6 +24,7 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/newclarity/scribeHelpers/helperRuntime v0.0.0-20200603025545-971efd0cb59a
 	github.com/newclarity/scribeHelpers/ux v0.0.0-00010101000000-000000000000
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect

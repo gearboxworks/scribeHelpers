@@ -12,6 +12,7 @@ var Types = map[string]reflect.Type{
 }
 
 var Functions = map[string]reflect.Value{
+	"New": reflect.ValueOf(New),
 	"ReflectHelperExample": reflect.ValueOf(ReflectHelperExample),
 }
 

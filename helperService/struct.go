@@ -2,6 +2,7 @@ package helperService
 
 import (
 	"github.com/newclarity/scribeHelpers/helperPath"
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
@@ -27,18 +28,19 @@ func ReflectHelperService(p *TypeService) *HelperService {
 }
 
 
-func New(debugFlag bool) *TypeService {
-	c := &TypeService{
+func New(runtime *helperRuntime.TypeRuntime) *TypeService {
+	runtime = runtime.EnsureNotNil()
+
+	s := TypeService{
 		name: "",
-		path:   helperPath.New(debugFlag),
+		path:   helperPath.New(runtime.Debug),
 
-		Debug:  debugFlag,
-		State:  ux.NewState(debugFlag),
+		Debug:  runtime.Debug,
+		State:  ux.NewState(runtime.CmdName, runtime.Debug),
 	}
-	c.State.SetPackage("")
-	c.State.SetFunctionCaller()
-
-	return c
+	s.State.SetPackage("")
+	s.State.SetFunctionCaller()
+	return &s
 }
 
 

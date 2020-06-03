@@ -34,6 +34,7 @@ type StateGetter interface {
 type State struct {
 	prefix      string
 	prefixArray []string
+	_Executable string
 	_Package    string
 	_Function   string
 
@@ -64,10 +65,11 @@ type RuntimeDebug struct {
 const DefaultSeparator = "\n"
 
 
-func NewState(debugMode bool) *State {
+func NewState(name string, debugMode bool) *State {
 	me := State{}
 	me.Clear()
 	me.debug.Enabled = debugMode
+	me._Executable = name	// @TODO - Add this to debugging.
 
 	return &me
 }
@@ -75,7 +77,7 @@ func NewState(debugMode bool) *State {
 func (p *State) EnsureNotNil() *State {
 	for range OnlyOnce {
 		if p == nil {
-			p = NewState(false)
+			p = NewState("", false)
 		}
 		p.Clear()
 	}
@@ -85,7 +87,7 @@ func (p *State) EnsureNotNil() *State {
 func EnsureStateNotNil(p *State) *State {
 	for range OnlyOnce {
 		if p == nil {
-			p = NewState(false)
+			p = NewState("", false)
 		}
 		p.Clear()
 	}
@@ -94,7 +96,7 @@ func EnsureStateNotNil(p *State) *State {
 
 func IfNilReturnError(ref interface{}) *State {
 	if ref == nil {
-		s := NewState(true)
+		s := NewState("", true)
 		s._Fatal = errors.New("SW ERROR")
 		s.ExitCode = 255
 		return s
@@ -102,7 +104,7 @@ func IfNilReturnError(ref interface{}) *State {
 
 	state := SearchStructureForUxState(ref)
 	if state == nil {
-		state = NewState(false)
+		state = NewState("", false)
 	}
 	return state
 	//return ref.(*State)
@@ -232,7 +234,7 @@ func (p *State) GetState() *bool {
 }
 func (s *State) SetState(p *State) {
 	if s == nil {
-		s = NewState(true)
+		s = NewState("", true)
 		s._Fatal = errors.New("SW ERROR")
 		s.ExitCode = 255
 		return

@@ -5,7 +5,7 @@ package helperPath
 //		{{ $ret := Chdir "/root" }}
 //		{{ if $ret.IsOk }}OK{{ end }}
 func HelperChdir(dir ...interface{}) *TypeOsPath {
-	ret := New(false)
+	ret := New(nil)
 
 	for range OnlyOnce {
 		ret.State.SetFunction("")
@@ -28,7 +28,7 @@ func HelperChdir(dir ...interface{}) *TypeOsPath {
 //		{{ $ret := GetCwd }}
 //		{{ if $ret.IsOk }}Current directory is {{ $ret.Dir }}{{ end }}
 func HelperGetCwd() *TypeOsPath {
-	ret := New(false)
+	ret := New(nil)
 
 	for range OnlyOnce {
 		ret.State.SetFunction("")
@@ -48,7 +48,7 @@ func HelperGetCwd() *TypeOsPath {
 //		{{ $ret := GetCwd }}
 //		{{ if $ret.IsOk }}Current directory is {{ $ret.Dir }}{{ end }}
 func HelperIsCwd() *TypeOsPath {
-	ret := New(false)
+	ret := New(nil)
 
 	for range OnlyOnce {
 		ret.State.SetFunction("")
@@ -68,7 +68,7 @@ func HelperIsCwd() *TypeOsPath {
 //		{{ $ret := Chmod 0644 "/root" ... }}
 //		{{ if $ret.IsOk }}Changed perms of file {{ $ret.Dir }}{{ end }}
 func HelperCreateDir(path ...interface{}) *TypeOsPath {
-	ret := New(false)
+	ret := New(nil)
 
 	for range OnlyOnce {
 		ret.State.SetFunction("")
@@ -94,7 +94,7 @@ func HelperCreateDir(path ...interface{}) *TypeOsPath {
 //		{{ $ret := Chmod 0644 "/root" ... }}
 //		{{ if $ret.IsOk }}Changed perms of file {{ $ret.Dir }}{{ end }}
 func HelperRemoveDir(path ...interface{}) *TypeOsPath {
-	ret := New(false)
+	ret := New(nil)
 
 	for range OnlyOnce {
 		ret.State.SetFunction("")

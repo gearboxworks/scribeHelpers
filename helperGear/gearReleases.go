@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"github.com/cavaliercoder/grab"
 	"github.com/google/go-github/github"
-	"golang.org/x/net/context"
-	"launch/ospaths"
+	"github.com/newclarity/scribeHelpers/helperPath"
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
+	"golang.org/x/net/context"
 	"os"
 	"strings"
 	"time"
@@ -21,7 +22,7 @@ type GitHubRepo struct {
 	Map             ReleasesMap
 	Latest	        *Release
 	Selected        *Release
-	BaseDir         *ospaths.Dir
+	BaseDir         *helperPath.TypeOsPath
 
 	Debug           bool
 	State           *ux.State
@@ -31,7 +32,7 @@ type Version string
 
 type Release struct {
 	Version       Version
-	File          *ospaths.File
+	File          *helperPath.TypeOsPath
 	Size          int64
 	Url           string
 	Instance      *github.RepositoryRelease
@@ -54,22 +55,21 @@ type ReleaseSelector struct {
 }
 
 
-func New(debugMode bool) *GitHubRepo {
-	var ret GitHubRepo
+func NewRepo(runtime *helperRuntime.TypeRuntime) *GitHubRepo {
+	runtime = runtime.EnsureNotNil()
 
-	for range OnlyOnce {
-		ret.State = ret.State.EnsureNotNil()
-		ret.State.DebugSet(debugMode)
-		ret.Debug = debugMode
+	repo := GitHubRepo{
+		Map:      make(ReleasesMap),
+		Latest:   nil,
+		Selected: nil,
+		BaseDir:  helperPath.HelperNewPath(runtime.CmdDir, "iso"),
 
-		p := ospaths.New("")
-		ret.BaseDir = p.UserConfigDir.AddToPath("iso")
-		ret.Map = make(ReleasesMap)
-
-		//ret.State = ret.UpdateReleases()
+		Debug:    runtime.Debug,
+		State:    ux.NewState(runtime.CmdName, runtime.Debug),
 	}
+	//repo.State = ret.UpdateReleases()
 
-	return &ret
+	return &repo
 }
 
 
@@ -152,8 +152,10 @@ func (ghr *GitHubRepo) UpdateReleases() *ux.State {
 
 	for range OnlyOnce {
 		if ghr.BaseDir == nil {
-			p := ospaths.New("")
-			ghr.BaseDir = p.UserConfigDir.AddToPath("iso")
+			ghr.BaseDir = helperPath.HelperNewPath("")
+			_ = ghr.BaseDir.AppendPath("iso")
+			//p := ospaths.New("")
+			//ghr.BaseDir = p.UserConfigDir.AddToPath("iso")
 		}
 
 		var rm = make(ReleasesMap)
@@ -188,7 +190,8 @@ func (ghr *GitHubRepo) UpdateReleases() *ux.State {
 				if strings.HasSuffix(asset.GetBrowserDownloadURL(), ".iso") {
 					// Return the first ISO found.
 					release.Url = asset.GetBrowserDownloadURL()
-					release.File = ghr.BaseDir.AddFileToPath(asset.GetName())
+					//release.File = ghr.BaseDir.AddFileToPath(asset.GetName())
+					_ = release.File.SetPath(ghr.BaseDir.GetPath(), asset.GetName())
 					release.Size = int64(asset.GetSize())
 					break
 				}
@@ -253,13 +256,13 @@ func (r *Release) GetIso() *ux.State {
 	}
 
 	for range OnlyOnce {
-		if r.File.String() == "" {
-			r.State.SetError(fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
+		if r.File.GetPath() == "" {
+			r.State.SetError(fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath()))
 			break
 		}
 
 		if r.Url == "" {
-			r.State.SetError(fmt.Sprintf("no Gearbox OS iso url defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
+			r.State.SetError(fmt.Sprintf("no Gearbox OS iso url defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath()))
 			break
 		}
 
@@ -275,14 +278,14 @@ func (r *Release) GetIso() *ux.State {
 		r.DlIndex = 0
 		r.IsDownloading = true
 		client := grab.NewClient()
-		req, _ := grab.NewRequest(r.File.String(), r.Url)
+		req, _ := grab.NewRequest(r.File.GetPath(), r.Url)
 		ux.Printf("downloading ISO from URL %s", req.URL().String())
 		resp := client.Do(req)
 		// fmt.Printf("  %v\n", resp.HTTPResponse.Status)
 		ux.Printf("%s VM: Downloading ISO from '%s' to '%s'. Size:%d\n",
 			Brandname,
 			r.Url,
-			r.File.String(),
+			r.File.GetPath(),
 			resp.Size)
 
 
@@ -297,7 +300,7 @@ func (r *Release) GetIso() *ux.State {
 					case <-t.C:
 						r.DlIndex = int(100*resp.Progress())
 						//r.publishDownloadState()
-						//fmt.Printf("Downloading '%s' transferred %v / %v bytes (%d%%)\n", r.File.String(), resp.BytesComplete(), resp.Size, r.DlIndex)
+						//fmt.Printf("Downloading '%s' transferred %v / %v bytes (%d%%)\n", r.File.GetPath(), resp.BytesComplete(), resp.Size, r.DlIndex)
 						fmt.Printf("%s VM: Downloading ISO - %d%% complete.\r",
 							Brandname,
 							r.DlIndex)
@@ -311,7 +314,7 @@ func (r *Release) GetIso() *ux.State {
 		// check for errors
 		if err := resp.Err(); err != nil {
 			ux.PrintfError("\nDownload failed\n")
-			r.State.SetError(fmt.Sprintf("ISO download failed VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
+			r.State.SetError(fmt.Sprintf("ISO download failed VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath()))
 			break
 		}
 		ux.PrintfOk("%s VM: Downloaded ISO completed OK.\n",
@@ -319,7 +322,7 @@ func (r *Release) GetIso() *ux.State {
 		)
 
 
-		//eblog.Debug(entity.VmBoxEntityName, "ISO fetched from '%s' and saved to '%s'. Size:%d", r.Url, r.File.String(), resp.Size)
+		//eblog.Debug(entity.VmBoxEntityName, "ISO fetched from '%s' and saved to '%s'. Size:%d", r.Url, r.File.GetPath(), resp.Size)
 		r.DlIndex = 100
 		//r.publishDownloadState()
 		r.IsDownloading = false
@@ -352,39 +355,39 @@ func (r *Release) IsIsoFilePresent() (int, *ux.State) {
 	}
 
 	for range OnlyOnce {
-		if r.File.String() == "" {
-			r.State.SetError( fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
+		if r.File.GetPath() == "" {
+			r.State.SetError( fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath()))
 			break
 		}
 
-		stat, err := os.Stat(r.File.String())
+		stat, err := os.Stat(r.File.GetPath())
 		if os.IsNotExist(err) {
-			r.State.SetError("ISO file needs to download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String())
+			r.State.SetError("ISO file needs to download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath())
 			ret = IsoFileNeedsToDownload
 			break
 		}
 
 		if r.IsDownloading {
-			r.State.SetError("ISO file still downloading VmIsoUrl:%s VmIsoFile:%s Percent:%d", r.Url, r.File.String(), r.DlIndex)
+			r.State.SetError("ISO file still downloading VmIsoUrl:%s VmIsoFile:%s Percent:%d", r.Url, r.File.GetPath(), r.DlIndex)
 			ret = IsoFileIsDownloading
 			break
 		}
 
 		if stat.Size() != r.Size {
-			r.State.SetError("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String())
+			r.State.SetError("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath())
 			ret = IsoFileNeedsToDownload
 			break
 		}
 
 		//if r.DlIndex < 100 {
-		//	err = errors.New("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String())
+		//	err = errors.New("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath())
 		//	ret = IsoFileNeedsToDownload
 		//	break
 		//}
 
 		ret = IsoFileDownloaded
 		r.DlIndex = 100
-		//eblog.Debug(entity.VmBoxEntityName, "ISO already fetched from '%s' and saved to '%s'", r.Url, r.File.String())
+		//eblog.Debug(entity.VmBoxEntityName, "ISO already fetched from '%s' and saved to '%s'", r.Url, r.File.GetPath())
 	}
 
 	return ret, r.State

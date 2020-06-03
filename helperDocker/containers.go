@@ -49,10 +49,16 @@ func (gear *DockerGear) ContainerList(f string) (int, *ux.State) {
 			"Size",
 		})
 
+
+		//gc := helperGear.NewGearConfig(gear.Runtime)
+		gc := gearConfig.New(gear.Runtime)
 		for _, c := range containers {
-			var gc *gearConfig.GearConfig
-			gc = gearConfig.New(c.Labels["gearbox.json"])
-			if gc.State.IsError() {
+			//c.State = gc.ParseJson(c.Summary.Labels["gearbox.json"])
+			//if c.State.IsError() {
+			//	break
+			//}
+			gear.State = gc.ParseJson(c.Labels["gearbox.json"])
+			if gear.State.IsError() {
 				continue
 			}
 
@@ -165,7 +171,8 @@ func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool
 
 		for _, c := range containers {
 			var gc *gearConfig.GearConfig
-			ok, gc = MatchContainer(&c, DefaultOrganization, gearName, gearVersion)
+			ok, gc = MatchContainer(&c,
+				TypeMatchContainer{Organization: DefaultOrganization, Name: gearName, Version: gearVersion})
 			if !ok {
 				continue
 			}
@@ -210,9 +217,10 @@ func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool
 }
 
 
-func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVersion string) (bool, *gearConfig.GearConfig) {
+//func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVersion string) (bool, *gearConfig.GearConfig) {
+func MatchContainer(m *types.Container, match TypeMatchContainer) (bool, *gearConfig.GearConfig) {
 	var ok bool
-	var gc *gearConfig.GearConfig
+	gc := gearConfig.New(gear.Runtime)
 
 	for range OnlyOnce {
 		if MatchTag("<none>:<none>", m.Names) {
@@ -220,7 +228,7 @@ func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVer
 			break
 		}
 
-		gc = gearConfig.New(m.Labels["gearbox.json"])
+		gc.State = gc.ParseJson(m.Labels["gearbox.json"])
 		if gc.State.IsError() {
 			ok = false
 			break
@@ -231,45 +239,47 @@ func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVer
 			break
 		}
 
-		tagCheck := fmt.Sprintf("%s/%s:%s", gearOrg, gearName, gearVersion)
+		tagCheck := fmt.Sprintf("%s/%s:%s", match.Organization, match.Name, match.Version)
 		if m.Image == tagCheck {
 			ok = true
 			break
 		}
 
-		if gc.Meta.Name != gearName {
-			if !RunAs.AsLink {
+		if gc.Meta.Name != match.Name {
+			//if !RunAs.AsLink {
+			if gc.Runtime.IsRunningAsFile() {
 				ok = false
 				break
 			}
 
-			cs := gc.MatchCommand(gearName)
+			cs := gc.MatchCommand(match.Name)
 			if cs == nil {
 				ok = false
 				break
 			}
 
-			gearName = gc.Meta.Name
+			match.Name = gc.Meta.Name
 		}
 
-		if !gc.Versions.HasVersion(gearVersion) {
+		if !gc.Versions.HasVersion(match.Version) {
 			ok = false
 			break
 		}
 
-		if gearVersion == "latest" {
+		if match.Version == "latest" {
 			gl := gc.Versions.GetLatest()
-			if gearVersion != "" {
-				gearVersion = gl
+			if match.Version != "" {
+				match.Version = gl
 			}
 		}
+
 		for range OnlyOnce {
-			if m.Labels["gearbox.version"] == gearVersion {
+			if m.Labels["gearbox.version"] == match.Version {
 				ok = true
 				break
 			}
 
-			if m.Labels["container.majorversion"] == gearVersion {
+			if m.Labels["container.majorversion"] == match.Version {
 				ok = true
 				break
 			}

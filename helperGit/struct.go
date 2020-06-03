@@ -1,10 +1,11 @@
 package helperGit
 
 import (
-	"github.com/tsuyoshiwada/go-gitcmd"
 	"github.com/newclarity/scribeHelpers/helperExec"
 	"github.com/newclarity/scribeHelpers/helperPath"
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/tsuyoshiwada/go-gitcmd"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
@@ -32,22 +33,23 @@ type TypeGit struct {
 }
 
 
-func New(debugFlag bool) *TypeGit {
+func New(runtime *helperRuntime.TypeRuntime) *TypeGit {
+	runtime = runtime.EnsureNotNil()
+
 	p := TypeGit{
 		Url:          "",
-		Base:         helperPath.New(debugFlag),
+		Base:         helperPath.New(runtime),
 		GitConfig:    nil,
 		GitOptions:   nil,
 		skipDirCheck: false,
 		client:       nil,
 		repository:   nil,
 
-		Debug:        debugFlag,
-		State:        ux.NewState(debugFlag),
+		Debug:        runtime.Debug,
+		State:        ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	p.State.SetPackage("")
 	p.State.SetFunctionCaller()
-
 	return &p
 }
 

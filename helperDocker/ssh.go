@@ -98,7 +98,7 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 			GearName:    gear.Container.Name,
 			GearVersion: gear.Container.Version,
 			CmdArgs:     cmdArgs,
-			State:       ux.NewState(gear.Debug),
+			State:       ux.NewState(gear.Runtime.CmdName, gear.Runtime.Debug),
 		})
 
 
@@ -174,14 +174,14 @@ func (gear *DockerGear) SetMountPath(mp string) *ux.State {
 		var err error
 		var cwd string
 
-		if mp == defaults.DefaultPathNone {
+		if mp == DefaultPathNone {
 			break
 		}
 
 		switch {
-			case mp == defaults.DefaultPathEmpty:
+			case mp == DefaultPathEmpty:
 				fallthrough
-			case mp == defaults.DefaultPathCwd:
+			case mp == DefaultPathCwd:
 				cwd, err = os.Getwd()
 				if err != nil {
 					gear.State.SetError(err)
@@ -190,7 +190,7 @@ func (gear *DockerGear) SetMountPath(mp string) *ux.State {
 				gear.State.SetOk()
 				gear.Ssh.FsMount = cwd
 
-			case mp == defaults.DefaultPathHome:
+			case mp == DefaultPathHome:
 				var u *user.User
 				u, err = user.Current()
 				if err != nil {

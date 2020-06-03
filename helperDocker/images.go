@@ -44,10 +44,10 @@ func (gear *DockerGear) ImageList(f string) (int, *ux.State) {
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{"Class", "Image", "Ports", "Size"})
 
+		gc := gearConfig.New(gear.Runtime)
 		for _, i := range images {
-			var gc *gearConfig.GearConfig
-			gc = gearConfig.New(i.Labels["gearbox.json"])
-			if gc.State.IsError() {
+			gear.State = gc.ParseJson(i.Labels["gearbox.json"])
+			if gear.State.IsError() {
 				continue
 			}
 
@@ -130,7 +130,8 @@ func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, *u
 
 		for _, i := range images {
 			var gc *gearConfig.GearConfig
-			ok, gc = MatchImage(&i, DefaultOrganization, gearName, gearVersion)
+			ok, gc = MatchImage(&i,
+				TypeMatchImage{Organization: DefaultOrganization, Name: gearName, Version: gearVersion})
 			if !ok {
 				continue
 			}
@@ -214,9 +215,10 @@ func (gear *DockerGear) Search(gearName string, gearVersion string) *ux.State {
 }
 
 
-func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVersion string) (bool, *gearConfig.GearConfig) {
+//func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVersion string) (bool, *gearConfig.GearConfig) {
+func MatchImage(m *types.ImageSummary, match TypeMatchImage) (bool, *gearConfig.GearConfig) {
 	var ok bool
-	var gc *gearConfig.GearConfig
+	gc := gearConfig.New(gear.Runtime)
 
 	for range OnlyOnce {
 		if MatchTag("<none>:<none>", m.RepoTags) {
@@ -224,7 +226,7 @@ func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVers
 			break
 		}
 
-		gc = gearConfig.New(m.Labels["gearbox.json"])
+		gc.State = gc.ParseJson(m.Labels["gearbox.json"])
 		if gc.State.IsError() {
 			ok = false
 			break
@@ -235,45 +237,46 @@ func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVers
 			break
 		}
 
-		tagCheck := fmt.Sprintf("%s/%s:%s", gearOrg, gearName, gearVersion)
+		tagCheck := fmt.Sprintf("%s/%s:%s", match.Organization, match.Name, match.Version)
 		if !MatchTag(tagCheck, m.RepoTags) {
 			ok = false
 			break
 		}
 
-		if gc.Meta.Name != gearName {
+		if gc.Meta.Name != match.Name {
 			if !RunAs.AsLink {
 				ok = false
 				break
 			}
 
-			cs := gc.MatchCommand(gearName)
+			cs := gc.MatchCommand(match.Name)
 			if cs == nil {
 				ok = false
 				break
 			}
 
-			gearName = gc.Meta.Name
+			match.Name = gc.Meta.Name
 		}
 
-		if !gc.Versions.HasVersion(gearVersion) {
+		if !gc.Versions.HasVersion(match.Version) {
 			ok = false
 			break
 		}
 
-		if gearVersion == "latest" {
+		if match.Version == "latest" {
 			gl := gc.Versions.GetLatest()
-			if gearVersion != "" {
-				gearVersion = gl
+			if match.Version != "" {
+				match.Version = gl
 			}
 		}
+
 		for range OnlyOnce {
-			if m.Labels["gearbox.version"] == gearVersion {
+			if m.Labels["gearbox.version"] == match.Version {
 				ok = true
 				break
 			}
 
-			if m.Labels["container.majorversion"] == gearVersion {
+			if m.Labels["container.majorversion"] == match.Version {
 				ok = true
 				break
 			}

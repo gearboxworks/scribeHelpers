@@ -2,6 +2,7 @@ package helperGitHub
 
 import (
 	"github.com/google/go-github/v31/github"
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
@@ -16,19 +17,20 @@ type TypeGitHub struct {
 }
 
 
-func New(debugMode bool) *TypeGitHub {
-	ret := &TypeGitHub {
+func New(runtime *helperRuntime.TypeRuntime) *TypeGitHub {
+	runtime = runtime.EnsureNotNil()
+
+	gh := &TypeGitHub {
 		User:   nil,
 		Client: nil,
 		Valid:  true,
 
-		Debug:  debugMode,
-		State:  ux.NewState(debugMode),
+		Debug:  runtime.Debug,
+		State:  ux.NewState(runtime.CmdName, runtime.Debug),
 	}
-	ret.State.SetPackage("")
-	ret.State.SetFunctionCaller()
-
-	return ret
+	gh.State.SetPackage("")
+	gh.State.SetFunctionCaller()
+	return gh
 }
 
 

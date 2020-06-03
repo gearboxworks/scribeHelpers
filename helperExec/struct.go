@@ -2,6 +2,7 @@ package helperExec
 
 import (
 	"bytes"
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/helperPath"
 	"github.com/newclarity/scribeHelpers/helperTypes"
 	"github.com/newclarity/scribeHelpers/ux"
@@ -30,7 +31,9 @@ type TypeExecCommand struct {
 }
 
 
-func New(debugMode bool) *TypeExecCommand {
+func New(runtime *helperRuntime.TypeRuntime) *TypeExecCommand {
+	runtime = runtime.EnsureNotNil()
+
 	ret := &TypeExecCommand {
 		exe:    "",
 		args:   nil,
@@ -40,19 +43,18 @@ func New(debugMode bool) *TypeExecCommand {
 		stderr: []byte{},
 		exit:   0,
 
-		Debug:  debugMode,
+		Debug:  runtime.Debug,
 
-		State:   ux.NewState(debugMode),
+		State:   ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	ret.State.SetPackage("")
 	ret.State.SetFunctionCaller()
-
 	return ret
 }
 
 
 func ReflectExecCommand(ref ...interface{}) *TypeExecCommand {
-	ec := New(false)
+	ec := New(nil)
 
 	for range OnlyOnce {
 		s := *helperTypes.ReflectStrings(ref)

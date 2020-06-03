@@ -5,7 +5,6 @@ import (
 	"github.com/google/go-github/v31/github"
 	"github.com/newclarity/scribeHelpers/helperPrompt"
 	"github.com/newclarity/scribeHelpers/helperTypes"
-	//"github.com/newclarity/scribeHelpers/ux"
 	"reflect"
 	"strings"
 )

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/newclarity/scribeHelpers/helperGear/gearConfig"
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"io"
 	"os"
@@ -22,7 +22,7 @@ type Image struct {
 	Version    string
 	Summary    *types.ImageSummary
 	Details    types.ImageInspect
-	GearConfig *gearConfig.GearConfig
+	//GearConfig *gearConfig.GearConfig
 
 	_Parent    *DockerGear
 	Debug      bool
@@ -30,8 +30,10 @@ type Image struct {
 }
 
 
-func NewImage(debugMode bool) *Image {
-	me := Image{
+func NewImage(runtime *helperRuntime.TypeRuntime) *Image {
+	runtime = runtime.EnsureNotNil()
+
+	i := Image{
 		ID:         "",
 		Name:       "",
 		Version:    "",
@@ -39,18 +41,19 @@ func NewImage(debugMode bool) *Image {
 		Details:    types.ImageInspect{},
 		GearConfig: nil,
 		_Parent:    nil,
-		Debug:      false,
-		State:      nil,
-	}
-	me.Debug = debugMode
 
-	return &me
+		Debug:      runtime.Debug,
+		State:      ux.NewState(runtime.CmdName, runtime.Debug),
+	}
+	i.State.SetPackage("")
+	i.State.SetFunctionCaller()
+	return &i
 }
 
 func (i *Image) EnsureNotNil() *Image {
 	for range OnlyOnce {
 		if i == nil {
-			i = NewImage(i.Debug)
+			i = NewImage(nil)
 		}
 		i.State = i.State.EnsureNotNil()
 	}
@@ -138,7 +141,8 @@ func (i *Image) Status() *ux.State {
 		}
 
 		if i.GearConfig == nil {
-			i.GearConfig = gearConfig.New(i.Summary.Labels["gearbox.json"])
+			i.GearConfig = gearConfig.New(nil)
+			i.GearConfig.ParseJson(i.Summary.Labels["gearbox.json"])
 			if i.GearConfig.State.IsError() {
 				i.State.SetState(i.GearConfig.State)
 				break

@@ -27,7 +27,7 @@ func (c *HelperOsPath) IsNil() *ux.State {
 //		{{ $str := ReadFile "filename.txt" }}
 //func HelperNewPath(file ...interface{}) *HelperOsPath {
 func HelperNewPath(file ...interface{}) *TypeOsPath {
-	ret := New(false)
+	ret := New(nil)
 
 	for range OnlyOnce {
 		ret.State.SetFunction("")
@@ -58,7 +58,7 @@ func HelperNewPath(file ...interface{}) *TypeOsPath {
 //		{{ $ret := Chmod 0644 "/root" ... }}
 //		{{ if $ret.IsOk }}Changed perms of file {{ $ret.Dir }}{{ end }}
 func HelperChmod(mode interface{}, path ...interface{}) *TypeOsPath {
-	ret := New(false)
+	ret := New(nil)
 
 	for range OnlyOnce {
 		ret.State.SetFunction("")

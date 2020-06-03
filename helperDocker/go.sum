@@ -89,6 +89,10 @@ github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh
 github.com/morikuni/aec v1.0.0 h1:nP9CBfwrvYnBRgY6qfDQkygYDmYwOilePFkwzv4dU8A=
 github.com/morikuni/aec v1.0.0/go.mod h1:BbKIizmSmc5MMPqRYbxO4ZU0S0+P200+tUnFx7PXmsc=
 github.com/newclarity/scribeHelpers v0.0.0-20200602112526-02c317f22772 h1:JWjuK7EO3eFUVpnKRf6r92THwSdmgl8MKrM4fDXEdLE=
+github.com/newclarity/scribeHelpers v0.0.0-20200603025545-971efd0cb59a h1:oFa0gLxxO2psJNT4KKF8M3jufiLXYNCKJyPMjGvixoc=
+github.com/newclarity/scribeHelpers/helperGear v0.0.0-20200603025545-971efd0cb59a h1:VmGFzTlLohaZ0TJnG0bboC09yaxpHagkj6+lPLCphU8=
+github.com/newclarity/scribeHelpers/helperRuntime v0.0.0-20200603025545-971efd0cb59a h1:G5dkYSxfK+b1GqJkA/9SSAAVntOh8HOV3/jFv17azek=
+github.com/newclarity/scribeHelpers/helperRuntime v0.0.0-20200603025545-971efd0cb59a/go.mod h1:Mvq/9cA4bvFDuHkHMwN4Gmrijf9h66c/xjQGrc1NWnE=
 github.com/newclarity/scribeHelpers/ux v0.0.0-20200602112526-02c317f22772 h1:RDtfEWjtkVXmdS8gQEz120lXunRmGOdE56HlVL9+K0s=
 github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d h1:x3S6kxmy49zXVVyhcnrFqxvNVCBPb2KZ9hV2RBdS840=
 github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d/go.mod h1:IuKpRQcYE1Tfu+oAQqaLisqDeXgjyyltCfsaoYN18NQ=

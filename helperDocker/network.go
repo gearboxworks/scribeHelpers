@@ -20,7 +20,7 @@ func (gear *DockerGear) NetworkList(f string) *ux.State {
 	}
 
 	for range OnlyOnce {
-		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
@@ -76,7 +76,7 @@ func (gear *DockerGear) FindNetwork(netName string) *ux.State {
 		df := filters.NewArgs()
 		df.Add("name", netName)
 
-		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
@@ -136,7 +136,7 @@ func (gear *DockerGear) NetworkCreate(netName string) *ux.State {
 			Labels:         nil,
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 

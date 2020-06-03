@@ -1,6 +1,7 @@
 package helperSystem
 
 import (
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
@@ -25,17 +26,19 @@ func ReflectHelperSystem(p *TypeSystem) *HelperSystem {
 }
 
 
-func New(debugMode bool) *TypeSystem {
-	ret := &TypeSystem {
-		Procs: NewProcesses(debugMode),
+func New(runtime *helperRuntime.TypeRuntime) *TypeSystem {
+	runtime = runtime.EnsureNotNil()
+
+	s := TypeSystem {
+		Procs: NewProcesses(runtime.Debug),
 		Env:   &Environment{},
 
-		State: ux.NewState(debugMode),
+		State: ux.NewState(runtime.CmdName, runtime.Debug),
 	}
-	ret.State.SetPackage("")
-	ret.State.SetFunctionCaller()
+	s.State.SetPackage("")
+	s.State.SetFunctionCaller()
 
-	return ret
+	return &s
 }
 
 

@@ -2,6 +2,7 @@ package helperCopy
 
 import (
 	"github.com/newclarity/scribeHelpers/helperPath"
+	"github.com/newclarity/scribeHelpers/helperRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
@@ -46,10 +47,15 @@ func ReflectHelperOsCopy(p *TypeOsCopy) *HelperOsCopy {
 }
 
 
-func New(debugFlag bool) *TypeOsCopy {
+func New(runtime *helperRuntime.TypeRuntime) *TypeOsCopy {
+	// if state := runtime.IsNil(); state.IsError() {
+	// 	return &TypeOsCopy{State: state}
+	// }
+	runtime = runtime.EnsureNotNil()
+
 	c := &TypeOsCopy{
-		Source:       helperPath.New(debugFlag),
-		Destination:  helperPath.New(debugFlag),
+		Source:       helperPath.New(runtime),
+		Destination:  helperPath.New(runtime),
 
 		Exclude: PathArray{},
 		Include: PathArray{},
@@ -57,12 +63,11 @@ func New(debugFlag bool) *TypeOsCopy {
 		Method: NewCopyMethod(),
 
 		Valid:  false,
-		Debug:  debugFlag,
-		State:  ux.NewState(debugFlag),
+		Debug:  runtime.Debug,
+		State:  ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	c.State.SetPackage("")
 	c.State.SetFunctionCaller()
-
 	return c
 }
 
@@ -78,7 +83,7 @@ func (c *TypeOsCopy) IsNil() *ux.State {
 
 func (c *TypeOsCopy) EnsureNotNil() *TypeOsCopy {
 	if c == nil {
-		return New(true)
+		return New(nil)
 	}
 	return c
 }

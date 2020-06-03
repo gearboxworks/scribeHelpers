@@ -11,8 +11,6 @@ const OnlyOnce = "1"
 
 
 type TypeScribeArgs struct {
-	Exec            *helperRuntime.TypeRuntime
-
 	Json            *TypeArgFile
 	Template        *TypeArgFile
 	TemplateRef     *template.Template
@@ -36,6 +34,7 @@ type TypeScribeArgs struct {
 
 	Helpers        template.FuncMap
 
+	Runtime        *helperRuntime.TypeRuntime
 	State          *ux.State
 	valid          bool
 }
@@ -44,8 +43,6 @@ type TypeScribeArgs struct {
 func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
 
 	p := TypeScribeArgs{
-		Exec:           helperRuntime.New(binary, version, debugFlag),
-
 		Json:           &TypeArgFile{State: ux.NewState(debugFlag)},
 		Template:       &TypeArgFile{State: ux.NewState(debugFlag)},
 		TemplateRef:    nil,
@@ -63,6 +60,7 @@ func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
 
 		Helpers:        make(template.FuncMap),
 
+		Runtime:        helperRuntime.New(binary, version, debugFlag),
 		State:          ux.NewState(debugFlag),
 		valid:          false,
 	}
