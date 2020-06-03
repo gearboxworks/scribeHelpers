@@ -27,7 +27,7 @@ func (c *HelperOsCopy) IsNil() *ux.State {
 // Usage:
 //		{{ $copy := CopyFiles }}
 func HelperCopyFiles() *HelperOsCopy {
-	ret := NewOsCopy()
+	ret := New(false)
 
 	for range OnlyOnce {
 		ret.State.Clear()

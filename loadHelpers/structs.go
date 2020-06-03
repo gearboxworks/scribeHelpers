@@ -1,22 +1,22 @@
-package scribeLoader
+package loadHelpers
 
 import (
 	"github.com/newclarity/scribeHelpers/helperRuntime"
-	"os"
 	"github.com/newclarity/scribeHelpers/ux"
+	"os"
 	"text/template"
 )
 
 const OnlyOnce = "1"
 
 
-type ArgTemplate struct {
-	Exec            *helperRuntime.Exec
+type TypeScribeArgs struct {
+	Exec            *helperRuntime.TypeRuntime
 
-	Json            TypeArgFile
-	Template        TypeArgFile
+	Json            *TypeArgFile
+	Template        *TypeArgFile
 	TemplateRef     *template.Template
-	Output          TypeArgFile
+	Output          *TypeArgFile
 	OutputFh        *os.File
 
 	ExecShell      bool // Cmd: "run"
@@ -41,15 +41,15 @@ type ArgTemplate struct {
 }
 
 
-func NewArgTemplate(binary string, version string) *ArgTemplate {
+func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
 
-	p := ArgTemplate{
-		Exec:           helperRuntime.NewExec(binary, version),
+	p := TypeScribeArgs{
+		Exec:           helperRuntime.New(binary, version, debugFlag),
 
-		Json:           TypeArgFile{State: ux.NewState(false)},
-		Template:       TypeArgFile{State: ux.NewState(false)},
+		Json:           &TypeArgFile{State: ux.NewState(debugFlag)},
+		Template:       &TypeArgFile{State: ux.NewState(debugFlag)},
 		TemplateRef:    nil,
-		Output:         TypeArgFile{State: ux.NewState(false)},
+		Output:         &TypeArgFile{State: ux.NewState(debugFlag)},
 		OutputFh:       nil,
 
 		ExecShell:      false,
@@ -63,7 +63,7 @@ func NewArgTemplate(binary string, version string) *ArgTemplate {
 
 		Helpers:        make(template.FuncMap),
 
-		State:          ux.NewState(false),
+		State:          ux.NewState(debugFlag),
 		valid:          false,
 	}
 
@@ -73,7 +73,7 @@ func NewArgTemplate(binary string, version string) *ArgTemplate {
 	return &p
 }
 
-func (at *ArgTemplate) IsNil() *ux.State {
+func (at *TypeScribeArgs) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
@@ -81,14 +81,14 @@ func (at *ArgTemplate) IsNil() *ux.State {
 	return at.State
 }
 
-func (at *ArgTemplate) IsValid() bool {
+func (at *TypeScribeArgs) IsValid() bool {
 	return at.valid
 }
 
-func (at *ArgTemplate) SetValid() {
+func (at *TypeScribeArgs) SetValid() {
 	at.valid = true
 }
 
-func (at *ArgTemplate) SetInvalid() {
+func (at *TypeScribeArgs) SetInvalid() {
 	at.valid = false
 }

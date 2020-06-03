@@ -12,7 +12,7 @@ import (
 const OnlyOnce = "1"
 
 
-type Exec struct {
+type TypeRuntime struct {
 	CmdName     string		`json:"cmd_name" mapstructure:"cmd_name"`
 	CmdVersion  string		`json:"cmd_version" mapstructure:"cmd_version"`
 	Cmd         string		`json:"cmd" mapstructure:"cmd"`
@@ -27,6 +27,7 @@ type Exec struct {
 
 	TimeStamp   time.Time	`json:"timestamp" mapstructure:"timestamp"`
 
+	Debug       bool        `json:"debug" mapstructure:"debug"`
 	State       *ux.State	`json:"state" mapstructure:"state"`
 }
 
@@ -35,13 +36,13 @@ type ExecEnv []string
 type Environment map[string]string
 
 
-func NewExec(binary string, version string) *Exec {
-	var ret Exec
+func New(binary string, version string, debugFlag bool) *TypeRuntime {
+	var ret TypeRuntime
 
 	for range OnlyOnce {
 		var err error
 
-		ret.State = ux.NewState(false)
+		ret.State = ux.NewState(debugFlag)
 		ret.State.SetPackage("")
 		ret.State.SetFunction("")
 
@@ -82,89 +83,18 @@ func NewExec(binary string, version string) *Exec {
 }
 
 
-func (me *ExecArgs) ToString() string {
-	return strings.Join(*me, " ")
-}
-
-
-func (me *Exec) TimeStampString() string {
-	return me.TimeStamp.Format("2006-01-02T15:04:05-0700")
-}
-
-
-func (me *Exec) TimeStampEpoch() int64 {
-	return me.TimeStamp.Unix()
-}
-
-
-
-func (e *Exec) GetEnvMap() *Environment {
-	return &e.EnvMap
-}
-
-
-func (e *Exec) GetArg(index int) string {
-	var ret string
-
-	for range OnlyOnce {
-		if len(e.Args) > index {
-			ret = e.Args[index]
-		}
+func (r *TypeRuntime) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(r); state.IsError() {
+		return state
 	}
-
-	return ret
+	r.State = r.State.EnsureNotNil()
+	return r.State
 }
 
 
-func (e *Exec) SetArgs(a ...string) error {
-	var err error
-
-	for range OnlyOnce {
-		e.Args = a
+func (r *TypeRuntime) EnsureNotNil() *TypeRuntime {
+	if r == nil {
+		return New("binary", "version", true)
 	}
-
-	return err
-}
-
-
-func (e *Exec) GetArgs() []string {
-	return e.Args
-}
-
-
-func (e *Exec) AddArgs(a ...string) error {
-	var err error
-
-	for range OnlyOnce {
-		e.Args = append(e.Args, a...)
-	}
-
-	return err
-}
-
-
-func (e *Exec) SetFullArgs(a ...string) error {
-	var err error
-
-	for range OnlyOnce {
-		e.FullArgs = a
-	}
-
-	return err
-}
-
-
-func (e *Exec) GetFullArgs() []string {
-	return e.FullArgs
-}
-
-
-func (e *Exec) AddFullArgs(a ...string) error {
-	var err error
-
-	for range OnlyOnce {
-		e.FullArgs = append(e.FullArgs, a...)
-	}
-
-	return err
+	return r
 }

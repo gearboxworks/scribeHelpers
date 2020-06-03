@@ -65,7 +65,7 @@ func (p *TypeProcess) GetOpenFiles() *TypeOpenFiles {
 		}
 
 		for _, f := range of {
-			path := helperPath.NewOsPath(p.Debug)
+			path := helperPath.New(p.Debug)
 			path.SetPath(f.Path)
 			p.openFiles.Files = append(p.openFiles.Files, path)
 		}
@@ -211,9 +211,9 @@ func (p *TypeProcess) populateStruct(proc *process.Process) {
 		//var of []process.OpenFilesStat
 		//of, err = p.proc.OpenFiles()
 		//for _, h := range of {
-		//	ux.PrintflnBlue("String: %s => %s, %d", h.String(), h.Path, h.Fd)
-		//	//if strings.HasSuffix(h.Path, fmt.Sprintf("%c%s", filepath.Separator, p.name)) {
-		//	//	p.pathExe = helperPath.HelperNewPath(h.Path)
+		//	ux.PrintflnBlue("String: %s => %s, %d", h.String(), h.Filename, h.Fd)
+		//	//if strings.HasSuffix(h.Filename, fmt.Sprintf("%c%s", filepath.Separator, p.name)) {
+		//	//	p.pathExe = helperPath.HelperNewPath(h.Filename)
 		//	//}
 		//}
 

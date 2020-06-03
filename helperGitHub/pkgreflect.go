@@ -7,13 +7,14 @@ import "reflect"
 var Types = map[string]reflect.Type{
 	"TypeGetRepositories": reflect.TypeOf((*TypeGetRepositories)(nil)).Elem(),
 	"TypeGetRepository": reflect.TypeOf((*TypeGetRepository)(nil)).Elem(),
-	"TypeLogin": reflect.TypeOf((*TypeLogin)(nil)).Elem(),
+	"TypeGitHub": reflect.TypeOf((*TypeGitHub)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
 	"HelperGitHubGetBranch": reflect.ValueOf(HelperGitHubGetBranch),
 	"HelperGitHubGetOrganization": reflect.ValueOf(HelperGitHubGetOrganization),
 	"HelperGitHubLogin": reflect.ValueOf(HelperGitHubLogin),
+	"New": reflect.ValueOf(New),
 }
 
 var Variables = map[string]reflect.Value{

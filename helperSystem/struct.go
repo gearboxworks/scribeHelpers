@@ -24,24 +24,25 @@ func ReflectHelperSystem(p *TypeSystem) *HelperSystem {
 	return (*HelperSystem)(p)
 }
 
-func (p *TypeSystem) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(p); state.IsError() {
-		return state
-	}
-	p.State = p.State.EnsureNotNil()
-	return p.State
-}
 
-func NewSystem(debugMode bool) *TypeSystem {
-	p := &TypeSystem {
+func New(debugMode bool) *TypeSystem {
+	ret := &TypeSystem {
 		Procs: NewProcesses(debugMode),
 		Env:   &Environment{},
 
 		State: ux.NewState(debugMode),
 	}
-	ret := NewSystem(false)
-	p.State.SetPackage("")
-	p.State.SetFunctionCaller()
+	ret.State.SetPackage("")
+	ret.State.SetFunctionCaller()
 
 	return ret
+}
+
+
+func (s *TypeSystem) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(s); state.IsError() {
+		return state
+	}
+	s.State = s.State.EnsureNotNil()
+	return s.State
 }

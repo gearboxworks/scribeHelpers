@@ -25,13 +25,12 @@ type TypeExecCommand struct {
 	stderr []byte
 	exit   int
 
-	debug  bool
-
+	Debug  bool
 	State  *ux.State
 }
 
 
-func NewExecCommand(debugMode bool) *TypeExecCommand {
+func New(debugMode bool) *TypeExecCommand {
 	ret := &TypeExecCommand {
 		exe:    "",
 		args:   nil,
@@ -41,7 +40,7 @@ func NewExecCommand(debugMode bool) *TypeExecCommand {
 		stderr: []byte{},
 		exit:   0,
 
-		debug:  debugMode,
+		Debug:  debugMode,
 
 		State:   ux.NewState(debugMode),
 	}
@@ -53,7 +52,7 @@ func NewExecCommand(debugMode bool) *TypeExecCommand {
 
 
 func ReflectExecCommand(ref ...interface{}) *TypeExecCommand {
-	ec := NewExecCommand(false)
+	ec := New(false)
 
 	for range OnlyOnce {
 		s := *helperTypes.ReflectStrings(ref)
@@ -88,10 +87,6 @@ func (e *TypeExecCommand) IsRunnable() bool {
 	var ok bool
 
 	for range OnlyOnce {
-		if e.State == nil {
-			e.State = ux.NewState(false)
-		}
-
 		_, err := exec.LookPath(e.exe)
 		if err != nil {
 			e.State.SetError("Executable not found.")
@@ -109,10 +104,6 @@ func (e *TypeExecCommand) Exec(cmd string, args ...string) *ux.State {
 	}
 
 	for range OnlyOnce {
-		if e.State == nil {
-			e.State = ux.NewState(false)
-		}
-
 		e.State = e.SetPath(cmd)
 		if e.State.IsNotOk() {
 			e.State.PrintResponse()
@@ -130,7 +121,7 @@ func (e *TypeExecCommand) Exec(cmd string, args ...string) *ux.State {
 			break
 		}
 
-		if e.debug {
+		if e.Debug {
 			ux.PrintflnBlue("# Executing: %s %s", e.exe, strings.Join(e.args, " "))
 		}
 		e.State = e.Run()
@@ -150,10 +141,6 @@ func (e *TypeExecCommand) Run() *ux.State {
 	}
 
 	for range OnlyOnce {
-		if e.State == nil {
-			e.State = ux.NewState(false)
-		}
-
 		//c := exec.Command((*cmds)[0], (*cmds)[1:]...)
 		c := exec.Command(e.exe, e.args...)
 

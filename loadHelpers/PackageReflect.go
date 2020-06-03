@@ -16,7 +16,7 @@ Command line usage:
 If -norecurs is not set, then pkgreflect traverses recursively into sub-directories.
 If no DIR_NAME is given, then the current directory is used as root.
 */
-package scribeLoader
+package loadHelpers
 
 import (
 	"bytes"
@@ -95,7 +95,7 @@ func (pr *PkgReflect) parseDir(dir string) *ux.State {
 			break
 		}
 		if !info.IsDir() {
-			pr.State.SetError("PackageReflect: Path '%s' is not a directory.", dir)
+			pr.State.SetError("PackageReflect: Filename '%s' is not a directory.", dir)
 			break
 		}
 

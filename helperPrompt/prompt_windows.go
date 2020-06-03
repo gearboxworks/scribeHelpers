@@ -10,11 +10,11 @@ import (
 )
 
 
-func (me *Prompt) UserPrompt() string {
+func (p *TypePrompt) UserPrompt() string {
 	var ret string
 
 	for range OnlyOnce {
-		fmt.Printf("%s", *me)
+		fmt.Printf("%s", p.string)
 
 		r := bufio.NewReader(os.Stdin)
 
@@ -32,11 +32,11 @@ func (me *Prompt) UserPrompt() string {
 }
 
 
-func (me *Prompt) UserPromptHidden() string {
+func (p *TypePrompt) UserPromptHidden() string {
 	var ret string
 
 	for range OnlyOnce {
-		fmt.Printf("%s", *me)
+		fmt.Printf("%s", p.string)
 
 		r := bufio.NewReader(os.Stdin)
 

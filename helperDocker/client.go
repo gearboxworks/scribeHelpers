@@ -19,7 +19,7 @@ type DockerGear struct {
 }
 
 
-func New(debugMode bool) (*DockerGear, *ux.State) {
+func New(debugMode bool) *DockerGear {
 	var gear DockerGear
 
 	for range OnlyOnce {
@@ -57,7 +57,7 @@ func New(debugMode bool) (*DockerGear, *ux.State) {
 		gear.Container._Parent = &gear
 	}
 
-	return &gear, gear.State
+	return &gear
 }
 
 

@@ -268,7 +268,7 @@ func (g *HelperGit) Remove() *ux.State {
 		//}
 		//if ps.IsDir {
 		//	if ps.Exists {
-		//		g.State.SetError("Repository exists for directory '%s'", ps.Path)
+		//		g.State.SetError("Repository exists for directory '%s'", ps.Filename)
 		//		g.Cmd.Exit = 1
 		//		break
 		//	}
@@ -276,10 +276,10 @@ func (g *HelperGit) Remove() *ux.State {
 		//
 		//g.SetUrl(*u)
 		//g.Base = ps
-		//ux.PrintfWhite("Cloning %s into %s\n", g.Url, g.Base.Path)
+		//ux.PrintfWhite("Cloning %s into %s\n", g.Url, g.Base.Filename)
 		//
 		//g.skipDirCheck = true
-		//g.Cmd = (*helperTypes.TypeExecCommand)(g.Exec(gitCommandClone, g.Url, g.Base.Path))
+		//g.Cmd = (*helperTypes.TypeExecCommand)(g.Exec(gitCommandClone, g.Url, g.Base.Filename))
 		//g.skipDirCheck = false
 	}
 

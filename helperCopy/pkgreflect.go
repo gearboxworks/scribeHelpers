@@ -18,8 +18,8 @@ var Types = map[string]reflect.Type{
 var Functions = map[string]reflect.Value{
 	"HelperCopyFiles": reflect.ValueOf(HelperCopyFiles),
 	"HelperCopyRsync": reflect.ValueOf(HelperCopyRsync),
+	"New": reflect.ValueOf(New),
 	"NewCopyMethod": reflect.ValueOf(NewCopyMethod),
-	"NewOsCopy": reflect.ValueOf(NewOsCopy),
 	"ReflectHelperOsCopy": reflect.ValueOf(ReflectHelperOsCopy),
 }
 

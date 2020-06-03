@@ -5,13 +5,14 @@ package helperPrompt
 import "reflect"
 
 var Types = map[string]reflect.Type{
-	"Prompt": reflect.TypeOf((*Prompt)(nil)).Elem(),
+	"TypePrompt": reflect.TypeOf((*TypePrompt)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
 	"HelperUserPrompt": reflect.ValueOf(HelperUserPrompt),
 	"HelperUserPromptBool": reflect.ValueOf(HelperUserPromptBool),
 	"HelperUserPromptHidden": reflect.ValueOf(HelperUserPromptHidden),
+	"New": reflect.ValueOf(New),
 	"UserPrompt": reflect.ValueOf(UserPrompt),
 	"UserPromptHidden": reflect.ValueOf(UserPromptHidden),
 }

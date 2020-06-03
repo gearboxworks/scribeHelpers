@@ -7,7 +7,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/dustin/go-humanize"
 	"github.com/jedib0t/go-pretty/table"
-	"launch/gear/gearJson"
+	"github.com/newclarity/scribeHelpers/helperGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"strings"
@@ -45,8 +45,8 @@ func (gear *DockerGear) ImageList(f string) (int, *ux.State) {
 		t.AppendHeader(table.Row{"Class", "Image", "Ports", "Size"})
 
 		for _, i := range images {
-			var gc *gearJson.GearConfig
-			gc = gearJson.New(i.Labels["gearbox.json"])
+			var gc *gearConfig.GearConfig
+			gc = gearConfig.New(i.Labels["gearbox.json"])
 			if gc.State.IsError() {
 				continue
 			}
@@ -129,7 +129,7 @@ func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, *u
 		gear.State.SetWarning("Gear image '%s:%s' doesn't exist.", gearName, gearVersion)
 
 		for _, i := range images {
-			var gc *gearJson.GearConfig
+			var gc *gearConfig.GearConfig
 			ok, gc = MatchImage(&i, DefaultOrganization, gearName, gearVersion)
 			if !ok {
 				continue
@@ -214,9 +214,9 @@ func (gear *DockerGear) Search(gearName string, gearVersion string) *ux.State {
 }
 
 
-func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVersion string) (bool, *gearJson.GearConfig) {
+func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVersion string) (bool, *gearConfig.GearConfig) {
 	var ok bool
-	var gc *gearJson.GearConfig
+	var gc *gearConfig.GearConfig
 
 	for range OnlyOnce {
 		if MatchTag("<none>:<none>", m.RepoTags) {
@@ -224,7 +224,7 @@ func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVers
 			break
 		}
 
-		gc = gearJson.New(m.Labels["gearbox.json"])
+		gc = gearConfig.New(m.Labels["gearbox.json"])
 		if gc.State.IsError() {
 			ok = false
 			break

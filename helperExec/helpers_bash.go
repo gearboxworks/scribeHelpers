@@ -10,7 +10,7 @@ import (
 
 
 func HelperExecBash(cmd ...interface{}) *ux.State {
-	ret := NewExecCommand(false)
+	ret := New(false)
 
 	for range OnlyOnce {
 		a := helperTypes.ReflectStrings(cmd...)
@@ -27,7 +27,7 @@ func HelperExecBash(cmd ...interface{}) *ux.State {
 
 
 func HelperNewBash(cmd ...interface{}) *HelperExecCommand {
-	ret := NewExecCommand(false)
+	ret := New(false)
 
 	for range OnlyOnce {
 		ret.exe = "bash"

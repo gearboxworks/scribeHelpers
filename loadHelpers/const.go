@@ -1,4 +1,4 @@
-package scribeLoader
+package loadHelpers
 
 const (
 	SelectStdout = "select:stdout"

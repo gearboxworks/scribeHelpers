@@ -22,7 +22,7 @@ var Functions = map[string]reflect.Value{
 	"HelperRemoveDir": reflect.ValueOf(HelperRemoveDir),
 	"HelperRemoveFile": reflect.ValueOf(HelperRemoveFile),
 	"HelperWriteFile": reflect.ValueOf(HelperWriteFile),
-	"NewOsPath": reflect.ValueOf(NewOsPath),
+	"New": reflect.ValueOf(New),
 	"ReflectAbsPath": reflect.ValueOf(ReflectAbsPath),
 	"ReflectFileMode": reflect.ValueOf(ReflectFileMode),
 	"ReflectHelperOsPath": reflect.ValueOf(ReflectHelperOsPath),

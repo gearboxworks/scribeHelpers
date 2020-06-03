@@ -11,7 +11,7 @@ import (
 // Usage:
 //		{{ $return := WriteFile "filename.txt" .Data.Source 0644 }}
 func HelperCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *ux.State {
-	c := NewOsCopy()
+	c := New(false)
 
 	for range OnlyOnce {
 		s := helperPath.ReflectAbsPath(src)

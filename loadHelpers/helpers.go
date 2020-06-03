@@ -1,4 +1,4 @@
-package scribeLoader
+package loadHelpers
 
 import (
 	"fmt"

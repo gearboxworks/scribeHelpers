@@ -6,8 +6,8 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/dustin/go-humanize"
 	"github.com/jedib0t/go-pretty/table"
+	"github.com/newclarity/scribeHelpers/helperGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/ux"
-	"launch/gear/gearJson"
 	"os"
 	"strings"
 )
@@ -50,8 +50,8 @@ func (gear *DockerGear) ContainerList(f string) (int, *ux.State) {
 		})
 
 		for _, c := range containers {
-			var gc *gearJson.GearConfig
-			gc = gearJson.New(c.Labels["gearbox.json"])
+			var gc *gearConfig.GearConfig
+			gc = gearConfig.New(c.Labels["gearbox.json"])
 			if gc.State.IsError() {
 				continue
 			}
@@ -164,7 +164,7 @@ func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool
 		gear.State.SetWarning("Gear '%s:%s' doesn't exist.", gearName, gearVersion)
 
 		for _, c := range containers {
-			var gc *gearJson.GearConfig
+			var gc *gearConfig.GearConfig
 			ok, gc = MatchContainer(&c, DefaultOrganization, gearName, gearVersion)
 			if !ok {
 				continue
@@ -210,9 +210,9 @@ func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool
 }
 
 
-func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVersion string) (bool, *gearJson.GearConfig) {
+func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVersion string) (bool, *gearConfig.GearConfig) {
 	var ok bool
-	var gc *gearJson.GearConfig
+	var gc *gearConfig.GearConfig
 
 	for range OnlyOnce {
 		if MatchTag("<none>:<none>", m.Names) {
@@ -220,7 +220,7 @@ func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVer
 			break
 		}
 
-		gc = gearJson.New(m.Labels["gearbox.json"])
+		gc = gearConfig.New(m.Labels["gearbox.json"])
 		if gc.State.IsError() {
 			ok = false
 			break

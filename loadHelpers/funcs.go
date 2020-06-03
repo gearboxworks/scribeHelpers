@@ -1,4 +1,4 @@
-package scribeLoader
+package loadHelpers
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 )
 
 
-func (at *ArgTemplate) ValidateArgs() *ux.State {
+func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 
 	for range OnlyOnce {
 		at.SetInvalid()		// Start with invalid.
@@ -30,15 +30,15 @@ func (at *ArgTemplate) ValidateArgs() *ux.State {
 
 		for range OnlyOnce {
 			// Validate json and template files/strings.
-			if at.Json.Name == DefaultJsonFile {
-				at.Json.Name = DefaultJsonString
+			if at.Json.Filename == DefaultJsonFile {
+				at.Json.Filename = DefaultJsonString
 			}
-			at.Json.SetInputFile(at.Json.Name, false)
+			at.Json.SetInputFile(at.Json.Filename, false)
 
-			if at.Json.Name == DefaultTemplateFile {
-				at.Json.Name = DefaultTemplateString
+			if at.Json.Filename == DefaultTemplateFile {
+				at.Json.Filename = DefaultTemplateString
 			}
-			at.Template.SetInputFile(at.Template.Name, at.RemoveTemplate)
+			at.Template.SetInputFile(at.Template.Filename, at.RemoveTemplate)
 
 			at.State.Clear()
 
@@ -50,9 +50,9 @@ func (at *ArgTemplate) ValidateArgs() *ux.State {
 					break
 				}
 
-				at.Template.Name = at.Json.Name
+				at.Template.Filename = at.Json.Filename
 				at.Template.ChangeSuffix(DefaultTemplateFileSuffix)
-				at.Template.SetInputFile(at.Template.Name, false)
+				at.Template.SetInputFile(at.Template.Filename, false)
 				if at.Json.IsNotOk() {
 					at.State.SetError("Neither template nor json provided.")
 					break
@@ -67,9 +67,9 @@ func (at *ArgTemplate) ValidateArgs() *ux.State {
 
 			// json:OK && tmpl:empty
 			if at.Json.IsOk() && at.Template.IsNotOk() {
-				at.Template.Name = at.Json.Name
+				at.Template.Filename = at.Json.Filename
 				at.Template.ChangeSuffix(DefaultTemplateFileSuffix)
-				at.Template.SetInputFile(at.Template.Name, false)
+				at.Template.SetInputFile(at.Template.Filename, false)
 				if at.Template.IsNotOk() {
 					at.State.SetError("Template not provided.")
 					break
@@ -78,9 +78,9 @@ func (at *ArgTemplate) ValidateArgs() *ux.State {
 
 			// json:empty && tmpl:OK
 			if at.Json.IsNotOk() && at.Template.IsOk() {
-				at.Json.Name = at.Template.Name
+				at.Json.Filename = at.Template.Filename
 				at.Json.ChangeSuffix(DefaultJsonFileSuffix)
-				at.Json.SetInputFile(at.Json.Name, false)
+				at.Json.SetInputFile(at.Json.Filename, false)
 				if at.Json.IsNotOk() {
 					at.State.SetError("Json not provided.")
 					break
@@ -101,13 +101,13 @@ func (at *ArgTemplate) ValidateArgs() *ux.State {
 
 		////////////////////////////////////////////////////
 		// Output file.
-		if at.Output.Name == SelectStdout {
-			at.Output.Name = DefaultOutFile
+		if at.Output.Filename == SelectStdout {
+			at.Output.Filename = DefaultOutFile
 			at.ForceOverwrite = true
-		} else if at.Output.Name == SelectConvert {
-			at.Output.Name = strings.TrimSuffix(at.Template.Name, DefaultTemplateFileSuffix)
+		} else if at.Output.Filename == SelectConvert {
+			at.Output.Filename = strings.TrimSuffix(at.Template.Filename, DefaultTemplateFileSuffix)
 		}
-		at.State = at.Output.SetOutputFile(at.Output.Name, at.ForceOverwrite)
+		at.State = at.Output.SetOutputFile(at.Output.Filename, at.ForceOverwrite)
 		if at.State.IsNotOk() {
 			break
 		}
@@ -132,14 +132,14 @@ func (at *ArgTemplate) ValidateArgs() *ux.State {
 }
 
 
-func (at *ArgTemplate) Load() *ux.State {
+func (at *TypeScribeArgs) Load() *ux.State {
 	if state := at.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range OnlyOnce {
 		if at.JsonStruct == nil {
-			at.JsonStruct = NewJsonStruct(at.Exec.CmdName, at.Exec.CmdVersion)
+			at.JsonStruct = NewJsonStruct(at.Exec.CmdName, at.Exec.CmdVersion, at.Debug)
 		}
 
 		// Historic reasons...
@@ -169,13 +169,13 @@ func (at *ArgTemplate) Load() *ux.State {
 }
 
 
-func (at *ArgTemplate) Run() *ux.State {
+func (at *TypeScribeArgs) Run() *ux.State {
 	if state := at.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range OnlyOnce {
-		if at.Output.Name == "" {
+		if at.Output.Filename == "" {
 			at.State.SetError("No output file specified.")
 			break
 		}
@@ -200,7 +200,7 @@ func (at *ArgTemplate) Run() *ux.State {
 
 		// Are we treating this as a shell script?
 		if at.ExecShell {
-			ux.PrintflnOk("Executing file '%s'", at.Output.Name)
+			ux.PrintflnOk("Executing file '%s'", at.Output.Filename)
 
 			//outFile := helperPath.HelperNewPath(at.OutFile)
 			bashFile := at.Output.File
@@ -211,7 +211,7 @@ func (at *ArgTemplate) Run() *ux.State {
 			}
 			bashFile.Chmod(0755)
 
-			exe := helperExec.NewExecCommand(false)
+			exe := helperExec.New(at.Debug)
 			at.State = exe.State
 			if at.State.IsError() {
 				at.State.SetError("Shell script error: %s", at.State.GetError())
@@ -280,7 +280,7 @@ func (at *ArgTemplate) Run() *ux.State {
 }
 
 
-func (at *ArgTemplate) CreateTemplate() (*template.Template, *ux.State) {
+func (at *TypeScribeArgs) CreateTemplate() (*template.Template, *ux.State) {
 	var t *template.Template
 	if state := at.IsNil(); state.IsError() {
 		return nil, state
@@ -306,8 +306,8 @@ func (at *ArgTemplate) CreateTemplate() (*template.Template, *ux.State) {
 
 // Ability to import from an external package.
 // You need to run `pkgreflect scribe/helpers` after code changes.
-// func (at *ArgTemplate) LoadHelpers(h map[string]reflect.Value) *ux.State {
-func (at *ArgTemplate) LoadHelpers(h template.FuncMap) *ux.State {
+// func (at *TypeScribeArgs) LoadHelpers(h map[string]reflect.Value) *ux.State {
+func (at *TypeScribeArgs) LoadHelpers(h template.FuncMap) *ux.State {
 	if state := at.IsNil(); state.IsError() {
 		return state
 	}
@@ -339,6 +339,6 @@ func (at *ArgTemplate) LoadHelpers(h template.FuncMap) *ux.State {
 }
 
 
-func (at *ArgTemplate) PrintHelpers() {
+func (at *TypeScribeArgs) PrintHelpers() {
 	_, _ = fmt.Fprintf(os.Stderr, PrintHelpers())
 }

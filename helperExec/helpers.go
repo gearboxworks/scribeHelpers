@@ -9,8 +9,8 @@ type HelperExecCommand TypeExecCommand
 func (g *HelperExecCommand) Reflect() *TypeExecCommand {
 	return (*TypeExecCommand)(g)
 }
-func (g *TypeExecCommand) Reflect() *HelperExecCommand {
-	return (*HelperExecCommand)(g)
+func (e *TypeExecCommand) Reflect() *HelperExecCommand {
+	return (*HelperExecCommand)(e)
 }
 
 func (c *HelperExecCommand) IsNil() *ux.State {
@@ -25,7 +25,7 @@ func (c *HelperExecCommand) IsNil() *ux.State {
 // Usage:
 //		{{ $output := ExecCommand "ps %s" "-eaf" ... }}
 func HelperExecCmd(cmd ...interface{}) *ux.State {
-	ret := NewExecCommand(false)
+	ret := New(false)
 
 	for range OnlyOnce {
 		ec := ReflectExecCommand(cmd...)

@@ -5,14 +5,15 @@ package helperService
 import "reflect"
 
 var Types = map[string]reflect.Type{
-	"ExampleGetter": reflect.TypeOf((*ExampleGetter)(nil)).Elem(),
-	"HelperExample": reflect.TypeOf((*HelperExample)(nil)).Elem(),
+	"HelperService": reflect.TypeOf((*HelperService)(nil)).Elem(),
+	"ServiceGetter": reflect.TypeOf((*ServiceGetter)(nil)).Elem(),
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
-	"TypeExample": reflect.TypeOf((*TypeExample)(nil)).Elem(),
+	"TypeService": reflect.TypeOf((*TypeService)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
-	"ReflectHelperExample": reflect.ValueOf(ReflectHelperExample),
+	"New": reflect.ValueOf(New),
+	"ReflectHelperService": reflect.ValueOf(ReflectHelperService),
 }
 
 var Variables = map[string]reflect.Value{

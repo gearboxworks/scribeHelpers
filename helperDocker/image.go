@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/newclarity/scribeHelpers/helperGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/ux"
 	"io"
-	"launch/gear/gearJson"
 	"os"
 	"strings"
 	"time"
@@ -22,7 +22,7 @@ type Image struct {
 	Version    string
 	Summary    *types.ImageSummary
 	Details    types.ImageInspect
-	GearConfig *gearJson.GearConfig
+	GearConfig *gearConfig.GearConfig
 
 	_Parent    *DockerGear
 	Debug      bool
@@ -50,7 +50,7 @@ func NewImage(debugMode bool) *Image {
 func (i *Image) EnsureNotNil() *Image {
 	for range OnlyOnce {
 		if i == nil {
-			i = NewImage(false)
+			i = NewImage(i.Debug)
 		}
 		i.State = i.State.EnsureNotNil()
 	}
@@ -138,7 +138,7 @@ func (i *Image) Status() *ux.State {
 		}
 
 		if i.GearConfig == nil {
-			i.GearConfig = gearJson.New(i.Summary.Labels["gearbox.json"])
+			i.GearConfig = gearConfig.New(i.Summary.Labels["gearbox.json"])
 			if i.GearConfig.State.IsError() {
 				i.State.SetState(i.GearConfig.State)
 				break

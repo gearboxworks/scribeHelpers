@@ -1,4 +1,4 @@
-package scribeLoader
+package loadHelpers
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 )
 
 
-func (at *ArgTemplate) LoadJsonFile() *ux.State {
+func (at *TypeScribeArgs) LoadJsonFile() *ux.State {
 	if state := at.IsNil(); state.IsError() {
 		return state
 	}
@@ -44,7 +44,7 @@ func (at *ArgTemplate) LoadJsonFile() *ux.State {
 }
 
 
-func (at *ArgTemplate) LoadTemplateFile() *ux.State {
+func (at *TypeScribeArgs) LoadTemplateFile() *ux.State {
 	if state := at.IsNil(); state.IsError() {
 		return state
 	}
@@ -81,7 +81,7 @@ func (at *ArgTemplate) LoadTemplateFile() *ux.State {
 }
 
 
-func (at *ArgTemplate) LoadOutputFile() *ux.State {
+func (at *TypeScribeArgs) LoadOutputFile() *ux.State {
 	if state := at.IsNil(); state.IsError() {
 		return state
 	}
@@ -97,7 +97,7 @@ func (at *ArgTemplate) LoadOutputFile() *ux.State {
 		}
 
 
-		if at.Output.Name == DefaultOutFile {
+		if at.Output.Filename == DefaultOutFile {
 			at.State = at.Output.File.SetFileHandle(os.Stdout)
 			if at.State.IsNotOk() {
 				at.State.SetError("Output file error: %s", at.State.GetError())
@@ -127,14 +127,16 @@ func (at *ArgTemplate) LoadOutputFile() *ux.State {
 
 
 type TypeArgFile struct {
-	Name     string
 	File     *helperPath.TypeOsPath
+
+	Filename string
 	String   string
 	isFile   bool
 	isString bool
 
 	State    *ux.State
 }
+
 
 func (at *TypeArgFile) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(at); state.IsError() {
@@ -143,6 +145,7 @@ func (at *TypeArgFile) IsNil() *ux.State {
 	at.State = at.State.EnsureNotNil()
 	return at.State
 }
+
 
 func (at *TypeArgFile) IsOk() bool {
 	var ok bool
@@ -169,14 +172,17 @@ func (at *TypeArgFile) IsOk() bool {
 	return ok
 }
 
+
 func (at *TypeArgFile) IsNotOk() bool {
 	return !at.IsOk()
 }
 
+
 func (at *TypeArgFile) ChangeSuffix(suffix string) {
-	s := filepath.Ext(at.Name)
-	at.Name = at.Name[:len(at.Name) - len(s)] + suffix
+	s := filepath.Ext(at.Filename)
+	at.Filename = at.Filename[:len(at.Filename) - len(s)] + suffix
 }
+
 
 func (at *TypeArgFile) IsAFile() bool {
 	var ok bool
@@ -186,6 +192,7 @@ func (at *TypeArgFile) IsAFile() bool {
 	return ok
 }
 
+
 func (at *TypeArgFile) IsAString() bool {
 	var ok bool
 	if at.File.NotExists() {
@@ -193,6 +200,7 @@ func (at *TypeArgFile) IsAString() bool {
 	}
 	return ok
 }
+
 
 func (at *TypeArgFile) IsStdFd() bool {
 	var ok bool
@@ -211,12 +219,17 @@ func (at *TypeArgFile) IsStdFd() bool {
 
 	return ok
 }
+
+
 func (at *TypeArgFile) IsStdout() bool {
 	return at.IsStdFd()
 }
+
+
 func (at *TypeArgFile) IsStdin() bool {
 	return at.IsStdFd()
 }
+
 
 // Check if this is a string of characters, instead of filename.
 func (at *TypeArgFile) isAString(arg string) bool {
@@ -253,6 +266,8 @@ func (at *TypeArgFile) isAString(arg string) bool {
 
 	return ok
 }
+
+
 func isAString(arg string) bool {
 	var ok bool
 
@@ -302,7 +317,7 @@ func (at *TypeArgFile) SetInputFile(file string, remove bool) *ux.State {
 				at.isString = false
 
 				at.String = at.File.GetContentString()
-				at.Name = file
+				at.Filename = file
 				at.State.SetOk("Input file '%s' read OK.", at.File.GetPath())
 				break
 			}
@@ -314,7 +329,7 @@ func (at *TypeArgFile) SetInputFile(file string, remove bool) *ux.State {
 
 			at.File.SetContents(file)
 			at.String = file
-			at.Name = "string"
+			at.Filename = "string"
 			at.State.SetOk("Input string set.")
 			break
 		}
@@ -351,7 +366,7 @@ func (at *TypeArgFile) SetOutputFile(file string, overwrite bool) *ux.State {
 		}
 
 		if overwrite {
-			at.State.SetOk("Output file '%s' set to writeable.", at.Name)
+			at.State.SetOk("Output file '%s' set to writeable.", at.Filename)
 			at.File.SetOverwriteable()
 		}
 	}

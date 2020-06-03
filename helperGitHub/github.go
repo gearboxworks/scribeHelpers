@@ -5,7 +5,7 @@ import (
 	"github.com/google/go-github/v31/github"
 	"github.com/newclarity/scribeHelpers/helperPrompt"
 	"github.com/newclarity/scribeHelpers/helperTypes"
-	"github.com/newclarity/scribeHelpers/ux"
+	//"github.com/newclarity/scribeHelpers/ux"
 	"reflect"
 	"strings"
 )
@@ -39,6 +39,7 @@ func HelperGitHubGetOrganization(i interface{}) []string {
 	return sa
 }
 
+
 func fetchOrganizations(username string) ([]*github.Organization, error) {
 	client := github.NewClient(nil)
 	orgs, _, err := client.Organizations.List(context.Background(), username, nil)
@@ -46,17 +47,8 @@ func fetchOrganizations(username string) ([]*github.Organization, error) {
 }
 
 
-// Usage: {{ $user := GitHubLogin "username" "password" "" }}
-type TypeLogin struct {
-	User *github.User
-	Client *github.Client
-
-	Valid bool
-	State *ux.State
-}
-
-func HelperGitHubLogin(username interface{}, password interface{}, twofactor interface{}) *TypeLogin {
-	var auth TypeLogin
+func HelperGitHubLogin(username interface{}, password interface{}, twofactor interface{}) *TypeGitHub {
+	auth := New(false)
 
 	for range OnlyOnce {
 		usernameString := ""
@@ -121,7 +113,7 @@ func HelperGitHubLogin(username interface{}, password interface{}, twofactor int
 		//fmt.Printf("\n%v\n", github.Stringify(auth))
 	}
 
-	return &auth
+	return auth
 }
 
 

@@ -1,4 +1,4 @@
-package scribeLoader
+package loadHelpers
 
 import (
 	"github.com/newclarity/scribeHelpers/helperPath"
@@ -9,7 +9,7 @@ import (
 
 
 type jsonStruct struct {
-	Exec            *helperRuntime.Exec
+	Exec            *helperRuntime.TypeRuntime
 
 	TemplateFile    FileInfo
 	JsonFile        FileInfo
@@ -37,9 +37,9 @@ func (at *jsonStruct) IsNil() *ux.State {
 }
 
 
-func NewJsonStruct(binary string, version string) *jsonStruct {
+func NewJsonStruct(binary string, version string, debugFlag bool) *jsonStruct {
 	js := jsonStruct {
-		Exec:            helperRuntime.NewExec(binary, version),
+		Exec:            helperRuntime.New(binary, version, debugFlag),
 		TemplateFile:    FileInfo{},
 		JsonFile:        FileInfo{},
 		OutFile:         FileInfo{},

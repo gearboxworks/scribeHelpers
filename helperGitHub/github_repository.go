@@ -18,7 +18,7 @@ type TypeGetRepository struct {
 // Usage:
 //		{{ $git := GitHubLogin }}
 //		{{ $repos := $git.GetRepository "gearboxworks" "docker-template" }}
-func (me *TypeLogin) GetRepository(owner interface{}, repo interface{}) *TypeGetRepository {
+func (gh *TypeGitHub) GetRepository(owner interface{}, repo interface{}) *TypeGetRepository {
 	var ret TypeGetRepository
 
 	for range OnlyOnce {
@@ -34,7 +34,7 @@ func (me *TypeLogin) GetRepository(owner interface{}, repo interface{}) *TypeGet
 
 		var err error
 		ctx := context.Background()
-		ret.Data, _, err = me.Client.Repositories.Get(ctx, *op, *rp)
+		ret.Data, _, err = gh.Client.Repositories.Get(ctx, *op, *rp)
 
 		ret.State.SetError(err)
 		if ret.State.IsError() {
@@ -185,10 +185,11 @@ type TypeGetRepositories struct {
 	Data []*github.Repository
 }
 
+
 // Usage:
 //		{{ $git := GitHubLogin }}
 //		{{ $repos := $git.GetRepositories "gearboxworks" }}
-func (me *TypeLogin) GetRepositories(owner interface{}) *TypeGetRepositories {
+func (gh *TypeGitHub) GetRepositories(owner interface{}) *TypeGetRepositories {
 	var ret TypeGetRepositories
 
 	for range OnlyOnce {
@@ -198,7 +199,7 @@ func (me *TypeLogin) GetRepositories(owner interface{}) *TypeGetRepositories {
 		}
 
 		ctx := context.Background()
-		ret.Data, _, ret.Error = me.Client.Repositories.List(ctx, *op, nil)
+		ret.Data, _, ret.Error = gh.Client.Repositories.List(ctx, *op, nil)
 
 		if ret.Error != nil {
 			break

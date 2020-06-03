@@ -14,19 +14,19 @@ func (g *TypeGit) Reflect() *HelperGit {
 	return (*HelperGit)(g)
 }
 
-func (c *HelperGit) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(c); state.IsError() {
+func (g *HelperGit) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(g); state.IsError() {
 		return state
 	}
-	c.State = c.State.EnsureNotNil()
-	return c.State
+	g.State = g.State.EnsureNotNil()
+	return g.State
 }
 
 
 // Usage:
 //		{{ $git := NewGit }}
 func HelperNewGit(path ...interface{}) *HelperGit {
-	ret := NewGit()
+	ret := New(false)
 
 	for range OnlyOnce {
 		p := helperPath.ReflectAbsPath(path...)

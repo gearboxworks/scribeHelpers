@@ -16,8 +16,6 @@ type TypeExecCommand helperExec.TypeExecCommand
 
 
 type TypeGit struct {
-	State        *ux.State
-
 	Url          string
 	Base         *helperPath.TypeOsPath
 
@@ -29,21 +27,23 @@ type TypeGit struct {
 	client       gitcmd.Client
 	repository   *git.Repository
 
-	//Cmd          *helperExec.TypeExecCommand
+	Debug        bool
+	State        *ux.State
 }
 
 
-func NewGit() *TypeGit {
+func New(debugFlag bool) *TypeGit {
 	p := TypeGit{
-		State:        ux.NewState(false),
 		Url:          "",
-		Base:         helperPath.NewOsPath(false),
+		Base:         helperPath.New(debugFlag),
 		GitConfig:    nil,
 		GitOptions:   nil,
 		skipDirCheck: false,
 		client:       nil,
 		repository:   nil,
-		//Cmd:          nil,
+
+		Debug:        debugFlag,
+		State:        ux.NewState(debugFlag),
 	}
 	p.State.SetPackage("")
 	p.State.SetFunctionCaller()
@@ -53,59 +53,67 @@ func NewGit() *TypeGit {
 
 
 type State ux.State
-func (p *State) Reflect() *ux.State {
-	return (*ux.State)(p)
+func (s *State) Reflect() *ux.State {
+	return (*ux.State)(s)
 }
 //func ReflectState(p *ux.State) *ux.State {
 //	return (*State)(p)
 //}
-func ReflectHelperGit(p *TypeGit) *HelperGit {
-	return (*HelperGit)(p)
+func ReflectHelperGit(g *TypeGit) *HelperGit {
+	return (*HelperGit)(g)
 }
 
 
-func (me *TypeGit) IsOk() bool {
+func (g *TypeGit) IsOk() bool {
 	var ok bool
-	if state := me.IsNil(); state.IsError() {
+	if state := g.IsNil(); state.IsError() {
 		return false
 	}
 
 	for range OnlyOnce {
-		if !me.IsAvailable() {
+		if !g.IsAvailable() {
 			break
 		}
-		if me.IsNilRepository() {
+		if g.IsNilRepository() {
 			break
 		}
-		me.State.Clear()
+		g.State.Clear()
 		ok = true
 	}
 
 	return ok
 }
-func (me *TypeGit) IsNotOk() bool {
-	return !me.IsOk()
+func (g *TypeGit) IsNotOk() bool {
+	return !g.IsOk()
 }
 
 
-func (e *TypeGit) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(e); state.IsError() {
+func (g *TypeGit) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(g); state.IsError() {
 		return state
 	}
-	e.State = e.State.EnsureNotNil()
-	return e.State
+	g.State = g.State.EnsureNotNil()
+	return g.State
 }
 
 
-func (me *TypeGit) IsNilRepository() bool {
+func (g *TypeGit) EnsureNotNil() *TypeGit {
+	if g == nil {
+		return New(true)
+	}
+	return g
+}
+
+
+func (g *TypeGit) IsNilRepository() bool {
 	ok := true
 
 	for range OnlyOnce {
-		if me.repository == nil {
-			me.State.SetError("repository not open")
+		if g.repository == nil {
+			g.State.SetError("repository not open")
 			break
 		}
-		me.State.Clear()
+		g.State.Clear()
 		ok = false
 	}
 
@@ -113,23 +121,23 @@ func (me *TypeGit) IsNilRepository() bool {
 }
 
 
-func (me *TypeGit) IsAvailable() bool {
+func (g *TypeGit) IsAvailable() bool {
 	ok := false
 
 	for range OnlyOnce {
-		me.State.SetError(me.client.CanExec())
-		if me.State.IsError() {
-			me.State.SetError("`git` does not exist or its command file is not executable: %s", me.State.GetError())
+		g.State.SetError(g.client.CanExec())
+		if g.State.IsError() {
+			g.State.SetError("`git` does not exist or its command file is not executable: %s", g.State.GetError())
 			break
 		}
-		me.State.Clear()
+		g.State.Clear()
 		ok = true
 	}
 
 	return ok
 }
-func (me *TypeGit) IsNotAvailable() bool {
-	return !me.IsAvailable()
+func (g *TypeGit) IsNotAvailable() bool {
+	return !g.IsAvailable()
 }
 
 

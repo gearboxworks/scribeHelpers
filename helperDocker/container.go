@@ -8,9 +8,9 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
-	"io"
-	"launch/gear/gearJson"
+	"github.com/newclarity/scribeHelpers/helperGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/ux"
+	"io"
 	"os"
 	"time"
 )
@@ -23,7 +23,7 @@ type Container struct {
 
 	Summary      *types.Container
 	Details      *types.ContainerJSON
-	GearConfig   *gearJson.GearConfig
+	GearConfig   *gearConfig.GearConfig
 
 	_Parent      *DockerGear
 	Debug        bool
@@ -39,7 +39,7 @@ func NewContainer(debugMode bool) *Container {
 		Version:    "",
 		Summary:    nil,
 		Details:    nil,
-		GearConfig: &gearJson.GearConfig{},
+		GearConfig: &gearConfig.GearConfig{},
 		_Parent:    nil,
 		State:      ux.NewState(debugMode),
 	}
@@ -48,15 +48,17 @@ func NewContainer(debugMode bool) *Container {
 	return c
 }
 
+
 func (i *Container) EnsureNotNil() *Container {
 	for range OnlyOnce {
 		if i == nil {
-			i = NewContainer(false)
+			i = NewContainer(i.Debug)
 		}
 		i.State = i.State.EnsureNotNil()
 	}
 	return i
 }
+
 
 func (c *Container) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(c); state.IsError() {
@@ -65,6 +67,7 @@ func (c *Container) IsNil() *ux.State {
 	c.State = c.State.EnsureNotNil()
 	return c.State
 }
+
 
 func (c *Container) IsValid() *ux.State {
 	if state := ux.IfNilReturnError(c); state.IsError() {
@@ -126,7 +129,7 @@ func (c *Container) Status() *ux.State {
 
 		c.Summary = &containers[0]
 
-		c.GearConfig = gearJson.New(c.Summary.Labels["gearbox.json"])
+		c.GearConfig = gearConfig.New(c.Summary.Labels["gearbox.json"])
 		if c.GearConfig.State.IsError() {
 			c.State.SetState(c.GearConfig.State)
 			break

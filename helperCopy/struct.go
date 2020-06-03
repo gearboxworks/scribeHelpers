@@ -20,28 +20,23 @@ type OsCopyGetter interface {
 type TypeOsPath helperPath.TypeOsPath
 
 type TypeOsCopy struct {
-	State        *ux.State
+	Source       *helperPath.TypeOsPath	`json:"source" mapstructure:"source"`
+	Destination  *helperPath.TypeOsPath	`json:"destination" mapstructure:"destination"`
 
-	Source       *helperPath.TypeOsPath
-	Destination  *helperPath.TypeOsPath
+	Exclude PathArray					`json:"exclude" mapstructure:"exclude"`
+	Include PathArray					`json:"include" mapstructure:"include"`
 
-	Exclude PathArray
-	Include PathArray
+	Method *TypeCopyMethods				`json:"method" mapstructure:"method"`
 
-	//RsyncOptions []string
-	//TarOptions   []string
-	//CpioOptions  []string
-	//CpOptions    []string
-	//SftpOptions  []string
-
-	_Valid       bool
-	Method      *TypeCopyMethods
+	Valid  bool							`json:"valid" mapstructure:"valid"`
+	Debug  bool							`json:"debug" mapstructure:"debug"`
+	State  *ux.State					`json:"state" mapstructure:"state"`
 }
 
 
 type State ux.State
-func (p *State) Reflect() *ux.State {
-	return (*ux.State)(p)
+func (s *State) Reflect() *ux.State {
+	return (*ux.State)(s)
 }
 //func ReflectState(p *ux.State) *ux.State {
 //	return (*State)(p)
@@ -49,6 +44,28 @@ func (p *State) Reflect() *ux.State {
 func ReflectHelperOsCopy(p *TypeOsCopy) *HelperOsCopy {
 	return (*HelperOsCopy)(p)
 }
+
+
+func New(debugFlag bool) *TypeOsCopy {
+	c := &TypeOsCopy{
+		Source:       helperPath.New(debugFlag),
+		Destination:  helperPath.New(debugFlag),
+
+		Exclude: PathArray{},
+		Include: PathArray{},
+
+		Method: NewCopyMethod(),
+
+		Valid:  false,
+		Debug:  debugFlag,
+		State:  ux.NewState(debugFlag),
+	}
+	c.State.SetPackage("")
+	c.State.SetFunctionCaller()
+
+	return c
+}
+
 
 func (c *TypeOsCopy) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(c); state.IsError() {
@@ -59,128 +76,9 @@ func (c *TypeOsCopy) IsNil() *ux.State {
 }
 
 
-func NewOsCopy() *TypeOsCopy {
-	c := &TypeOsCopy{
-		State:        ux.NewState(false),
-
-		Source:       helperPath.NewOsPath(false),
-		Destination:  helperPath.NewOsPath(false),
-
-		Exclude: PathArray{},
-		Include: PathArray{},
-
-		_Valid:       false,
-		Method:      NewCopyMethod(),
+func (c *TypeOsCopy) EnsureNotNil() *TypeOsCopy {
+	if c == nil {
+		return New(true)
 	}
-	c.State.SetPackage("")
-	c.State.SetFunctionCaller()
-
 	return c
-}
-func (me *TypeOsCopy) EnsureNotNil() {
-	if me == nil {
-		me = NewOsCopy()
-	}
-}
-
-
-func (p *TypeOsCopy) SetSourcePath(path ...string) bool {
-	var ok bool
-
-	for range OnlyOnce {
-		ok = p.Source.SetPath(path...)
-		if !ok {
-			break
-		}
-
-		if p.Destination.IsValid() {
-			p._Valid = true
-		}
-
-		ok = true
-	}
-
-	return ok
-}
-func (p *TypeOsCopy) GetSourcePath() string {
-	return p.Source.GetPath()
-}
-
-
-func (p *TypeOsCopy) SetDestinationPath(path ...string) bool {
-	var ok bool
-
-	for range OnlyOnce {
-		ok = p.Destination.SetPath(path...)
-		if !ok {
-			break
-		}
-
-		if p.Source.IsValid() {
-			p._Valid = true
-		}
-
-		ok = true
-	}
-
-	return ok
-}
-func (p *TypeOsCopy) GetDestinationPath() string {
-	return p.Destination.GetPath()
-}
-
-
-func (p *TypeOsCopy) SetExcludePaths(paths ...string) bool {
-	return p.Exclude.SetPaths(paths...)
-}
-func (p *TypeOsCopy) AddExcludePaths(paths ...string) bool {
-	return p.Exclude.AddPaths(paths...)
-}
-func (p *TypeOsCopy) GetExcludePaths() *PathArray {
-	return p.Exclude.GetPaths()
-}
-
-
-func (p *TypeOsCopy) SetIncludePaths(paths ...string) bool {
-	return p.Include.SetPaths(paths...)
-}
-func (p *TypeOsCopy) AddIncludePaths(paths ...string) bool {
-	return p.Include.AddPaths(paths...)
-}
-func (p *TypeOsCopy) GetIncludePaths() *PathArray {
-	return p.Include.GetPaths()
-}
-
-
-func (p *TypeOsCopy) SetMethodRsync() bool {
-	return p.Method.SelectMethod(ConstMethodRsync)
-}
-func (p *TypeOsCopy) SetMethodTar() bool {
-	return p.Method.SelectMethod(ConstMethodTar)
-}
-func (p *TypeOsCopy) SetMethodCpio() bool {
-	return p.Method.SelectMethod(ConstMethodCpio)
-}
-func (p *TypeOsCopy) SetMethodSftp() bool {
-	return p.Method.SelectMethod(ConstMethodSftp)
-}
-func (p *TypeOsCopy) SetMethodCp() bool {
-	return p.Method.SelectMethod(ConstMethodCp)
-}
-
-
-func (p *TypeOsCopy) GetMethodOptions() interface{} {
-	return p.Method.GetOptions()
-}
-func (p *TypeOsCopy) GetMethodName() string {
-	return p.Method.GetName()
-}
-func (p *TypeOsCopy) GetMethodPath() string {
-	return p.Method.GetPath()
-}
-func (p *TypeOsCopy) GetMethodAllowRemote() bool {
-	return p.Method.GetAllowRemote()
-}
-func (p *TypeOsCopy) GetMethodAvailable() bool {
-	return p.Method.GetAvailable()
 }

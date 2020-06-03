@@ -3,26 +3,26 @@ package helperSystem
 import "github.com/newclarity/scribeHelpers/ux"
 
 type HelperSystem TypeSystem
-func (p *HelperSystem) Reflect() *TypeSystem {
-	return (*TypeSystem)(p)
+func (s *HelperSystem) Reflect() *TypeSystem {
+	return (*TypeSystem)(s)
 }
-func (p *TypeSystem) Reflect() *HelperSystem {
-	return (*HelperSystem)(p)
+func (s *TypeSystem) Reflect() *HelperSystem {
+	return (*HelperSystem)(s)
 }
 
-func (p *HelperSystem) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(p); state.IsError() {
+func (s *HelperSystem) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(s); state.IsError() {
 		return state
 	}
-	p.State = p.State.EnsureNotNil()
-	return p.State
+	s.State = s.State.EnsureNotNil()
+	return s.State
 }
 
 
 // Usage:
 //		{{ $sys := NewSystem }}
 func HelperNewSystem() *HelperSystem {
-	ret := NewSystem(false)
+	ret := New(false)
 
 	for range OnlyOnce {
 	}
