@@ -12,18 +12,18 @@ require (
 	github.com/go-openapi/strfmt v0.19.5 // indirect
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible // indirect
-	github.com/newclarity/scribeHelpers/helperCopy v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/helperDocker v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/helperExec v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/helperGit v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/helperGitHub v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/helperPath v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/helperPrompt v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/helperRuntime v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/helperService v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/helperSystem v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/helperTypes v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/helperUx v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolCopy v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolDocker v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolExec v0.0.0-00010101000000-000000000000
+	github.com/newclarity/scribeHelpers/toolGit v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolGitHub v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolPath v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolPrompt v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-00010101000000-000000000000
+	github.com/newclarity/scribeHelpers/toolService v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolSystem v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolTypes v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolUx v0.0.0-00010101000000-000000000000 // indirect
 	github.com/newclarity/scribeHelpers/loadHelpers v0.0.0-00010101000000-000000000000
 	github.com/newclarity/scribeHelpers/ux v0.0.0-00010101000000-000000000000
 	github.com/opencontainers/go-digest v1.0.0 // indirect
@@ -39,26 +39,26 @@ replace github.com/newclarity/scribeHelpers/ux => ../ux
 
 replace github.com/newclarity/scribeHelpers/loadHelpers => ../loadHelpers
 
-replace github.com/newclarity/scribeHelpers/helperCopy => ../helperCopy
+replace github.com/newclarity/scribeHelpers/toolCopy => ../toolCopy
 
-replace github.com/newclarity/scribeHelpers/helperDocker => ../helperDocker
+replace github.com/newclarity/scribeHelpers/toolDocker => ../toolDocker
 
-replace github.com/newclarity/scribeHelpers/helperExec => ../helperExec
+replace github.com/newclarity/scribeHelpers/toolExec => ../toolExec
 
-replace github.com/newclarity/scribeHelpers/helperGit => ../helperGit
+replace github.com/newclarity/scribeHelpers/toolGit => ../toolGit
 
-replace github.com/newclarity/scribeHelpers/helperGitHub => ../helperGitHub
+replace github.com/newclarity/scribeHelpers/toolGitHub => ../toolGitHub
 
-replace github.com/newclarity/scribeHelpers/helperPath => ../helperPath
+replace github.com/newclarity/scribeHelpers/toolPath => ../toolPath
 
-replace github.com/newclarity/scribeHelpers/helperPrompt => ../helperPrompt
+replace github.com/newclarity/scribeHelpers/toolPrompt => ../toolPrompt
 
-replace github.com/newclarity/scribeHelpers/helperService => ../helperService
+replace github.com/newclarity/scribeHelpers/toolService => ../toolService
 
-replace github.com/newclarity/scribeHelpers/helperSystem => ../helperSystem
+replace github.com/newclarity/scribeHelpers/toolSystem => ../toolSystem
 
-replace github.com/newclarity/scribeHelpers/helperTypes => ../helperTypes
+replace github.com/newclarity/scribeHelpers/toolTypes => ../toolTypes
 
-replace github.com/newclarity/scribeHelpers/helperUx => ../helperUx
+replace github.com/newclarity/scribeHelpers/toolUx => ../toolUx
 
-replace github.com/newclarity/scribeHelpers/helperRuntime => ../helperRuntime
+replace github.com/newclarity/scribeHelpers/toolRuntime => ../toolRuntime

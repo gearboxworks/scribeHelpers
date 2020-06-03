@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="fe680a09-2c7f-4e69-add7-167a5e236a46" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../toolCopy/copy.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolCopy/copy.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolCopy/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolCopy/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolCopy/helpers_rsync.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolCopy/helpers_rsync.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolCopy/struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolCopy/struct.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolExample/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolExample/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolExample/struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolExample/struct.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolExec/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolExec/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolExec/helpers_bash.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolExec/helpers_bash.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolExec/helpers_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolExec/helpers_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolExec/struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolExec/struct.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGit/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGit/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGit/helpers_branch.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGit/helpers_branch.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGit/helpers_commit.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGit/helpers_commit.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGit/helpers_exec.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGit/helpers_exec.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGit/helpers_files.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGit/helpers_files.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGit/helpers_pull.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGit/helpers_pull.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGit/helpers_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGit/helpers_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGit/struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGit/struct.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGitHub/github.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGitHub/github.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolGitHub/github_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolGitHub/github_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolPath/dir.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolPath/dir.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolPath/file.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolPath/file.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolPath/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolPath/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolPath/remove.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolPath/remove.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolPath/stat.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolPath/stat.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolPath/struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolPath/struct.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolRuntime/struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolRuntime/struct.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolService/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolService/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolService/struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolService/struct.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolSystem/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolSystem/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolSystem/helpers_process.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolSystem/helpers_process.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolSystem/process.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolSystem/process.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolSystem/process_struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolSystem/process_struct.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolSystem/processes.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolSystem/processes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolSystem/struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolSystem/struct.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolTypes/arrays.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolTypes/arrays.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolTypes/numbers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolTypes/numbers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolTypes/reflects.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolTypes/reflects.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolTypes/strings.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolTypes/strings.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../toolUx/ux.go" beforeDir="false" afterPath="$PROJECT_DIR$/../toolUx/ux.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PackageReflect.go" beforeDir="false" afterPath="$PROJECT_DIR$/PackageReflect.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/files.go" beforeDir="false" afterPath="$PROJECT_DIR$/files.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/funcs.go" beforeDir="false" afterPath="$PROJECT_DIR$/funcs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/structs.go" beforeDir="false" afterPath="$PROJECT_DIR$/structs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/structs_json.go" beforeDir="false" afterPath="$PROJECT_DIR$/structs_json.go" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="GOROOT" path="/usr/local/go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="false" />
+  </component>
+  <component name="ProjectId" id="1clDXI6dBC97XXE02QSeZYulbqh" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.sdk.automatically.set" value="true" />
+    <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+  </component>
+</project>
