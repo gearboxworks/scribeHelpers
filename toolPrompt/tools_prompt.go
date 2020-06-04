@@ -7,21 +7,21 @@ import (
 
 // Usage:
 //		{{ $str := UserPrompt "Enter something %s:" "here" }}
-func HelperUserPrompt(prompt string, args ...interface{}) string {
+func ToolUserPrompt(prompt string, args ...interface{}) string {
 	return UserPrompt(prompt, args...)
 }
 
 
 // Usage:
 //		{{ $str := UserPromptHidden "Enter something %s:" "here" }}
-func HelperUserPromptHidden(prompt string, args ...interface{}) string {
+func ToolUserPromptHidden(prompt string, args ...interface{}) string {
 	return UserPromptHidden(prompt, args...)
 }
 
 
 // Usage:
 //		{{ $str := UserPrompt "Enter something %s:" "here" }}
-func HelperUserPromptBool(prompt string, args ...interface{}) bool {
+func ToolUserPromptBool(prompt string, args ...interface{}) bool {
 	var ret bool
 
 	for range OnlyOnce {

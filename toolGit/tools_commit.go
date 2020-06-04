@@ -19,7 +19,7 @@ func _NewCommit(hash string) *Commit {
 // Usage:
 //		{{- $cmd := $git.Commit }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) Commit(format interface{}, a ...interface{}) *ux.State {
+func (g *ToolGit) Commit(format interface{}, a ...interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -41,7 +41,7 @@ func (g *HelperGit) Commit(format interface{}, a ...interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.LastCommitMessage }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) LastCommitMessage(format interface{}, a ...interface{}) *ux.State {
+func (g *ToolGit) LastCommitMessage(format interface{}, a ...interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}

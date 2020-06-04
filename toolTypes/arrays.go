@@ -6,7 +6,7 @@ import (
 )
 
 
-func HelperIsSlice(i interface{}) bool {
+func ToolIsSlice(i interface{}) bool {
 	return ux.IsReflectSlice(i)
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -17,7 +17,7 @@ func HelperIsSlice(i interface{}) bool {
 	//}
 }
 
-func HelperIsArray(i interface{}) bool {
+func ToolIsArray(i interface{}) bool {
 	return ux.IsReflectArray(i)
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -28,7 +28,7 @@ func HelperIsArray(i interface{}) bool {
 	//}
 }
 
-func HelperIsMap(i interface{}) bool {
+func ToolIsMap(i interface{}) bool {
 	return ux.IsReflectMap(i)
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -40,7 +40,7 @@ func HelperIsMap(i interface{}) bool {
 }
 
 // FindInMap function.
-func HelperFindInMap(i interface{}, n string) interface{} {
+func ToolFindInMap(i interface{}, n string) interface{} {
 	var ret interface{}
 	n = strings.TrimPrefix(n, "\"")
 	n = strings.TrimSuffix(n, "\"")

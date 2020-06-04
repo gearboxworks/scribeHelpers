@@ -203,7 +203,7 @@ func (p *TypeProcess) populateStruct(proc *process.Process) {
 		var path string
 		path, err = proc.Cwd()
 		if err == nil {
-			p.pathCwd = toolPath.HelperNewPath(path)
+			p.pathCwd = toolPath.ToolNewPath(path)
 		}
 
 		p.openFiles = p.GetOpenFiles()
@@ -213,14 +213,14 @@ func (p *TypeProcess) populateStruct(proc *process.Process) {
 		//for _, h := range of {
 		//	ux.PrintflnBlue("String: %s => %s, %d", h.String(), h.Filename, h.Fd)
 		//	//if strings.HasSuffix(h.Filename, fmt.Sprintf("%c%s", filepath.Separator, p.name)) {
-		//	//	p.pathExe = toolPath.HelperNewPath(h.Filename)
+		//	//	p.pathExe = toolPath.ToolNewPath(h.Filename)
 		//	//}
 		//}
 
 		path, err = proc.Exe()
 		// Errors will be ignored.
 		if path != "" {
-			p.pathExe = toolPath.HelperNewPath(path)
+			p.pathExe = toolPath.ToolNewPath(path)
 		}
 
 

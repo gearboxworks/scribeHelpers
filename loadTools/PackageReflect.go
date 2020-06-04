@@ -55,7 +55,7 @@ type PkgReflect struct {
 func PackageReflect(pr PkgReflect, paths ...string) *ux.State {
 
 	for range OnlyOnce {
-		pr.State = ux.NewState(pr.Debug)
+		pr.State = ux.NewState("scribe", false)
 
 		if pr.Gofile == "" {
 			pr.Gofile = "pkgreflect.go"

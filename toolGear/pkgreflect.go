@@ -39,6 +39,7 @@ var Functions = map[string]reflect.Value{
 }
 
 var Variables = map[string]reflect.Value{
+	"GetTools": reflect.ValueOf(&GetTools),
 	"RunAs": reflect.ValueOf(&RunAs),
 }
 
@@ -62,5 +63,6 @@ var Consts = map[string]reflect.Value{
 	"IsoFileNeedsToDownload": reflect.ValueOf(IsoFileNeedsToDownload),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
 	"ProviderDocker": reflect.ValueOf(ProviderDocker),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

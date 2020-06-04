@@ -63,7 +63,7 @@ func NewRepo(runtime *toolRuntime.TypeRuntime) *GitHubRepo {
 		Map:      make(ReleasesMap),
 		Latest:   nil,
 		Selected: nil,
-		BaseDir:  toolPath.HelperNewPath(runtime.CmdDir, "iso"),
+		BaseDir:  toolPath.ToolNewPath(runtime.CmdDir, "iso"),
 
 		runtime:  runtime,
 		State:    ux.NewState(runtime.CmdName, runtime.Debug),
@@ -153,7 +153,7 @@ func (ghr *GitHubRepo) UpdateReleases() *ux.State {
 
 	for range OnlyOnce {
 		if ghr.BaseDir == nil {
-			ghr.BaseDir = toolPath.HelperNewPath("")
+			ghr.BaseDir = toolPath.ToolNewPath("")
 			_ = ghr.BaseDir.AppendPath("iso")
 			//p := ospaths.New("")
 			//ghr.BaseDir = p.UserConfigDir.AddToPath("iso")

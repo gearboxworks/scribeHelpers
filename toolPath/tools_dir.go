@@ -4,7 +4,7 @@ package toolPath
 // Usage:
 //		{{ $ret := Chdir "/root" }}
 //		{{ if $ret.IsOk }}OK{{ end }}
-func HelperChdir(dir ...interface{}) *TypeOsPath {
+func ToolChdir(dir ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {
@@ -27,7 +27,7 @@ func HelperChdir(dir ...interface{}) *TypeOsPath {
 // Usage:
 //		{{ $ret := GetCwd }}
 //		{{ if $ret.IsOk }}Current directory is {{ $ret.Dir }}{{ end }}
-func HelperGetCwd() *TypeOsPath {
+func ToolGetCwd() *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {
@@ -47,7 +47,7 @@ func HelperGetCwd() *TypeOsPath {
 // Usage:
 //		{{ $ret := GetCwd }}
 //		{{ if $ret.IsOk }}Current directory is {{ $ret.Dir }}{{ end }}
-func HelperIsCwd() *TypeOsPath {
+func ToolIsCwd() *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {
@@ -67,7 +67,7 @@ func HelperIsCwd() *TypeOsPath {
 // Usage:
 //		{{ $ret := Chmod 0644 "/root" ... }}
 //		{{ if $ret.IsOk }}Changed perms of file {{ $ret.Dir }}{{ end }}
-func HelperCreateDir(path ...interface{}) *TypeOsPath {
+func ToolCreateDir(path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {
@@ -93,7 +93,7 @@ func HelperCreateDir(path ...interface{}) *TypeOsPath {
 // Usage:
 //		{{ $ret := Chmod 0644 "/root" ... }}
 //		{{ if $ret.IsOk }}Changed perms of file {{ $ret.Dir }}{{ end }}
-func HelperRemoveDir(path ...interface{}) *TypeOsPath {
+func ToolRemoveDir(path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {

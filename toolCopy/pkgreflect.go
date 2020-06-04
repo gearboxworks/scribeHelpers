@@ -5,10 +5,10 @@ package toolCopy
 import "reflect"
 
 var Types = map[string]reflect.Type{
-	"HelperOsCopy": reflect.TypeOf((*HelperOsCopy)(nil)).Elem(),
 	"OsCopyGetter": reflect.TypeOf((*OsCopyGetter)(nil)).Elem(),
 	"PathArray": reflect.TypeOf((*PathArray)(nil)).Elem(),
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
+	"ToolOsCopy": reflect.TypeOf((*ToolOsCopy)(nil)).Elem(),
 	"TypeCopyMethod": reflect.TypeOf((*TypeCopyMethod)(nil)).Elem(),
 	"TypeCopyMethods": reflect.TypeOf((*TypeCopyMethods)(nil)).Elem(),
 	"TypeOsCopy": reflect.TypeOf((*TypeOsCopy)(nil)).Elem(),
@@ -16,15 +16,15 @@ var Types = map[string]reflect.Type{
 }
 
 var Functions = map[string]reflect.Value{
-	"HelperCopyFiles": reflect.ValueOf(HelperCopyFiles),
-	"HelperCopyRsync": reflect.ValueOf(HelperCopyRsync),
 	"New": reflect.ValueOf(New),
 	"NewCopyMethod": reflect.ValueOf(NewCopyMethod),
-	"ReflectHelperOsCopy": reflect.ValueOf(ReflectHelperOsCopy),
+	"ReflectToolOsCopy": reflect.ValueOf(ReflectToolOsCopy),
+	"ToolCopyFiles": reflect.ValueOf(ToolCopyFiles),
+	"ToolCopyRsync": reflect.ValueOf(ToolCopyRsync),
 }
 
 var Variables = map[string]reflect.Value{
-	"GetHelpers": reflect.ValueOf(&GetHelpers),
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
@@ -34,7 +34,7 @@ var Consts = map[string]reflect.Value{
 	"ConstMethodRsync": reflect.ValueOf(ConstMethodRsync),
 	"ConstMethodSftp": reflect.ValueOf(ConstMethodSftp),
 	"ConstMethodTar": reflect.ValueOf(ConstMethodTar),
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

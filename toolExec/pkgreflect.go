@@ -5,27 +5,27 @@ package toolExec
 import "reflect"
 
 var Types = map[string]reflect.Type{
-	"HelperExecCommand": reflect.TypeOf((*HelperExecCommand)(nil)).Elem(),
+	"ToolExecCommand": reflect.TypeOf((*ToolExecCommand)(nil)).Elem(),
 	"TypeExecCommand": reflect.TypeOf((*TypeExecCommand)(nil)).Elem(),
 	"TypeExecCommandGetter": reflect.TypeOf((*TypeExecCommandGetter)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
-	"HelperExec": reflect.ValueOf(HelperExec),
-	"HelperExecBash": reflect.ValueOf(HelperExecBash),
-	"HelperExecCmd": reflect.ValueOf(HelperExecCmd),
-	"HelperNewBash": reflect.ValueOf(HelperNewBash),
-	"HelperOsExit": reflect.ValueOf(HelperOsExit),
 	"New": reflect.ValueOf(New),
 	"ReflectExecCommand": reflect.ValueOf(ReflectExecCommand),
+	"ToolExec": reflect.ValueOf(ToolExec),
+	"ToolExecBash": reflect.ValueOf(ToolExecBash),
+	"ToolExecCmd": reflect.ValueOf(ToolExecCmd),
+	"ToolNewBash": reflect.ValueOf(ToolNewBash),
+	"ToolOsExit": reflect.ValueOf(ToolOsExit),
 }
 
 var Variables = map[string]reflect.Value{
-	"GetHelpers": reflect.ValueOf(&GetHelpers),
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

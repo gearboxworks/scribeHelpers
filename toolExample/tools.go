@@ -3,15 +3,15 @@ package toolExample
 import "github.com/newclarity/scribeHelpers/ux"
 
 
-type HelperExample TypeExample
-func (g *HelperExample) Reflect() *TypeExample {
+type ToolExample TypeExample
+func (g *ToolExample) Reflect() *TypeExample {
 	return (*TypeExample)(g)
 }
-func (g *TypeExample) Reflect() *HelperExample {
-	return (*HelperExample)(g)
+func (g *TypeExample) Reflect() *ToolExample {
+	return (*ToolExample)(g)
 }
 
-func (c *HelperExample) IsNil() *ux.State {
+func (c *ToolExample) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(c); state.IsError() {
 		return state
 	}

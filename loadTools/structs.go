@@ -32,7 +32,7 @@ type TypeScribeArgs struct {
 
 	JsonStruct     *jsonStruct
 
-	Helpers        template.FuncMap
+	Tools          template.FuncMap
 
 	Runtime        *toolRuntime.TypeRuntime
 	State          *ux.State
@@ -43,10 +43,10 @@ type TypeScribeArgs struct {
 func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
 
 	p := TypeScribeArgs{
-		Json:           &TypeArgFile{State: ux.NewState(debugFlag)},
-		Template:       &TypeArgFile{State: ux.NewState(debugFlag)},
+		Json:           &TypeArgFile{State: ux.NewState(binary, debugFlag)},
+		Template:       &TypeArgFile{State: ux.NewState(binary, debugFlag)},
 		TemplateRef:    nil,
-		Output:         &TypeArgFile{State: ux.NewState(debugFlag)},
+		Output:         &TypeArgFile{State: ux.NewState(binary, debugFlag)},
 		OutputFh:       nil,
 
 		ExecShell:      false,
@@ -58,10 +58,10 @@ func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
 
 		JsonStruct:     nil,
 
-		Helpers:        make(template.FuncMap),
+		Tools:          make(template.FuncMap),
 
 		Runtime:        toolRuntime.New(binary, version, debugFlag),
-		State:          ux.NewState(debugFlag),
+		State:          ux.NewState(binary, debugFlag),
 		valid:          false,
 	}
 

@@ -11,7 +11,7 @@ import (
 
 
 // Usage: {{ array := GitHubGetOrganization "gearboxworks" }}
-func HelperGitHubGetOrganization(i interface{}) []string {
+func ToolGitHubGetOrganization(i interface{}) []string {
 	var sa []string
 
 	for range OnlyOnce {
@@ -46,7 +46,7 @@ func fetchOrganizations(username string) ([]*github.Organization, error) {
 }
 
 
-func HelperGitHubLogin(username interface{}, password interface{}, twofactor interface{}) *TypeGitHub {
+func ToolGitHubLogin(username interface{}, password interface{}, twofactor interface{}) *TypeGitHub {
 	auth := New(false)
 
 	for range OnlyOnce {
@@ -57,7 +57,7 @@ func HelperGitHubLogin(username interface{}, password interface{}, twofactor int
 			usernameString = ""
 		}
 		if usernameString == "" {
-			usernameString = toolPrompt.HelperUserPrompt("GitHub username: ")
+			usernameString = toolPrompt.ToolUserPrompt("GitHub username: ")
 		}
 
 
@@ -68,7 +68,7 @@ func HelperGitHubLogin(username interface{}, password interface{}, twofactor int
 			passwordString = ""
 		}
 		if passwordString == "" {
-			passwordString = toolPrompt.HelperUserPromptHidden("GitHub password: ")
+			passwordString = toolPrompt.ToolUserPromptHidden("GitHub password: ")
 		}
 
 
@@ -95,7 +95,7 @@ func HelperGitHubLogin(username interface{}, password interface{}, twofactor int
 		if _, ok := err.(*github.TwoFactorAuthError); ok {
 			// Is this a two-factor auth error? If so, prompt for OTP and try again.
 			if twofactorString == "" {
-				twofactorString = toolPrompt.HelperUserPrompt("GitHub 2FA password: ")
+				twofactorString = toolPrompt.ToolUserPrompt("GitHub 2FA password: ")
 			}
 
 			tp.OTP = strings.TrimSpace(twofactorString)

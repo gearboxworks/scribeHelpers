@@ -26,7 +26,7 @@ func (p *TypeOsPath) Remove() *ux.State {
 				break
 			}
 
-			if !toolPrompt.HelperUserPromptBool("Remove path '%s'? (Y|N) ", p._Path) {
+			if !toolPrompt.ToolUserPromptBool("Remove path '%s'? (Y|N) ", p._Path) {
 				p.State.SetWarning("not removing path '%s'", p._Path)
 				break
 			}
@@ -73,7 +73,7 @@ func (p *TypeOsPath) RemoveFile() *ux.State {
 			}
 
 			p.State.Clear()
-			if !toolPrompt.HelperUserPromptBool("Remove file '%s'? (Y|N) ", p._Path) {
+			if !toolPrompt.ToolUserPromptBool("Remove file '%s'? (Y|N) ", p._Path) {
 				p.State.SetWarning("not removing file '%s'", p._Path)
 				break
 			}
@@ -118,7 +118,7 @@ func (p *TypeOsPath) RemoveDir() *ux.State {
 				break
 			}
 
-			if !toolPrompt.HelperUserPromptBool("Remove directory '%s'? (Y|N) ", p._Path) {
+			if !toolPrompt.ToolUserPromptBool("Remove directory '%s'? (Y|N) ", p._Path) {
 				p.State.SetWarning("not removing file '%s'", p._Path)
 				break
 			}

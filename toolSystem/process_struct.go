@@ -37,8 +37,8 @@ type TypeOpenFiles struct {
 }
 
 
-func ReflectHelperProcess(p *TypeProcess) *HelperProcess {
-	return (*HelperProcess)(p)
+func ReflectToolProcess(p *TypeProcess) *ToolProcess {
+	return (*ToolProcess)(p)
 }
 
 func (p *TypeProcess) IsNil() *ux.State {
@@ -69,8 +69,8 @@ func NewProcess(debugMode bool) *TypeProcess {
 		pid:       0,
 
 		proc:      nil,
-		pathExe:   nil,	// toolPath.HelperNewPath(),
-		pathCwd:   nil,	// toolPath.HelperNewPath(),
+		pathExe:   nil,	// toolPath.ToolNewPath(),
+		pathCwd:   nil,	// toolPath.ToolNewPath(),
 
 		openFiles: NewOpenFiles(debugMode),
 

@@ -9,7 +9,7 @@ import (
 // Usage:
 //		{{- $cmd := $git.Open }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) Pull(opts ...*PullOptions) *ux.State {
+func (g *ToolGit) Pull(opts ...*PullOptions) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}

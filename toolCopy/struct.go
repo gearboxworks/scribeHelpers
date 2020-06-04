@@ -42,8 +42,8 @@ func (s *State) Reflect() *ux.State {
 //func ReflectState(p *ux.State) *ux.State {
 //	return (*State)(p)
 //}
-func ReflectHelperOsCopy(p *TypeOsCopy) *HelperOsCopy {
-	return (*HelperOsCopy)(p)
+func ReflectToolOsCopy(p *TypeOsCopy) *ToolOsCopy {
+	return (*ToolOsCopy)(p)
 }
 
 

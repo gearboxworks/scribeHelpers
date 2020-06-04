@@ -2,7 +2,6 @@ package toolDocker
 
 import "time"
 
-const OnlyOnce = "1"
 
 const (
 	DefaultTimeout = time.Second * 2

@@ -37,8 +37,8 @@ type State ux.State
 func (p *State) Reflect() *ux.State {
 	return (*ux.State)(p)
 }
-func ReflectHelperExample(p *TypeExample) *HelperExample {
-	return (*HelperExample)(p)
+func ReflectToolExample(p *TypeExample) *ToolExample {
+	return (*ToolExample)(p)
 }
 
 func (c *TypeExample) IsNil() *ux.State {

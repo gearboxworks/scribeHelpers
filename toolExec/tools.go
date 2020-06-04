@@ -5,15 +5,15 @@ import (
 )
 
 
-type HelperExecCommand TypeExecCommand
-func (g *HelperExecCommand) Reflect() *TypeExecCommand {
+type ToolExecCommand TypeExecCommand
+func (g *ToolExecCommand) Reflect() *TypeExecCommand {
 	return (*TypeExecCommand)(g)
 }
-func (e *TypeExecCommand) Reflect() *HelperExecCommand {
-	return (*HelperExecCommand)(e)
+func (e *TypeExecCommand) Reflect() *ToolExecCommand {
+	return (*ToolExecCommand)(e)
 }
 
-func (c *HelperExecCommand) IsNil() *ux.State {
+func (c *ToolExecCommand) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(c); state.IsError() {
 		return state
 	}
@@ -24,7 +24,7 @@ func (c *HelperExecCommand) IsNil() *ux.State {
 
 // Usage:
 //		{{ $output := ExecCommand "ps %s" "-eaf" ... }}
-func HelperExecCmd(cmd ...interface{}) *ux.State {
+func ToolExecCmd(cmd ...interface{}) *ux.State {
 	ret := New(false)
 
 	for range OnlyOnce {
@@ -39,8 +39,8 @@ func HelperExecCmd(cmd ...interface{}) *ux.State {
 	return ret.State
 }
 // Alias of ExecCommand
-func HelperExec(cmd ...interface{}) *ux.State {
-	return HelperExecCmd(cmd...)
+func ToolExec(cmd ...interface{}) *ux.State {
+	return ToolExecCmd(cmd...)
 }
 
 
@@ -70,7 +70,7 @@ func (e *TypeExecCommand) ExitOnWarning() string {
 
 // Usage:
 //		{{ OsExit 1 }}
-func HelperOsExit(e ...interface{}) string {
+func ToolOsExit(e ...interface{}) string {
 	for range OnlyOnce {
 		value := ux.ReflectInt(e)
 		ux.Exit(*value)

@@ -23,6 +23,7 @@ var Functions = map[string]reflect.Value{
 }
 
 var Variables = map[string]reflect.Value{
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
@@ -31,5 +32,6 @@ var Consts = map[string]reflect.Value{
 	"DefaultProject": reflect.ValueOf(DefaultProject),
 	"DefaultTimeout": reflect.ValueOf(DefaultTimeout),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

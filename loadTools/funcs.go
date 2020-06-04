@@ -139,7 +139,7 @@ func (at *TypeScribeArgs) Load() *ux.State {
 
 	for range OnlyOnce {
 		if at.JsonStruct == nil {
-			at.JsonStruct = NewJsonStruct(at.Exec.CmdName, at.Exec.CmdVersion, at.Debug)
+			at.JsonStruct = NewJsonStruct(at.Runtime.CmdName, at.Runtime.CmdVersion, at.Debug)
 		}
 
 		// Historic reasons...
@@ -202,7 +202,7 @@ func (at *TypeScribeArgs) Run() *ux.State {
 		if at.ExecShell {
 			ux.PrintflnOk("Executing file '%s'", at.Output.Filename)
 
-			//outFile := toolPath.HelperNewPath(at.OutFile)
+			//outFile := toolPath.ToolNewPath(at.OutFile)
 			bashFile := at.Output.File
 			at.State = bashFile.StatPath()
 			if at.State.IsNotOk() {
@@ -211,7 +211,7 @@ func (at *TypeScribeArgs) Run() *ux.State {
 			}
 			bashFile.Chmod(0755)
 
-			exe := toolExec.New(at.Debug)
+			exe := toolExec.New(at.Runtime)
 			at.State = exe.State
 			if at.State.IsError() {
 				at.State.SetError("Shell script error: %s", at.State.GetError())
@@ -288,16 +288,16 @@ func (at *TypeScribeArgs) CreateTemplate() (*template.Template, *ux.State) {
 
 	for range OnlyOnce {
 		// Define additional template functions.
-		at.State = DiscoverHelpers()
+		at.State = DiscoverTools()
 		if at.State.IsNotOk() {
 			break
 		}
-		at.LoadHelpers(at.State.Response.(template.FuncMap))
+		at.LoadTools(at.State.Response.(template.FuncMap))
 
-		// Add inbuilt helpers.
-		at.Helpers["PrintHelpers"] = PrintHelpers
+		// Add inbuilt Tools.
+		at.Tools["PrintTools"] = PrintTools
 
-		t = template.New("JSON").Funcs(at.Helpers)
+		t = template.New("JSON").Funcs(at.Tools)
 	}
 
 	return t, at.State
@@ -305,33 +305,33 @@ func (at *TypeScribeArgs) CreateTemplate() (*template.Template, *ux.State) {
 
 
 // Ability to import from an external package.
-// You need to run `pkgreflect scribe/helpers` after code changes.
-// func (at *TypeScribeArgs) LoadHelpers(h map[string]reflect.Value) *ux.State {
-func (at *TypeScribeArgs) LoadHelpers(h template.FuncMap) *ux.State {
+// You need to run `pkgreflect scribe/tools` after code changes.
+// func (at *TypeScribeArgs) LoadTools(h map[string]reflect.Value) *ux.State {
+func (at *TypeScribeArgs) LoadTools(h template.FuncMap) *ux.State {
 	if state := at.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range OnlyOnce {
 		for name, fn := range h {
-			at.Helpers[name] = fn
+			at.Tools[name] = fn
 		}
 
 		//// Define additional template functions.
 		//for name, fn := range h {
-		//	// Ignore GetHelpers function.
-		//	if name == "GetHelpers" {
+		//	// Ignore GetTools function.
+		//	if name == "GetTools" {
 		//		continue
 		//	}
 		//
-		//	// Ignore any function that doesn't have a HelperPrefix
-		//	if !strings.HasPrefix(name, "Helper") {
+		//	// Ignore any function that doesn't have a ToolPrefix
+		//	if !strings.HasPrefix(name, "Tool") {
 		//		continue
 		//	}
 		//
-		//	// Trim HelperPrefix from function template name.
-		//	name = strings.TrimPrefix(name, "Helper")
-		//	at.Helpers[name] = fn.Interface()
+		//	// Trim ToolPrefix from function template name.
+		//	name = strings.TrimPrefix(name, "Tool")
+		//	at.Tools[name] = fn.Interface()
 		//}
 	}
 
@@ -339,6 +339,6 @@ func (at *TypeScribeArgs) LoadHelpers(h template.FuncMap) *ux.State {
 }
 
 
-func (at *TypeScribeArgs) PrintHelpers() {
-	_, _ = fmt.Fprintf(os.Stderr, PrintHelpers())
+func (at *TypeScribeArgs) PrintTools() {
+	_, _ = fmt.Fprintf(os.Stderr, PrintTools())
 }

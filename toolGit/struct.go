@@ -61,8 +61,8 @@ func (s *State) Reflect() *ux.State {
 //func ReflectState(p *ux.State) *ux.State {
 //	return (*State)(p)
 //}
-func ReflectHelperGit(g *TypeGit) *HelperGit {
-	return (*HelperGit)(g)
+func ReflectToolGit(g *TypeGit) *ToolGit {
+	return (*ToolGit)(g)
 }
 
 

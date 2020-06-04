@@ -2,7 +2,6 @@ package toolGear
 
 import "time"
 
-const OnlyOnce = "1"
 
 const (
 	DefaultTimeout = time.Second * 2

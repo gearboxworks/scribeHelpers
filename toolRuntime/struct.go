@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-const OnlyOnce = "1"
-
 
 type TypeRuntime struct {
 	CmdName     string		`json:"cmd_name" mapstructure:"cmd_name"`
@@ -47,9 +45,6 @@ type Environment map[string]string
 
 // Instead of creating every time, let's cache the initial result in a global variable.
 var globalRuntime *TypeRuntime
-func init() {
-	//globalRuntime =
-}
 
 
 func New(binary string, version string, debugFlag bool) *TypeRuntime {

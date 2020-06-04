@@ -1,4 +1,4 @@
-module github.com/newclarity/scribeHelpers/loader
+module github.com/newclarity/scribeHelpers/loadTools
 
 go 1.14
 

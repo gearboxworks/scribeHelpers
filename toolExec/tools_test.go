@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestHelperExecCommand(t *testing.T) {
+func TestToolExecCommand(t *testing.T) {
 
 	for _, c := range []struct {
 		cmd []string
@@ -25,7 +25,7 @@ func TestHelperExecCommand(t *testing.T) {
 			Response:    nil,
 		}},
 	} {
-		returned := HelperExecCmd(c.cmd)
+		returned := ToolExecCmd(c.cmd)
 		if returned.ExitCode != c.expected.ExitCode {
 			t.Errorf("%s(%q) == %q, want %q", t.Name(), c.cmd, returned.ExitCode, c.expected.ExitCode)
 			spew.Dump(c.expected)

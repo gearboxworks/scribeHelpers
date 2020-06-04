@@ -5,23 +5,23 @@ package toolService
 import "reflect"
 
 var Types = map[string]reflect.Type{
-	"HelperService": reflect.TypeOf((*HelperService)(nil)).Elem(),
 	"ServiceGetter": reflect.TypeOf((*ServiceGetter)(nil)).Elem(),
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
+	"ToolService": reflect.TypeOf((*ToolService)(nil)).Elem(),
 	"TypeService": reflect.TypeOf((*TypeService)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
 	"New": reflect.ValueOf(New),
-	"ReflectHelperService": reflect.ValueOf(ReflectHelperService),
+	"ReflectToolService": reflect.ValueOf(ReflectToolService),
 }
 
 var Variables = map[string]reflect.Value{
-	"GetHelpers": reflect.ValueOf(&GetHelpers),
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

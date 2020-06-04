@@ -23,8 +23,8 @@ type State ux.State
 func (p *State) Reflect() *ux.State {
 	return (*ux.State)(p)
 }
-func ReflectHelperService(p *TypeService) *HelperService {
-	return (*HelperService)(p)
+func ReflectToolService(p *TypeService) *ToolService {
+	return (*ToolService)(p)
 }
 
 

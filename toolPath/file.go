@@ -156,7 +156,7 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 				break
 			}
 
-			if !toolPrompt.HelperUserPromptBool("Overwrite file '%s'? (Y|N) ", p._Path) {
+			if !toolPrompt.ToolUserPromptBool("Overwrite file '%s'? (Y|N) ", p._Path) {
 				p.State.SetWarning("not overwriting file '%s'", p._Path)
 				break
 			}
@@ -208,7 +208,7 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 				break
 			}
 
-			if !toolPrompt.HelperUserPromptBool("Overwrite file '%s'? (Y|N) ", p._Path) {
+			if !toolPrompt.ToolUserPromptBool("Overwrite file '%s'? (Y|N) ", p._Path) {
 				p.State.SetWarning("not overwriting file '%s'", p._Path)
 				break
 			}

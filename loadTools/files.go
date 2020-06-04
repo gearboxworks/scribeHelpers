@@ -302,7 +302,7 @@ func (at *TypeArgFile) SetInputFile(file string, remove bool) *ux.State {
 		}
 
 		if at.File == nil {
-			at.File = toolPath.HelperNewPath(file)
+			at.File = toolPath.ToolNewPath(file)
 		}
 
 		if remove {
@@ -356,7 +356,7 @@ func (at *TypeArgFile) SetOutputFile(file string, overwrite bool) *ux.State {
 		}
 
 		if at.File == nil {
-			at.File = toolPath.HelperNewPath(file)
+			at.File = toolPath.ToolNewPath(file)
 			//at.File.State.Clear()	// Special case.
 		}
 		at.isFile = true

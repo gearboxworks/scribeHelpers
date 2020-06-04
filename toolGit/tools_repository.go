@@ -11,8 +11,8 @@ import (
 // Usage:
 //		{{- $cmd := $git.Clone }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-// func (me *HelperGit) Clone(url string, dir ...interface{}) *TypeExecCommand {
-func (g *HelperGit) Clone() *ux.State {
+// func (me *ToolGit) Clone(url string, dir ...interface{}) *TypeExecCommand {
+func (g *ToolGit) Clone() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -44,7 +44,7 @@ func (g *HelperGit) Clone() *ux.State {
 
 	return g.State
 }
-//func (g *HelperGit) Clone() *ux.State {
+//func (g *ToolGit) Clone() *ux.State {
 //	for range OnlyOnce {
 //		if g.Reflect().IsNotOk() {
 //			break
@@ -92,7 +92,7 @@ func (g *HelperGit) Clone() *ux.State {
 // Usage:
 //		{{- $cmd := $git.Open }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) IsExisting() bool {
+func (g *ToolGit) IsExisting() bool {
 	var ok bool
 	if state := g.IsNil(); state.IsError() {
 		return false
@@ -109,14 +109,14 @@ func (g *HelperGit) IsExisting() bool {
 
 	return ok
 }
-func (g *HelperGit) IsNotExisting() bool {
+func (g *ToolGit) IsNotExisting() bool {
 	return !g.IsExisting()
 }
 
 // Usage:
 //		{{- $cmd := $git.Open }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) Open() *ux.State {
+func (g *ToolGit) Open() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -159,7 +159,7 @@ func (g *HelperGit) Open() *ux.State {
 // Usage:
 //		{{- $cmd := $git.SetPath }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) SetPath(path ...interface{}) *ux.State {
+func (g *ToolGit) SetPath(path ...interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -210,7 +210,7 @@ func (g *HelperGit) SetPath(path ...interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GetUrl }}
 //		{{- if $cmd.IsOk }}{{ $cmd.Data }}{{- end }}
-func (g *HelperGit) GetUrl() *ux.State {
+func (g *ToolGit) GetUrl() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -233,7 +233,7 @@ func (g *HelperGit) GetUrl() *ux.State {
 // Usage:
 //		{{- $cmd := $git.SetUrl }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) SetUrl(u Url) *ux.State {
+func (g *ToolGit) SetUrl(u Url) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -246,8 +246,8 @@ func (g *HelperGit) SetUrl(u Url) *ux.State {
 // Usage:
 //		{{- $cmd := $git.Clone }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-// func (me *HelperGit) Clone(url interface{}, dir ...interface{}) *TypeExecCommand {
-func (g *HelperGit) Remove() *ux.State {
+// func (me *ToolGit) Clone(url interface{}, dir ...interface{}) *TypeExecCommand {
+func (g *ToolGit) Remove() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -290,7 +290,7 @@ func (g *HelperGit) Remove() *ux.State {
 // Usage:
 //		{{- $cmd := $git.Lock }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) Lock() *ux.State {
+func (g *ToolGit) Lock() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -315,7 +315,7 @@ func (g *HelperGit) Lock() *ux.State {
 // Usage:
 //		{{- $cmd := $git.GetStatus }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) GetStatus() *ux.State {
+func (g *ToolGit) GetStatus() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}

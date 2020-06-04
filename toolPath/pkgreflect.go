@@ -5,37 +5,37 @@ package toolPath
 import "reflect"
 
 var Types = map[string]reflect.Type{
-	"HelperOsPath": reflect.TypeOf((*HelperOsPath)(nil)).Elem(),
 	"OsPathGetter": reflect.TypeOf((*OsPathGetter)(nil)).Elem(),
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
+	"ToolOsPath": reflect.TypeOf((*ToolOsPath)(nil)).Elem(),
 	"TypeOsPath": reflect.TypeOf((*TypeOsPath)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
-	"HelperChdir": reflect.ValueOf(HelperChdir),
-	"HelperChmod": reflect.ValueOf(HelperChmod),
-	"HelperCreateDir": reflect.ValueOf(HelperCreateDir),
-	"HelperGetCwd": reflect.ValueOf(HelperGetCwd),
-	"HelperIsCwd": reflect.ValueOf(HelperIsCwd),
-	"HelperNewPath": reflect.ValueOf(HelperNewPath),
-	"HelperReadFile": reflect.ValueOf(HelperReadFile),
-	"HelperRemoveDir": reflect.ValueOf(HelperRemoveDir),
-	"HelperRemoveFile": reflect.ValueOf(HelperRemoveFile),
-	"HelperWriteFile": reflect.ValueOf(HelperWriteFile),
 	"New": reflect.ValueOf(New),
 	"ReflectAbsPath": reflect.ValueOf(ReflectAbsPath),
 	"ReflectFileMode": reflect.ValueOf(ReflectFileMode),
-	"ReflectHelperOsPath": reflect.ValueOf(ReflectHelperOsPath),
 	"ReflectPath": reflect.ValueOf(ReflectPath),
+	"ReflectToolOsPath": reflect.ValueOf(ReflectToolOsPath),
+	"ToolChdir": reflect.ValueOf(ToolChdir),
+	"ToolChmod": reflect.ValueOf(ToolChmod),
+	"ToolCreateDir": reflect.ValueOf(ToolCreateDir),
+	"ToolGetCwd": reflect.ValueOf(ToolGetCwd),
+	"ToolIsCwd": reflect.ValueOf(ToolIsCwd),
+	"ToolNewPath": reflect.ValueOf(ToolNewPath),
+	"ToolReadFile": reflect.ValueOf(ToolReadFile),
+	"ToolRemoveDir": reflect.ValueOf(ToolRemoveDir),
+	"ToolRemoveFile": reflect.ValueOf(ToolRemoveFile),
+	"ToolWriteFile": reflect.ValueOf(ToolWriteFile),
 }
 
 var Variables = map[string]reflect.Value{
-	"GetHelpers": reflect.ValueOf(&GetHelpers),
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
 	"DefaultSeparator": reflect.ValueOf(DefaultSeparator),
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

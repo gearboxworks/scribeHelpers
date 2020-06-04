@@ -7,21 +7,21 @@ import "reflect"
 var Types = map[string]reflect.Type{
 	"FileInfo": reflect.TypeOf((*FileInfo)(nil)).Elem(),
 	"Files": reflect.TypeOf((*Files)(nil)).Elem(),
-	"Helper": reflect.TypeOf((*Helper)(nil)).Elem(),
-	"Helpers": reflect.TypeOf((*Helpers)(nil)).Elem(),
 	"PkgReflect": reflect.TypeOf((*PkgReflect)(nil)).Elem(),
-	"SortedHelpers": reflect.TypeOf((*SortedHelpers)(nil)).Elem(),
+	"SortedTools": reflect.TypeOf((*SortedTools)(nil)).Elem(),
+	"Tool": reflect.TypeOf((*Tool)(nil)).Elem(),
+	"Tools": reflect.TypeOf((*Tools)(nil)).Elem(),
 	"TypeArgFile": reflect.TypeOf((*TypeArgFile)(nil)).Elem(),
 	"TypeScribeArgs": reflect.TypeOf((*TypeScribeArgs)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
-	"AddHelpers": reflect.ValueOf(AddHelpers),
-	"DiscoverHelpers": reflect.ValueOf(DiscoverHelpers),
+	"AddTools": reflect.ValueOf(AddTools),
+	"DiscoverTools": reflect.ValueOf(DiscoverTools),
 	"New": reflect.ValueOf(New),
 	"NewJsonStruct": reflect.ValueOf(NewJsonStruct),
 	"PackageReflect": reflect.ValueOf(PackageReflect),
-	"PrintHelpers": reflect.ValueOf(PrintHelpers),
+	"PrintTools": reflect.ValueOf(PrintTools),
 	"UnescapeString": reflect.ValueOf(UnescapeString),
 }
 
@@ -31,11 +31,11 @@ var Variables = map[string]reflect.Value{
 var Consts = map[string]reflect.Value{
 	"CmdBuild": reflect.ValueOf(CmdBuild),
 	"CmdConvert": reflect.ValueOf(CmdConvert),
-	"CmdHelpers": reflect.ValueOf(CmdHelpers),
 	"CmdLoad": reflect.ValueOf(CmdLoad),
 	"CmdPush": reflect.ValueOf(CmdPush),
 	"CmdRelease": reflect.ValueOf(CmdRelease),
 	"CmdRun": reflect.ValueOf(CmdRun),
+	"CmdTools": reflect.ValueOf(CmdTools),
 	"CmdVersion": reflect.ValueOf(CmdVersion),
 	"DefaultJsonFile": reflect.ValueOf(DefaultJsonFile),
 	"DefaultJsonFileSuffix": reflect.ValueOf(DefaultJsonFileSuffix),
@@ -58,9 +58,9 @@ var Consts = map[string]reflect.Value{
 	"FlagRemoveTemplate": reflect.ValueOf(FlagRemoveTemplate),
 	"FlagTemplateFile": reflect.ValueOf(FlagTemplateFile),
 	"FlagVersion": reflect.ValueOf(FlagVersion),
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
 	"SelectConvert": reflect.ValueOf(SelectConvert),
 	"SelectStdout": reflect.ValueOf(SelectStdout),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

@@ -11,9 +11,9 @@ import (
 )
 
 
-type HelperOsCopy TypeOsCopy
+type ToolOsCopy TypeOsCopy
 
-func (c *HelperOsCopy) IsNil() *ux.State {
+func (c *ToolOsCopy) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(c); state.IsError() {
 		return state
 	}
@@ -26,21 +26,21 @@ func (c *HelperOsCopy) IsNil() *ux.State {
 // @TODO - To be implemented.
 // Usage:
 //		{{ $copy := CopyFiles }}
-func HelperCopyFiles() *HelperOsCopy {
+func ToolCopyFiles() *ToolOsCopy {
 	ret := New(false)
 
 	for range OnlyOnce {
 		ret.State.Clear()
 	}
 
-	return (*HelperOsCopy)(ret)
+	return (*ToolOsCopy)(ret)
 }
 
 
 // Usage:
 //		{{ $copy := CopyFiles }}
 //		{{ $state := SetSourcePath "filename.txt" }}
-func (c *HelperOsCopy) SetSourcePath(src ...interface{}) *ux.State {
+func (c *ToolOsCopy) SetSourcePath(src ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
@@ -61,7 +61,7 @@ func (c *HelperOsCopy) SetSourcePath(src ...interface{}) *ux.State {
 
 	return c.State
 }
-func (c *HelperOsCopy) SetSource(dest ...interface{}) *ux.State {
+func (c *ToolOsCopy) SetSource(dest ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
@@ -73,7 +73,7 @@ func (c *HelperOsCopy) SetSource(dest ...interface{}) *ux.State {
 // Usage:
 //		{{ $copy := CopyFiles }}
 //		{{ $state := SetDestinationPath "filename.txt" }}
-func (c *HelperOsCopy) SetDestinationPath(dest ...interface{}) *ux.State {
+func (c *ToolOsCopy) SetDestinationPath(dest ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
@@ -94,7 +94,7 @@ func (c *HelperOsCopy) SetDestinationPath(dest ...interface{}) *ux.State {
 
 	return c.State
 }
-func (c *HelperOsCopy) SetTarget(dest ...interface{}) *ux.State {
+func (c *ToolOsCopy) SetTarget(dest ...interface{}) *ux.State {
 	return c.SetDestinationPath(dest...)
 }
 
@@ -102,7 +102,7 @@ func (c *HelperOsCopy) SetTarget(dest ...interface{}) *ux.State {
 // Usage:
 //		{{ $copy := CopyFiles }}
 //		{{ $state := SetSourcePath "filename.txt" }}
-func (c *HelperOsCopy) SetExcludePaths(exclude ...interface{}) *ux.State {
+func (c *ToolOsCopy) SetExcludePaths(exclude ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
@@ -126,7 +126,7 @@ func (c *HelperOsCopy) SetExcludePaths(exclude ...interface{}) *ux.State {
 // Usage:
 //		{{ $copy := CopyFiles }}
 //		{{ $state := SetSourcePath "filename.txt" }}
-func (c *HelperOsCopy) SetIncludePaths(include ...interface{}) *ux.State {
+func (c *ToolOsCopy) SetIncludePaths(include ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
@@ -149,7 +149,7 @@ func (c *HelperOsCopy) SetIncludePaths(include ...interface{}) *ux.State {
 
 // Usage:
 //		{{ $return := WriteFile "filename.txt" .Data.Source 0644 }}
-func (c *HelperOsCopy) Run() *ux.State {
+func (c *ToolOsCopy) Run() *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
@@ -196,7 +196,7 @@ func (c *HelperOsCopy) Run() *ux.State {
 //// Usage:
 ////		{{ $copy := CopyFiles }}
 ////		{{ $state := SetSourcePath "filename.txt" }}
-//func (c *HelperOsCopy) SetOptions(src interface{}) *ux.State {
+//func (c *ToolOsCopy) SetOptions(src interface{}) *ux.State {
 //	for range OnlyOnce {
 //		e := toolTypes.ReflectStrings(exclude...)
 //		if e == nil {

@@ -16,9 +16,11 @@ var Functions = map[string]reflect.Value{
 }
 
 var Variables = map[string]reflect.Value{
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

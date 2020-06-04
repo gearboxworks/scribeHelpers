@@ -7,7 +7,7 @@ import (
 
 // Usage:
 //		{{ $str := ReadFile "filename.txt" }}
-func HelperReadFile(file ...interface{}) *TypeOsPath {
+func ToolReadFile(file ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {
@@ -35,7 +35,7 @@ func HelperReadFile(file ...interface{}) *TypeOsPath {
 
 // Usage:
 //		{{ $return := WriteFile .Data.Source 0644 "dir1" "dir2/dir3" "filename.txt" }}
-func HelperWriteFile(contents interface{}, perms interface{}, file ...interface{}) *TypeOsPath {
+func ToolWriteFile(contents interface{}, perms interface{}, file ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {
@@ -75,7 +75,7 @@ func HelperWriteFile(contents interface{}, perms interface{}, file ...interface{
 // Usage:
 //		{{ $ret := Chmod 0644 "/root" ... }}
 //		{{ if $ret.IsOk }}Changed perms of file {{ $ret.Dir }}{{ end }}
-func HelperRemoveFile(path ...interface{}) *TypeOsPath {
+func ToolRemoveFile(path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {

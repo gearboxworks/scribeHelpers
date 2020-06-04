@@ -9,7 +9,7 @@ import (
 // Usage:
 //		{{- $cmd := $git.ChangedFiles }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) ChangedFiles() *ux.State {
+func (g *ToolGit) ChangedFiles() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -40,7 +40,7 @@ func (g *HelperGit) ChangedFiles() *ux.State {
 // Usage:
 //		{{- $cmd := $git.AddFiles }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) AddFiles() *ux.State {
+func (g *ToolGit) AddFiles() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}

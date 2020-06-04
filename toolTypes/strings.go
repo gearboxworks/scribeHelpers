@@ -23,7 +23,7 @@ type TypeGenericStringArray struct {
 
 // Usage:
 //		{{ if IsString $output }}YES{{ end }}
-func HelperIsString(i interface{}) bool {
+func ToolIsString(i interface{}) bool {
 	return ux.IsReflectString(i)
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -37,7 +37,7 @@ func HelperIsString(i interface{}) bool {
 
 // Usage:
 //		{{ $str := ToUpper "lowercase" }}
-func HelperToUpper(i interface{}) string {
+func ToolToUpper(i interface{}) string {
 	return strings.ToUpper(*ux.ReflectString(i))
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -51,7 +51,7 @@ func HelperToUpper(i interface{}) string {
 
 // Usage:
 //		{{ $str := ToLower "UPPERCASE" }}
-func HelperToLower(i interface{}) string {
+func ToolToLower(i interface{}) string {
 	return strings.ToLower(*ux.ReflectString(i))
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -65,7 +65,7 @@ func HelperToLower(i interface{}) string {
 
 // Usage:
 //		{{ $str := ToString .Json.array }}
-func HelperToString(i interface{}) string {
+func ToolToString(i interface{}) string {
 	ret := ""
 	var j []byte
 	var err error
@@ -79,7 +79,7 @@ func HelperToString(i interface{}) string {
 
 // Usage:
 //		{{ if ExecParseOutput $output "uid=%s" "mick" ... }}YES{{ end }}
-func HelperContains(s interface{}, substr interface{}) bool {
+func ToolContains(s interface{}, substr interface{}) bool {
 	var ret bool
 
 	for range OnlyOnce {
@@ -102,7 +102,7 @@ func HelperContains(s interface{}, substr interface{}) bool {
 
 // Usage:
 //		{{ Sprintf "uid=%s" "mick" ... }}
-func HelperSprintf(format interface{}, a ...interface{}) string {
+func ToolSprintf(format interface{}, a ...interface{}) string {
 	var ret string
 
 	for range OnlyOnce {
@@ -119,7 +119,7 @@ func HelperSprintf(format interface{}, a ...interface{}) string {
 
 // Usage:
 //		{{ Grep .This.output "uid=%s" "mick" ... }}
-func HelperGrepArray(str interface{}, format interface{}, a ...interface{}) []string {
+func ToolGrepArray(str interface{}, format interface{}, a ...interface{}) []string {
 	var ret []string
 
 	for range OnlyOnce {
@@ -150,11 +150,11 @@ func HelperGrepArray(str interface{}, format interface{}, a ...interface{}) []st
 
 // Usage:
 //		{{ Grep .This.output "uid=%s" "mick" ... }}
-func HelperGrep(str interface{}, format interface{}, a ...interface{}) string {
+func ToolGrep(str interface{}, format interface{}, a ...interface{}) string {
 	var ret string
 
 	for range OnlyOnce {
-		sa := HelperGrepArray(str, format, a...)
+		sa := ToolGrepArray(str, format, a...)
 
 		ret = strings.Join(sa, "\n")
 	}

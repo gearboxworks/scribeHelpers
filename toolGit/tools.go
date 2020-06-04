@@ -6,15 +6,15 @@ import (
 	"github.com/tsuyoshiwada/go-gitcmd"
 )
 
-type HelperGit TypeGit
-func (g *HelperGit) Reflect() *TypeGit {
+type ToolGit TypeGit
+func (g *ToolGit) Reflect() *TypeGit {
 	return (*TypeGit)(g)
 }
-func (g *TypeGit) Reflect() *HelperGit {
-	return (*HelperGit)(g)
+func (g *TypeGit) Reflect() *ToolGit {
+	return (*ToolGit)(g)
 }
 
-func (g *HelperGit) IsNil() *ux.State {
+func (g *ToolGit) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(g); state.IsError() {
 		return state
 	}
@@ -25,7 +25,7 @@ func (g *HelperGit) IsNil() *ux.State {
 
 // Usage:
 //		{{ $git := NewGit }}
-func HelperNewGit(path ...interface{}) *HelperGit {
+func ToolNewGit(path ...interface{}) *ToolGit {
 	ret := New(false)
 
 	for range OnlyOnce {
@@ -56,25 +56,25 @@ func HelperNewGit(path ...interface{}) *HelperGit {
 		}
 	}
 
-	return ReflectHelperGit(ret)
+	return ReflectToolGit(ret)
 }
 
 
 // Usage:
 //		{{ $cmd := $git.Chdir .Some.Directory }}
 //		{{ if $git.IsOk }}Changed to directory {{ $git.Dir }}{{ end }}
-func (g *HelperGit) Chdir() *ux.State {
+func (g *ToolGit) Chdir() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
 	g.State.SetFunction("")
-	return toolPath.HelperChdir(g.Base.GetPath()).State
+	return toolPath.ToolChdir(g.Base.GetPath()).State
 }
 
 
 // Usage:
 //		{{ $git.SetDryRun }}
-func (g *HelperGit) SetDryRun() bool {
+func (g *ToolGit) SetDryRun() bool {
 	g.GitOptions = append(g.GitOptions, "-n")
 	return true
 }
@@ -83,8 +83,8 @@ func (g *HelperGit) SetDryRun() bool {
 // Usage:
 //		{{ $cmd := $git.Exec "tag" "-l" }}
 //		{{ if $git.IsOk }}OK{{ end }}
-// func (me *HelperGit) Exec(cmd interface{}, args ...interface{}) *ux.State {
-func (g *HelperGit) Exec(cmd string, args ...string) *ux.State {
+// func (me *ToolGit) Exec(cmd interface{}, args ...interface{}) *ux.State {
+func (g *ToolGit) Exec(cmd string, args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -124,7 +124,7 @@ func (g *HelperGit) Exec(cmd string, args ...string) *ux.State {
 				break
 			}
 			path := g.Base.GetPath()
-			cd := toolPath.HelperChdir(path)
+			cd := toolPath.ToolChdir(path)
 			if cd.State.IsError() {
 				ux.PrintfError("Cannot change directory to '%s'", path)
 				break
@@ -151,7 +151,7 @@ func (g *HelperGit) Exec(cmd string, args ...string) *ux.State {
 //// Usage:
 ////		{{- $cmd := $git.IsExec }}
 ////		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-//func (g *HelperGit) IsAvailable() *ux.State {
+//func (g *ToolGit) IsAvailable() *ux.State {
 //	for range OnlyOnce {
 //		if g.Reflect().IsNotAvailable() {
 //			break
@@ -169,34 +169,34 @@ func (g *HelperGit) Exec(cmd string, args ...string) *ux.State {
 //
 //// Usage:
 ////		{{ if $ret.IsError }}{{ $cmd.PrintError }}{{ end }}
-//func (g *HelperGit) SetError(error ...interface{}) {
+//func (g *ToolGit) SetError(error ...interface{}) {
 //	g.State.SetError(error...)
 //}
 //
 //
 //// Usage:
 ////		{{ if $ret.IsError }}{{ $cmd.PrintError }}{{ end }}
-//func (g *HelperGit) IsError() bool {
+//func (g *ToolGit) IsError() bool {
 //	return g.State.IsError()
 //}
 //
 //
 //// Usage:
 ////		{{ if $ret.IsOk }}OK{{ end }}
-//func (g *HelperGit) IsOk() bool {
+//func (g *ToolGit) IsOk() bool {
 //	return g.State.IsOk()
 //}
 //
 //
 //// Usage:
 ////		{{ if $ret.IsOk }}OK{{ end }}
-//func (g *HelperGit) PrintError() string {
+//func (g *ToolGit) PrintError() string {
 //	return g.Cmd.PrintError()
 //}
 //
 //
 //// Usage:
 ////		{{ if $ret.IsOk }}OK{{ end }}
-//func (g *HelperGit) ExitOnError() string {
+//func (g *ToolGit) ExitOnError() string {
 //	return g.State.ExitOnError()
 //}

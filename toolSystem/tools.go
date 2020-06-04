@@ -2,15 +2,15 @@ package toolSystem
 
 import "github.com/newclarity/scribeHelpers/ux"
 
-type HelperSystem TypeSystem
-func (s *HelperSystem) Reflect() *TypeSystem {
+type ToolSystem TypeSystem
+func (s *ToolSystem) Reflect() *TypeSystem {
 	return (*TypeSystem)(s)
 }
-func (s *TypeSystem) Reflect() *HelperSystem {
-	return (*HelperSystem)(s)
+func (s *TypeSystem) Reflect() *ToolSystem {
+	return (*ToolSystem)(s)
 }
 
-func (s *HelperSystem) IsNil() *ux.State {
+func (s *ToolSystem) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(s); state.IsError() {
 		return state
 	}
@@ -21,11 +21,11 @@ func (s *HelperSystem) IsNil() *ux.State {
 
 // Usage:
 //		{{ $sys := NewSystem }}
-func HelperNewSystem() *HelperSystem {
+func ToolNewSystem() *ToolSystem {
 	ret := New(false)
 
 	for range OnlyOnce {
 	}
 
-	return ReflectHelperSystem(ret)
+	return ReflectToolSystem(ret)
 }

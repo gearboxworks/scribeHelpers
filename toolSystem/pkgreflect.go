@@ -6,12 +6,12 @@ import "reflect"
 
 var Types = map[string]reflect.Type{
 	"Environment": reflect.TypeOf((*Environment)(nil)).Elem(),
-	"HelperProcess": reflect.TypeOf((*HelperProcess)(nil)).Elem(),
-	"HelperProcesses": reflect.TypeOf((*HelperProcesses)(nil)).Elem(),
-	"HelperSystem": reflect.TypeOf((*HelperSystem)(nil)).Elem(),
 	"ProcessGetter": reflect.TypeOf((*ProcessGetter)(nil)).Elem(),
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
 	"SystemGetter": reflect.TypeOf((*SystemGetter)(nil)).Elem(),
+	"ToolProcess": reflect.TypeOf((*ToolProcess)(nil)).Elem(),
+	"ToolProcesses": reflect.TypeOf((*ToolProcesses)(nil)).Elem(),
+	"ToolSystem": reflect.TypeOf((*ToolSystem)(nil)).Elem(),
 	"TypeOpenFiles": reflect.TypeOf((*TypeOpenFiles)(nil)).Elem(),
 	"TypeProcess": reflect.TypeOf((*TypeProcess)(nil)).Elem(),
 	"TypeProcesses": reflect.TypeOf((*TypeProcesses)(nil)).Elem(),
@@ -20,24 +20,24 @@ var Types = map[string]reflect.Type{
 
 var Functions = map[string]reflect.Value{
 	"GetEnv": reflect.ValueOf(GetEnv),
-	"HelperFindProcByName": reflect.ValueOf(HelperFindProcByName),
-	"HelperFindProcByPid": reflect.ValueOf(HelperFindProcByPid),
-	"HelperNewSystem": reflect.ValueOf(HelperNewSystem),
 	"New": reflect.ValueOf(New),
 	"NewOpenFiles": reflect.ValueOf(NewOpenFiles),
 	"NewProcess": reflect.ValueOf(NewProcess),
 	"NewProcesses": reflect.ValueOf(NewProcesses),
 	"PrintEnv": reflect.ValueOf(PrintEnv),
-	"ReflectHelperProcess": reflect.ValueOf(ReflectHelperProcess),
-	"ReflectHelperSystem": reflect.ValueOf(ReflectHelperSystem),
+	"ReflectToolProcess": reflect.ValueOf(ReflectToolProcess),
+	"ReflectToolSystem": reflect.ValueOf(ReflectToolSystem),
+	"ToolFindProcByName": reflect.ValueOf(ToolFindProcByName),
+	"ToolFindProcByPid": reflect.ValueOf(ToolFindProcByPid),
+	"ToolNewSystem": reflect.ValueOf(ToolNewSystem),
 }
 
 var Variables = map[string]reflect.Value{
-	"GetHelpers": reflect.ValueOf(&GetHelpers),
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

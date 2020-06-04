@@ -6,7 +6,7 @@ import (
 )
 
 
-func HelperIsInt(i interface{}) bool {
+func ToolIsInt(i interface{}) bool {
 	return ux.IsReflectInt(i)
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {

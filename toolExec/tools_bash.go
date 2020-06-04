@@ -9,7 +9,7 @@ import (
 )
 
 
-func HelperExecBash(cmd ...interface{}) *ux.State {
+func ToolExecBash(cmd ...interface{}) *ux.State {
 	ret := New(false)
 
 	for range OnlyOnce {
@@ -26,7 +26,7 @@ func HelperExecBash(cmd ...interface{}) *ux.State {
 }
 
 
-func HelperNewBash(cmd ...interface{}) *HelperExecCommand {
+func ToolNewBash(cmd ...interface{}) *ToolExecCommand {
 	ret := New(false)
 
 	for range OnlyOnce {
@@ -46,7 +46,7 @@ func HelperNewBash(cmd ...interface{}) *HelperExecCommand {
 // Template examples:
 //  {{ . }}
 //  fmt.Println("Hello")
-func (e *HelperExecCommand) AppendCommands(cmd ...interface{}) *ux.State {
+func (e *ToolExecCommand) AppendCommands(cmd ...interface{}) *ux.State {
 	if state := e.IsNil(); state.IsError() {
 		return state
 	}
@@ -59,12 +59,12 @@ func (e *HelperExecCommand) AppendCommands(cmd ...interface{}) *ux.State {
 
 	return e.State
 }
-func (e *HelperExecCommand) Append(cmd ...interface{}) *ux.State {
+func (e *ToolExecCommand) Append(cmd ...interface{}) *ux.State {
 	return e.AppendCommands(cmd...)
 }
 
 
-func (e *HelperExecCommand) Run() *ux.State {
+func (e *ToolExecCommand) Run() *ux.State {
 	if state := e.IsNil(); state.IsError() {
 		return state
 	}

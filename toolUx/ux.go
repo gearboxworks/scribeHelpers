@@ -121,100 +121,100 @@ import (
 
 /////////////////////////////////////
 
-func HelperPrintfWhite(format string, args ...interface{}) string {
+func ToolPrintfWhite(format string, args ...interface{}) string {
 	return ux.SprintfWhite(format, args...)
 }
 
-func HelperPrintfCyan(format string, args ...interface{}) string {
+func ToolPrintfCyan(format string, args ...interface{}) string {
 	return ux.SprintfCyan(format, args...)
 }
 
-func HelperPrintfYellow(format string, args ...interface{}) string {
+func ToolPrintfYellow(format string, args ...interface{}) string {
 	return ux.SprintfYellow(format, args...)
 }
 
-func HelperPrintfRed(format string, args ...interface{}) string {
+func ToolPrintfRed(format string, args ...interface{}) string {
 	return ux.SprintfRed(format, args...)
 }
 
-func HelperPrintfGreen(format string, args ...interface{}) string {
+func ToolPrintfGreen(format string, args ...interface{}) string {
 	return ux.SprintfGreen(format, args...)
 }
 
-func HelperPrintfBlue(format string, args ...interface{}) string {
+func ToolPrintfBlue(format string, args ...interface{}) string {
 	return ux.SprintfBlue(format, args...)
 }
 
-func HelperPrintfMagenta(format string, args ...interface{}) string {
+func ToolPrintfMagenta(format string, args ...interface{}) string {
 	return ux.SprintfMagenta(format, args...)
 }
 
-func HelperPrintf(format string, args ...interface{}) string {
+func ToolPrintf(format string, args ...interface{}) string {
 	return ux.Sprintf(format, args...)
 }
 
-func HelperPrintfOk(format string, args ...interface{}) string {
+func ToolPrintfOk(format string, args ...interface{}) string {
 	return ux.SprintfOk(format, args...)
 }
 
-func HelperPrintfWarning(format string, args ...interface{}) string {
+func ToolPrintfWarning(format string, args ...interface{}) string {
 	return ux.SprintfWarning(format, args...)
 }
 
-func HelperPrintfError(format string, args ...interface{}) string {
+func ToolPrintfError(format string, args ...interface{}) string {
 	return ux.SprintfError(format, args...)
 }
 
-func HelperPrintln() string {
+func ToolPrintln() string {
 	return ux.SprintfNormal("\n")
 }
 
 
-func HelperPrintflnWhite(format string, args ...interface{}) string {
+func ToolPrintflnWhite(format string, args ...interface{}) string {
 	return ux.SprintfWhite(format, args...) + "\n"
 }
 
-func HelperPrintflnCyan(format string, args ...interface{}) string {
+func ToolPrintflnCyan(format string, args ...interface{}) string {
 	return ux.SprintfCyan(format, args...) + "\n"
 }
 
-func HelperPrintflnYellow(format string, args ...interface{}) string {
+func ToolPrintflnYellow(format string, args ...interface{}) string {
 	return ux.SprintfYellow(format, args...) + "\n"
 }
 
-func HelperPrintflnRed(format string, args ...interface{}) string {
+func ToolPrintflnRed(format string, args ...interface{}) string {
 	return ux.SprintfRed(format, args...) + "\n"
 }
 
-func HelperPrintflnGreen(format string, args ...interface{}) string {
+func ToolPrintflnGreen(format string, args ...interface{}) string {
 	return ux.SprintfGreen(format, args...) + "\n"
 }
 
-func HelperPrintflnBlue(format string, args ...interface{}) string {
+func ToolPrintflnBlue(format string, args ...interface{}) string {
 	return ux.SprintfBlue(format, args...) + "\n"
 }
 
-func HelperPrintflnMagenta(format string, args ...interface{}) string {
+func ToolPrintflnMagenta(format string, args ...interface{}) string {
 	return ux.SprintfMagenta(format, args...) + "\n"
 }
 
-func HelperPrintfln(format string, args ...interface{}) string {
+func ToolPrintfln(format string, args ...interface{}) string {
 	return ux.Sprintf(format, args...) + "\n"
 }
 
-func HelperPrintflnOk(format string, args ...interface{}) string {
+func ToolPrintflnOk(format string, args ...interface{}) string {
 	return ux.SprintfOk(format, args...) + "\n"
 }
 
-func HelperPrintflnWarning(format string, args ...interface{}) string {
+func ToolPrintflnWarning(format string, args ...interface{}) string {
 	return ux.SprintfWarning(format, args...) + "\n"
 }
 
-func HelperPrintflnError(format string, args ...interface{}) string {
+func ToolPrintflnError(format string, args ...interface{}) string {
 	return ux.SprintfError(format, args...) + "\n"
 }
 
 
-func HelperPrintError(err error) string {
+func ToolPrintError(err error) string {
 	return ux.SprintError(err)
 }

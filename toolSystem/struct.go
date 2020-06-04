@@ -21,8 +21,8 @@ type State ux.State
 func (p *State) Reflect() *ux.State {
 	return (*ux.State)(p)
 }
-func ReflectHelperSystem(p *TypeSystem) *HelperSystem {
-	return (*HelperSystem)(p)
+func ReflectToolSystem(p *TypeSystem) *ToolSystem {
+	return (*ToolSystem)(p)
 }
 
 

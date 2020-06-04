@@ -209,7 +209,7 @@ func (e *TypeExecCommand) SetPath(path ...string) *ux.State {
 		return nil
 	}
 
-	ep := toolPath.HelperNewPath()
+	ep := toolPath.ToolNewPath()
 	ep.SetPath(path...)
 	e.exe = ep.GetPath()
 	return e.State

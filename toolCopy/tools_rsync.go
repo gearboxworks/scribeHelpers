@@ -10,7 +10,7 @@ import (
 
 // Usage:
 //		{{ $return := WriteFile "filename.txt" .Data.Source 0644 }}
-func HelperCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *ux.State {
+func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *ux.State {
 	c := New(false)
 
 	for range OnlyOnce {
@@ -121,7 +121,7 @@ func HelperCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) 
 }
 
 
-//func HelperRsync(src interface{}, dest interface{}, options interface{}, exclude ...interface{}) *HelperOsCopy {
+//func ToolRsync(src interface{}, dest interface{}, options interface{}, exclude ...interface{}) *ToolOsCopy {
 //	ret := NewOsCopy()
 //
 //	for range OnlyOnce {
@@ -166,5 +166,5 @@ func HelperCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) 
 //		}
 //	}
 //
-//	return (*HelperOsCopy)(ret)
+//	return (*ToolOsCopy)(ret)
 //}

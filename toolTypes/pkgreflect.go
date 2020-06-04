@@ -10,19 +10,6 @@ var Types = map[string]reflect.Type{
 }
 
 var Functions = map[string]reflect.Value{
-	"HelperContains": reflect.ValueOf(HelperContains),
-	"HelperFindInMap": reflect.ValueOf(HelperFindInMap),
-	"HelperGrep": reflect.ValueOf(HelperGrep),
-	"HelperGrepArray": reflect.ValueOf(HelperGrepArray),
-	"HelperIsArray": reflect.ValueOf(HelperIsArray),
-	"HelperIsInt": reflect.ValueOf(HelperIsInt),
-	"HelperIsMap": reflect.ValueOf(HelperIsMap),
-	"HelperIsSlice": reflect.ValueOf(HelperIsSlice),
-	"HelperIsString": reflect.ValueOf(HelperIsString),
-	"HelperSprintf": reflect.ValueOf(HelperSprintf),
-	"HelperToLower": reflect.ValueOf(HelperToLower),
-	"HelperToString": reflect.ValueOf(HelperToString),
-	"HelperToUpper": reflect.ValueOf(HelperToUpper),
 	"ReflectBool": reflect.ValueOf(ReflectBool),
 	"ReflectBoolArg": reflect.ValueOf(ReflectBoolArg),
 	"ReflectByteArray": reflect.ValueOf(ReflectByteArray),
@@ -31,14 +18,27 @@ var Functions = map[string]reflect.Value{
 	"ReflectInt32": reflect.ValueOf(ReflectInt32),
 	"ReflectString": reflect.ValueOf(ReflectString),
 	"ReflectStrings": reflect.ValueOf(ReflectStrings),
+	"ToolContains": reflect.ValueOf(ToolContains),
+	"ToolFindInMap": reflect.ValueOf(ToolFindInMap),
+	"ToolGrep": reflect.ValueOf(ToolGrep),
+	"ToolGrepArray": reflect.ValueOf(ToolGrepArray),
+	"ToolIsArray": reflect.ValueOf(ToolIsArray),
+	"ToolIsInt": reflect.ValueOf(ToolIsInt),
+	"ToolIsMap": reflect.ValueOf(ToolIsMap),
+	"ToolIsSlice": reflect.ValueOf(ToolIsSlice),
+	"ToolIsString": reflect.ValueOf(ToolIsString),
+	"ToolSprintf": reflect.ValueOf(ToolSprintf),
+	"ToolToLower": reflect.ValueOf(ToolToLower),
+	"ToolToString": reflect.ValueOf(ToolToString),
+	"ToolToUpper": reflect.ValueOf(ToolToUpper),
 }
 
 var Variables = map[string]reflect.Value{
-	"GetHelpers": reflect.ValueOf(&GetHelpers),
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

@@ -10,7 +10,6 @@ var Types = map[string]reflect.Type{
 	"Dir": reflect.TypeOf((*Dir)(nil)).Elem(),
 	"Filepath": reflect.TypeOf((*Filepath)(nil)).Elem(),
 	"Filepaths": reflect.TypeOf((*Filepaths)(nil)).Elem(),
-	"HelperGit": reflect.TypeOf((*HelperGit)(nil)).Elem(),
 	"LogOptions": reflect.TypeOf((*LogOptions)(nil)).Elem(),
 	"PullOptions": reflect.TypeOf((*PullOptions)(nil)).Elem(),
 	"ReadableName": reflect.TypeOf((*ReadableName)(nil)).Elem(),
@@ -19,25 +18,26 @@ var Types = map[string]reflect.Type{
 	"Status": reflect.TypeOf((*Status)(nil)).Elem(),
 	"Tag": reflect.TypeOf((*Tag)(nil)).Elem(),
 	"Tagname": reflect.TypeOf((*Tagname)(nil)).Elem(),
+	"ToolGit": reflect.TypeOf((*ToolGit)(nil)).Elem(),
 	"TypeExecCommand": reflect.TypeOf((*TypeExecCommand)(nil)).Elem(),
 	"TypeGit": reflect.TypeOf((*TypeGit)(nil)).Elem(),
 	"Url": reflect.TypeOf((*Url)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
-	"HelperNewGit": reflect.ValueOf(HelperNewGit),
 	"New": reflect.ValueOf(New),
-	"ReflectHelperGit": reflect.ValueOf(ReflectHelperGit),
+	"ReflectToolGit": reflect.ValueOf(ReflectToolGit),
+	"ToolNewGit": reflect.ValueOf(ToolNewGit),
 }
 
 var Variables = map[string]reflect.Value{
-	"GetHelpers": reflect.ValueOf(&GetHelpers),
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"LockMsg": reflect.ValueOf(LockMsg),
 	"LockTag": reflect.ValueOf(LockTag),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

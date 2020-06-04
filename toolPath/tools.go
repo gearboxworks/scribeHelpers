@@ -6,15 +6,15 @@ import (
 )
 
 
-type HelperOsPath TypeOsPath
-func (g *HelperOsPath) Reflect() *TypeOsPath {
+type ToolOsPath TypeOsPath
+func (g *ToolOsPath) Reflect() *TypeOsPath {
 	return (*TypeOsPath)(g)
 }
-func (p *TypeOsPath) Reflect() *HelperOsPath {
-	return (*HelperOsPath)(p)
+func (p *TypeOsPath) Reflect() *ToolOsPath {
+	return (*ToolOsPath)(p)
 }
 
-func (c *HelperOsPath) IsNil() *ux.State {
+func (c *ToolOsPath) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(c); state.IsError() {
 		return state
 	}
@@ -25,8 +25,8 @@ func (c *HelperOsPath) IsNil() *ux.State {
 
 // Usage:
 //		{{ $str := ReadFile "filename.txt" }}
-//func HelperNewPath(file ...interface{}) *HelperOsPath {
-func HelperNewPath(file ...interface{}) *TypeOsPath {
+//func ToolNewPath(file ...interface{}) *ToolOsPath {
+func ToolNewPath(file ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {
@@ -49,7 +49,7 @@ func HelperNewPath(file ...interface{}) *TypeOsPath {
 		}
 	}
 
-	//return ReflectHelperOsPath(ret)
+	//return ReflectToolOsPath(ret)
 	return ret
 }
 
@@ -57,7 +57,7 @@ func HelperNewPath(file ...interface{}) *TypeOsPath {
 // Usage:
 //		{{ $ret := Chmod 0644 "/root" ... }}
 //		{{ if $ret.IsOk }}Changed perms of file {{ $ret.Dir }}{{ end }}
-func HelperChmod(mode interface{}, path ...interface{}) *TypeOsPath {
+func ToolChmod(mode interface{}, path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range OnlyOnce {

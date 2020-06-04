@@ -11,18 +11,18 @@ var Types = map[string]reflect.Type{
 }
 
 var Functions = map[string]reflect.Value{
-	"HelperGitHubGetBranch": reflect.ValueOf(HelperGitHubGetBranch),
-	"HelperGitHubGetOrganization": reflect.ValueOf(HelperGitHubGetOrganization),
-	"HelperGitHubLogin": reflect.ValueOf(HelperGitHubLogin),
 	"New": reflect.ValueOf(New),
+	"ToolGitHubGetBranch": reflect.ValueOf(ToolGitHubGetBranch),
+	"ToolGitHubGetOrganization": reflect.ValueOf(ToolGitHubGetOrganization),
+	"ToolGitHubLogin": reflect.ValueOf(ToolGitHubLogin),
 }
 
 var Variables = map[string]reflect.Value{
-	"GetHelpers": reflect.ValueOf(&GetHelpers),
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

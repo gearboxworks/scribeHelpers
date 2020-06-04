@@ -9,7 +9,7 @@ import (
 // Usage:
 //		{{- $cmd := $git.GetBranch }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) GetBranch() *ux.State {
+func (g *ToolGit) GetBranch() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -27,7 +27,7 @@ func (g *HelperGit) GetBranch() *ux.State {
 // Usage:
 //		{{- $cmd := $git.GetBranch }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) BranchExists(branch interface{}) *ux.State {
+func (g *ToolGit) BranchExists(branch interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -56,7 +56,7 @@ func (g *HelperGit) BranchExists(branch interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GetTags }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) GetTags() *ux.State {
+func (g *ToolGit) GetTags() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -99,7 +99,7 @@ func (g *HelperGit) GetTags() *ux.State {
 // Usage:
 //		{{- $cmd := $git.CreateTag "1.0" }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) CreateTag(tag interface{}) *ux.State {
+func (g *ToolGit) CreateTag(tag interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -125,7 +125,7 @@ func (g *HelperGit) CreateTag(tag interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.RemoveTag "1.0" }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) RemoveTag(tag interface{}) *ux.State {
+func (g *ToolGit) RemoveTag(tag interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -151,7 +151,7 @@ func (g *HelperGit) RemoveTag(tag interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.TagExists "1.0" }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) TagExists(tag interface{}) *ux.State {
+func (g *ToolGit) TagExists(tag interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -181,7 +181,7 @@ func (g *HelperGit) TagExists(tag interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GetTagObject "1.0" }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *HelperGit) GetTagObject(tag interface{}) *ux.State {
+func (g *ToolGit) GetTagObject(tag interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}

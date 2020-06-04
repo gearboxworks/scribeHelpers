@@ -9,20 +9,20 @@ var Types = map[string]reflect.Type{
 }
 
 var Functions = map[string]reflect.Value{
-	"HelperUserPrompt": reflect.ValueOf(HelperUserPrompt),
-	"HelperUserPromptBool": reflect.ValueOf(HelperUserPromptBool),
-	"HelperUserPromptHidden": reflect.ValueOf(HelperUserPromptHidden),
 	"New": reflect.ValueOf(New),
+	"ToolUserPrompt": reflect.ValueOf(ToolUserPrompt),
+	"ToolUserPromptBool": reflect.ValueOf(ToolUserPromptBool),
+	"ToolUserPromptHidden": reflect.ValueOf(ToolUserPromptHidden),
 	"UserPrompt": reflect.ValueOf(UserPrompt),
 	"UserPromptHidden": reflect.ValueOf(UserPromptHidden),
 }
 
 var Variables = map[string]reflect.Value{
-	"GetHelpers": reflect.ValueOf(&GetHelpers),
+	"GetTools": reflect.ValueOf(&GetTools),
 }
 
 var Consts = map[string]reflect.Value{
-	"HelperPrefix": reflect.ValueOf(HelperPrefix),
 	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

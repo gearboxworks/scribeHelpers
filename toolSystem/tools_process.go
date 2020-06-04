@@ -6,14 +6,14 @@ import (
 )
 
 
-type HelperProcesses TypeProcesses
-func (p *HelperProcesses) Reflect() *TypeProcesses {
+type ToolProcesses TypeProcesses
+func (p *ToolProcesses) Reflect() *TypeProcesses {
 	return (*TypeProcesses)(p)
 }
-func (p *TypeProcesses) Reflect() *HelperProcesses {
-	return (*HelperProcesses)(p)
+func (p *TypeProcesses) Reflect() *ToolProcesses {
+	return (*ToolProcesses)(p)
 }
-func (p *HelperProcesses) IsNil() *ux.State {
+func (p *ToolProcesses) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
@@ -22,14 +22,14 @@ func (p *HelperProcesses) IsNil() *ux.State {
 }
 
 
-type HelperProcess TypeProcess
-func (p *HelperProcess) Reflect() *TypeProcess {
+type ToolProcess TypeProcess
+func (p *ToolProcess) Reflect() *TypeProcess {
 	return (*TypeProcess)(p)
 }
-func (p *TypeProcess) Reflect() *HelperProcess {
-	return (*HelperProcess)(p)
+func (p *TypeProcess) Reflect() *ToolProcess {
+	return (*ToolProcess)(p)
 }
-func (p *HelperProcess) IsNil() *ux.State {
+func (p *ToolProcess) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
@@ -40,7 +40,7 @@ func (p *HelperProcess) IsNil() *ux.State {
 
 // Usage:
 //		{{ $procs := FindByName }}
-func (p *HelperProcesses) FindByName(name interface{}) *ux.State {
+func (p *ToolProcesses) FindByName(name interface{}) *ux.State {
 	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
@@ -65,7 +65,7 @@ func (p *HelperProcesses) FindByName(name interface{}) *ux.State {
 
 // Usage:
 //		{{ $procs := FindByPid }}
-func (p *HelperProcesses) FindByPid(pid interface{}) *ux.State {
+func (p *ToolProcesses) FindByPid(pid interface{}) *ux.State {
 	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
@@ -90,7 +90,7 @@ func (p *HelperProcesses) FindByPid(pid interface{}) *ux.State {
 
 // Usage:
 //		{{ $procs := FindByName }}
-func (p *HelperProcesses) Print() string {
+func (p *ToolProcesses) Print() string {
 	if state := ux.IfNilReturnError(p); state.IsError() {
 		return ""
 	}
@@ -111,7 +111,7 @@ func (p *HelperProcesses) Print() string {
 
 
 // Usage:
-func HelperFindProcByName(name interface{}) *HelperProcesses {
+func ToolFindProcByName(name interface{}) *ToolProcesses {
 	p := NewProcesses(false)
 	p.State = p.Reflect().FindByName(name)
 	return p.Reflect()
@@ -119,7 +119,7 @@ func HelperFindProcByName(name interface{}) *HelperProcesses {
 
 
 // Usage:
-func HelperFindProcByPid(pid interface{}) *HelperProcesses {
+func ToolFindProcByPid(pid interface{}) *ToolProcesses {
 	p := NewProcesses(false)
 	p.State = p.Reflect().FindByPid(pid)
 	return p.Reflect()
