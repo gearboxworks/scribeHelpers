@@ -44,20 +44,43 @@ func (p *TypeOsPath) AppendContents(data ...interface{}) {
 
 			var sa []string
 			switch d.(type) {
-				case []byte:
-					sa = append(sa, string(d.([]byte)))
 				case []string:
 					for _, s := range d.([]string) {
+						if s != "" {
+							s = removeDupeEol(s)
+							sa = append(sa, strings.Split(s, p._Separator)...)
+						}
+					}
+
+				case string:
+					if d.(string) != "" {
+						s := removeDupeEol(d.(string))
 						sa = append(sa, strings.Split(s, p._Separator)...)
 					}
-				case string:
-					sa = append(sa, strings.Split(d.(string), p._Separator)...)
+
+				case []byte:
+					s := removeDupeEol(string(d.([]byte)))
+					//s := removeDupeEol(d.(string))
+					sa = append(sa, strings.Split(s, p._Separator)...)
 			}
 
 			p._Array = append(p._Array, sa...)
 		}
 		p._String = strings.Join(p._Array, p._Separator)
 	}
+}
+
+func removeDupeEol(s string) string {
+	s = strings.ReplaceAll(s, `\n\n`, `\n`)
+	s = strings.ReplaceAll(s, `\r\n\r\n`, `\r\n`)
+
+	// @TODO better way to do this.
+	s = strings.ReplaceAll(s, `\n\n`, `\n`)
+	s = strings.ReplaceAll(s, `\r\n\r\n`, `\r\n`)
+
+	s = strings.TrimSpace(s)
+
+	return s
 }
 
 
@@ -231,7 +254,7 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 			break
 		}
 
-		p.State.Response = p.fileHandle
+		p.State.SetResponse(p.fileHandle)
 
 		p.State.SetOk("File '%s' opened OK", p._Path)
 	}
@@ -261,7 +284,7 @@ func (p *TypeOsPath) GetFileHandle() (*os.File, *ux.State) {
 			break
 		}
 
-		p.State.Response = p.fileHandle
+		p.State.SetResponse(p.fileHandle)
 	}
 
 	return p.fileHandle, p.State

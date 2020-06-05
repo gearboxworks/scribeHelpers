@@ -19,7 +19,7 @@ func _NewCommit(hash string) *Commit {
 // Usage:
 //		{{- $cmd := $git.Commit }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) Commit(format interface{}, a ...interface{}) *ux.State {
+func (g *TypeGit) Commit(format interface{}, a ...interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -31,7 +31,7 @@ func (g *ToolGit) Commit(format interface{}, a ...interface{}) *ux.State {
 			break
 		}
 
-		g.State.Response = _NewCommit(g.State.Output)
+		g.State.SetResponse(_NewCommit(g.State.Output))
 	}
 
 	return g.State
@@ -41,7 +41,7 @@ func (g *ToolGit) Commit(format interface{}, a ...interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.LastCommitMessage }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) LastCommitMessage(format interface{}, a ...interface{}) *ux.State {
+func (g *TypeGit) LastCommitMessage(format interface{}, a ...interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -53,7 +53,7 @@ func (g *ToolGit) LastCommitMessage(format interface{}, a ...interface{}) *ux.St
 			break
 		}
 
-		g.State.Response = _NewCommit(g.State.Output)
+		g.State.SetResponse(_NewCommit(g.State.Output))
 	}
 
 	return g.State

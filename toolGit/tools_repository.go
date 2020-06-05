@@ -1,7 +1,6 @@
 package toolGit
 
 import (
-	"github.com/newclarity/scribeHelpers/toolPath"
 	"github.com/newclarity/scribeHelpers/ux"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
@@ -12,14 +11,14 @@ import (
 //		{{- $cmd := $git.Clone }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
 // func (me *ToolGit) Clone(url string, dir ...interface{}) *TypeExecCommand {
-func (g *ToolGit) Clone() *ux.State {
+func (g *TypeGit) Clone() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
 	g.State.SetFunction("")
 
 	for range onlyOnce {
-		if g.Reflect().IsNotAvailable() {
+		if g.IsNotAvailable() {
 			break
 		}
 
@@ -44,7 +43,7 @@ func (g *ToolGit) Clone() *ux.State {
 
 	return g.State
 }
-//func (g *ToolGit) Clone() *ux.State {
+//func (g *TypeGit) Clone() *ux.State {
 //	for range onlyOnce {
 //		if g.Reflect().IsNotOk() {
 //			break
@@ -92,7 +91,7 @@ func (g *ToolGit) Clone() *ux.State {
 // Usage:
 //		{{- $cmd := $git.Open }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) IsExisting() bool {
+func (g *TypeGit) IsExisting() bool {
 	var ok bool
 	if state := g.IsNil(); state.IsError() {
 		return false
@@ -100,7 +99,7 @@ func (g *ToolGit) IsExisting() bool {
 	g.State.SetFunction("")
 
 	for range onlyOnce {
-		if g.Reflect().IsNotAvailable() {
+		if g.IsNotAvailable() {
 			break
 		}
 
@@ -109,21 +108,21 @@ func (g *ToolGit) IsExisting() bool {
 
 	return ok
 }
-func (g *ToolGit) IsNotExisting() bool {
+func (g *TypeGit) IsNotExisting() bool {
 	return !g.IsExisting()
 }
 
 // Usage:
 //		{{- $cmd := $git.Open }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) Open() *ux.State {
+func (g *TypeGit) Open() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
 	g.State.SetFunction("")
 
 	for range onlyOnce {
-		if g.Reflect().IsNotAvailable() {
+		if g.IsNotAvailable() {
 			break
 		}
 
@@ -149,7 +148,8 @@ func (g *ToolGit) Open() *ux.State {
 		g.Url = c.Remotes["origin"].URLs[0]
 
 		g.State.SetOk("Opened directory %s.\nRemote origin is set to %s\n", g.Base.GetPath(), g.Url)
-		g.State.Response = true
+		ok := true
+		g.State.SetResponse(&ok)
 	}
 
 	return g.State
@@ -159,32 +159,32 @@ func (g *ToolGit) Open() *ux.State {
 // Usage:
 //		{{- $cmd := $git.SetPath }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) SetPath(path ...interface{}) *ux.State {
+func (g *TypeGit) SetPath(path ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
 	g.State.SetFunction("")
 
 	for range onlyOnce {
-		if g.Reflect().IsNotAvailable() {
+		if g.IsNotAvailable() {
 			break
 		}
 
-		p := toolPath.ReflectAbsPath(path...)
-		if p == nil {
-			g.State.SetError("path repo is nil")
-			break
-		}
-		if *p == "" {
-			g.State.SetError("path repo is nil")
-			break
-		}
+		//p := toolPath.ReflectAbsPath(path...)
+		//if p == nil {
+		//	g.State.SetError("path repo is nil")
+		//	break
+		//}
+		//if *p == "" {
+		//	g.State.SetError("path repo is nil")
+		//	break
+		//}
 
-
-		if !g.Base.SetPath(*p) {
-			g.State.SetError("path repo '%s' cannot be set", *p)
-			break
-		}
+		g.Base.SetPath(path...)
+		//if ! g.Base.SetPath(path...) {
+		//	g.State.SetError("path repo '%s' cannot be set", g.Base.GetPath())
+		//	break
+		//}
 
 		g.State = g.Base.StatPath()
 		//if state.IsError() {
@@ -197,7 +197,7 @@ func (g *ToolGit) SetPath(path ...interface{}) *ux.State {
 			break
 		}
 		if g.Base.IsAFile() {
-			g.State.SetError("path repo '%s' exists and is a file", *p)
+			g.State.SetError("path repo '%s' exists and is a file", g.Base.GetPath())
 			break
 		}
 		g.State = g.Chdir()
@@ -209,8 +209,8 @@ func (g *ToolGit) SetPath(path ...interface{}) *ux.State {
 
 // Usage:
 //		{{- $cmd := $git.GetUrl }}
-//		{{- if $cmd.IsOk }}{{ $cmd.Data }}{{- end }}
-func (g *ToolGit) GetUrl() *ux.State {
+//		{{- if $cmd.IsOk }}{{ $cmd.data }}{{- end }}
+func (g *TypeGit) GetUrl() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -223,7 +223,7 @@ func (g *ToolGit) GetUrl() *ux.State {
 		}
 
 		g.Url = g.State.Output
-		g.State.Response = g.State.Output
+		g.State.SetResponse(&g.State.Output)
 	}
 
 	return g.State
@@ -233,7 +233,7 @@ func (g *ToolGit) GetUrl() *ux.State {
 // Usage:
 //		{{- $cmd := $git.SetUrl }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) SetUrl(u Url) *ux.State {
+func (g *TypeGit) SetUrl(u Url) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -247,7 +247,7 @@ func (g *ToolGit) SetUrl(u Url) *ux.State {
 //		{{- $cmd := $git.Clone }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
 // func (me *ToolGit) Clone(url interface{}, dir ...interface{}) *TypeExecCommand {
-func (g *ToolGit) Remove() *ux.State {
+func (g *TypeGit) Remove() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -290,7 +290,7 @@ func (g *ToolGit) Remove() *ux.State {
 // Usage:
 //		{{- $cmd := $git.Lock }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) Lock() *ux.State {
+func (g *TypeGit) Lock() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -305,7 +305,7 @@ func (g *ToolGit) Lock() *ux.State {
 		var to *object.Tag
 		to = g.State.Response.(*object.Tag)
 
-		g.State.Response = to.ID()
+		g.State.SetResponse(to.ID())
 	}
 
 	return g.State
@@ -315,7 +315,7 @@ func (g *ToolGit) Lock() *ux.State {
 // Usage:
 //		{{- $cmd := $git.GetStatus }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GetStatus() *ux.State {
+func (g *TypeGit) GetStatus() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -337,7 +337,7 @@ func (g *ToolGit) GetStatus() *ux.State {
 			break
 		}
 
-		g.State.Response = sts
+		g.State.SetResponse(&sts)
 	}
 
 	return g.State

@@ -476,7 +476,7 @@ func (r *Release) IsValid() *ux.State {
 //}
 //
 //
-//Data returned:
+//data returned:
 //
 //release.ID=0xc000289538
 //release.TagName=0xc0002964c0
@@ -508,7 +508,7 @@ func (r *Release) IsValid() *ux.State {
 //		AvatarURL:"https://avatars0.githubusercontent.com/u/17118367?v=4",
 //		HTMLURL:"https://github.com/MickMake",
 //		GravatarID:"",
-//		Type:"User",
+//		ofType:"User",
 //		SiteAdmin:false,
 //		URL:"https://api.github.com/users/MickMake",
 //		EventsURL:"https://api.github.com/users/MickMake/events{/privacy}",
@@ -526,7 +526,7 @@ func (r *Release) IsValid() *ux.State {
 //release.UploadURL=0xc000296490
 //release.ZipballURL=0xc000296760
 //release.TarballURL=0xc000296750
-//release.Author=github.User{Login:"MickMake", ID:17118367, NodeID:"MDQ6VXNlcjE3MTE4MzY3", AvatarURL:"https://avatars0.githubusercontent.com/u/17118367?v=4", HTMLURL:"https://github.com/MickMake", GravatarID:"", Type:"User", SiteAdmin:false, URL:"https://api.github.com/users/MickMake", EventsURL:"https://api.github.com/users/MickMake/events{/privacy}", FollowingURL:"https://api.github.com/users/MickMake/following{/other_user}", FollowersURL:"https://api.github.com/users/MickMake/followers", GistsURL:"https://api.github.com/users/MickMake/gists{/gist_id}", OrganizationsURL:"https://api.github.com/users/MickMake/orgs", ReceivedEventsURL:"https://api.github.com/users/MickMake/received_events", ReposURL:"https://api.github.com/users/MickMake/repos", StarredURL:"https://api.github.com/users/MickMake/starred{/owner}{/repo}", SubscriptionsURL:"https://api.github.com/users/MickMake/subscriptions"}
+//release.Author=github.User{Login:"MickMake", ID:17118367, NodeID:"MDQ6VXNlcjE3MTE4MzY3", AvatarURL:"https://avatars0.githubusercontent.com/u/17118367?v=4", HTMLURL:"https://github.com/MickMake", GravatarID:"", ofType:"User", SiteAdmin:false, URL:"https://api.github.com/users/MickMake", EventsURL:"https://api.github.com/users/MickMake/events{/privacy}", FollowingURL:"https://api.github.com/users/MickMake/following{/other_user}", FollowersURL:"https://api.github.com/users/MickMake/followers", GistsURL:"https://api.github.com/users/MickMake/gists{/gist_id}", OrganizationsURL:"https://api.github.com/users/MickMake/orgs", ReceivedEventsURL:"https://api.github.com/users/MickMake/received_events", ReposURL:"https://api.github.com/users/MickMake/repos", StarredURL:"https://api.github.com/users/MickMake/starred{/owner}{/repo}", SubscriptionsURL:"https://api.github.com/users/MickMake/subscriptions"}
 //release.NodeID=0xc0002964b0
 //
 //

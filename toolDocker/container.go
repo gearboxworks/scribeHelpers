@@ -333,7 +333,7 @@ func (c *Container) ContainerCreate(org string, name string, version string, fsm
 
 		// DockerMount
 		// ms := mount.Mount {
-		// 	Type:          "bind",
+		// 	ofType:          "bind",
 		// 	Source:        "/Users/mick/Documents/GitHub/containers/docker-golang",
 		// 	Target:        "/foo",
 		// 	ReadOnly:      false,

@@ -9,7 +9,7 @@ import (
 
 
 // Usage:
-//		{{ $return := WriteFile "filename.txt" .Data.Source 0644 }}
+//		{{ $return := WriteFile "filename.txt" .data.Source 0644 }}
 func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *ux.State {
 	c := New(nil)
 
@@ -21,7 +21,7 @@ func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *u
 		if !c.Source.SetPath(*s) {
 			break
 		}
-		c.State.SetState(c.Source.StatPath())
+		c.State = c.Source.StatPath()
 		if !c.Source.Exists() {
 			//c.State.SetError("src path not found")
 			break
@@ -38,7 +38,7 @@ func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *u
 			break
 		}
 		for range onlyOnce {
-			c.State.SetState(c.Destination.StatPath())
+			c.State = c.Destination.StatPath()
 			if c.Destination.NotExists() {
 				c.State.Clear()
 				break

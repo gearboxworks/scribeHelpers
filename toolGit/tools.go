@@ -63,7 +63,7 @@ func ToolNewGit(path ...interface{}) *ToolGit {
 // Usage:
 //		{{ $cmd := $git.Chdir .Some.Directory }}
 //		{{ if $git.IsOk }}Changed to directory {{ $git.Dir }}{{ end }}
-func (g *ToolGit) Chdir() *ux.State {
+func (g *TypeGit) Chdir() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -74,7 +74,7 @@ func (g *ToolGit) Chdir() *ux.State {
 
 // Usage:
 //		{{ $git.SetDryRun }}
-func (g *ToolGit) SetDryRun() bool {
+func (g *TypeGit) SetDryRun() bool {
 	g.GitOptions = append(g.GitOptions, "-n")
 	return true
 }
@@ -84,14 +84,14 @@ func (g *ToolGit) SetDryRun() bool {
 //		{{ $cmd := $git.Exec "tag" "-l" }}
 //		{{ if $git.IsOk }}OK{{ end }}
 // func (me *ToolGit) Exec(cmd interface{}, args ...interface{}) *ux.State {
-func (g *ToolGit) Exec(cmd string, args ...string) *ux.State {
+func (g *TypeGit) Exec(cmd string, args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
 	g.State.SetFunction("")
 
 	for range onlyOnce {
-		if g.Reflect().IsNotAvailable() {
+		if g.IsNotAvailable() {
 			break
 		}
 
@@ -136,6 +136,7 @@ func (g *ToolGit) Exec(cmd string, args ...string) *ux.State {
 		g.State.SetOutput(out)
 		g.State.OutputTrim()
 		g.State.SetError(err)
+
 		if g.State.IsError() {
 			g.State.SetExitCode(1) // Fake an exit code.
 			break
@@ -151,7 +152,7 @@ func (g *ToolGit) Exec(cmd string, args ...string) *ux.State {
 //// Usage:
 ////		{{- $cmd := $git.IsExec }}
 ////		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-//func (g *ToolGit) IsAvailable() *ux.State {
+//func (g *TypeGit) IsAvailable() *ux.State {
 //	for range onlyOnce {
 //		if g.Reflect().IsNotAvailable() {
 //			break
@@ -169,34 +170,34 @@ func (g *ToolGit) Exec(cmd string, args ...string) *ux.State {
 //
 //// Usage:
 ////		{{ if $ret.IsError }}{{ $cmd.PrintError }}{{ end }}
-//func (g *ToolGit) SetError(error ...interface{}) {
+//func (g *TypeGit) SetError(error ...interface{}) {
 //	g.State.SetError(error...)
 //}
 //
 //
 //// Usage:
 ////		{{ if $ret.IsError }}{{ $cmd.PrintError }}{{ end }}
-//func (g *ToolGit) IsError() bool {
+//func (g *TypeGit) IsError() bool {
 //	return g.State.IsError()
 //}
 //
 //
 //// Usage:
 ////		{{ if $ret.IsOk }}OK{{ end }}
-//func (g *ToolGit) IsOk() bool {
+//func (g *TypeGit) IsOk() bool {
 //	return g.State.IsOk()
 //}
 //
 //
 //// Usage:
 ////		{{ if $ret.IsOk }}OK{{ end }}
-//func (g *ToolGit) PrintError() string {
+//func (g *TypeGit) PrintError() string {
 //	return g.Cmd.PrintError()
 //}
 //
 //
 //// Usage:
 ////		{{ if $ret.IsOk }}OK{{ end }}
-//func (g *ToolGit) ExitOnError() string {
+//func (g *TypeGit) ExitOnError() string {
 //	return g.State.ExitOnError()
 //}

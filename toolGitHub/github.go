@@ -167,7 +167,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //type TypeGetRepository struct {
 //	Valid bool
 //	Error error
-//	Data *github.Repository
+//	data *github.Repository
 //}
 //func (me TypeLogin) GetRepository(owner interface{}, repo interface{}) TypeGetRepository {
 //	var ret TypeGetRepository
@@ -184,7 +184,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //		}
 //
 //		ctx := context.Background()
-//		ret.Data, _, ret.Error = me.Client.Repositories.Get(ctx, *op, *rp)
+//		ret.data, _, ret.Error = me.Client.Repositories.Get(ctx, *op, *rp)
 //
 //		if ret.Error != nil {
 //			break
@@ -199,7 +199,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //	var ret TypeGenericStringArray
 //
 //	for range onlyOnce {
-//		ret.Data = append(ret.Data, *me.Data.Name)
+//		ret.data = append(ret.data, *me.data.Name)
 //		ret.Valid = true
 //	}
 //
@@ -209,7 +209,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //	var ret TypeGenericStringArray
 //
 //	for range onlyOnce {
-//		ret.Data = append(ret.Data, *me.Data.FullName)
+//		ret.data = append(ret.data, *me.data.FullName)
 //		ret.Valid = true
 //	}
 //
@@ -219,7 +219,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //	var ret TypeGenericStringArray
 //
 //	for range onlyOnce {
-//		ret.Data = append(ret.Data, *me.Data.URL)
+//		ret.data = append(ret.data, *me.data.URL)
 //		ret.Valid = true
 //	}
 //
@@ -231,7 +231,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //type TypeGetRepositories struct {
 //	Valid bool
 //	Error error
-//	Data []*github.Repository
+//	data []*github.Repository
 //}
 //func (me TypeLogin) GetRepositories(owner interface{}) TypeGetRepositories {
 //	var ret TypeGetRepositories
@@ -243,7 +243,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //		}
 //
 //		ctx := context.Background()
-//		ret.Data, _, ret.Error = me.Client.Repositories.List(ctx, *op, nil)
+//		ret.data, _, ret.Error = me.Client.Repositories.List(ctx, *op, nil)
 //
 //		if ret.Error != nil {
 //			break
@@ -259,8 +259,8 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //	var ret TypeGenericStringArray
 //
 //	for range onlyOnce {
-//		for _, v := range me.Data {
-//			ret.Data = append(ret.Data, *v.Name)
+//		for _, v := range me.data {
+//			ret.data = append(ret.data, *v.Name)
 //		}
 //		ret.Valid = true
 //	}
@@ -271,8 +271,8 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //	var ret TypeGenericStringArray
 //
 //	for range onlyOnce {
-//		for _, v := range me.Data {
-//			ret.Data = append(ret.Data, *v.FullName)
+//		for _, v := range me.data {
+//			ret.data = append(ret.data, *v.FullName)
 //		}
 //		ret.Valid = true
 //	}
@@ -283,8 +283,8 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //	var ret TypeGenericStringArray
 //
 //	for range onlyOnce {
-//		for _, v := range me.Data {
-//			ret.Data = append(ret.Data, *v.URL)
+//		for _, v := range me.data {
+//			ret.data = append(ret.data, *v.URL)
 //		}
 //		ret.Valid = true
 //	}
@@ -298,7 +298,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //	var ret TypeGenericString
 //
 //	for range onlyOnce {
-//		repo := ret.Data
+//		repo := ret.data
 //
 //		branchRefs, ret.Error = repo.Branches()
 //		if ret.Error != nil {
@@ -313,7 +313,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //		var currentBranchName string
 //		err = branchRefs.ForEach(func(branchRef *plumbing.Reference) error {
 //			if branchRef.Hash() == headRef.Hash() {
-//				ret.Data = branchRef.Name().output()
+//				ret.data = branchRef.Name().output()
 //
 //				return nil
 //			}
@@ -337,7 +337,7 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //			break
 //		}
 //
-//		ret.Data = headRef.Hash().output()
+//		ret.data = headRef.Hash().output()
 //	}
 //
 //	return ret
@@ -367,12 +367,12 @@ func ToolGitHubLogin(username interface{}, password interface{}, twofactor inter
 //
 //			if latestTagCommit == nil {
 //				latestTagCommit = commit
-//				ret.Data = tagRef.Name().output()
+//				ret.data = tagRef.Name().output()
 //			}
 //
 //			if commit.Committer.When.After(latestTagCommit.Committer.When) {
 //				latestTagCommit = commit
-//				ret.Data = tagRef.Name().output()
+//				ret.data = tagRef.Name().output()
 //			}
 //
 //			return nil

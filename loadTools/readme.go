@@ -8,7 +8,7 @@ using the
 All helper packages can be used in one of two ways:
 1. Direct
 	- That is; native GoLang.
-	- Methods are hanging off a structure with a "Type" prefix - EG TypeGit, TypeSystem.
+	- Methods are hanging off a structure with a "ofType" prefix - EG TypeGit, TypeSystem.
 		- This is to logically separate low level types from high level types.
 
 2. Templates, (aka Tools)

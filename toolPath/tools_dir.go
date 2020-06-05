@@ -17,7 +17,7 @@ func ToolChdir(dir ...interface{}) *TypeOsPath {
 		}
 		ret.SetPath(*f)
 
-		ret.State.SetState(ret.Chdir())
+		ret.State = ret.Chdir()
 	}
 
 	return ret
@@ -34,7 +34,7 @@ func ToolGetCwd() *TypeOsPath {
 		ret.State.SetFunction("")
 
 		state := ret.GetCwd()
-		ret.State.SetState(state)
+		ret.State = state
 		if ret.State.IsError() {
 			break
 		}
@@ -53,11 +53,8 @@ func ToolIsCwd() *TypeOsPath {
 	for range onlyOnce {
 		ret.State.SetFunction("")
 
-		if ret.IsCwd() {
-			ret.State.Response = true
-			break
-		}
-		ret.State.Response = false
+		ok := ret.IsCwd()
+		ret.State.SetResponse(&ok)
 	}
 
 	return ret
@@ -80,7 +77,7 @@ func ToolCreateDir(path ...interface{}) *TypeOsPath {
 		}
 		ret.SetPath(*f)
 
-		ret.State.SetState(ret.Mkdir())
+		ret.State = ret.Mkdir()
 		if ret.State.IsError() {
 			break
 		}
@@ -109,7 +106,7 @@ func ToolRemoveDir(path ...interface{}) *TypeOsPath {
 		//if force {
 		//	ret.SetRemoveable()
 		//}
-		ret.State.SetState(ret.RemoveDir())
+		ret.State = ret.RemoveDir()
 		if ret.State.IsError() {
 			break
 		}

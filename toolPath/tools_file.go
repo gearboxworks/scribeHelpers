@@ -20,13 +20,14 @@ func ToolReadFile(file ...interface{}) *TypeOsPath {
 		}
 
 		ret.SetPath(*f)
-		ret.State.SetState(ret.ReadFile())
+		ret.State = ret.ReadFile()
 		if ret.State.IsError() {
 			break
 		}
 
 		// Make available OsPath structure.
-		ret.State.Response = ret.GetContentString()
+		s := ret.GetContentString()
+		ret.State.SetResponse(&s)
 	}
 
 	return ret
@@ -34,7 +35,7 @@ func ToolReadFile(file ...interface{}) *TypeOsPath {
 
 
 // Usage:
-//		{{ $return := WriteFile .Data.Source 0644 "dir1" "dir2/dir3" "filename.txt" }}
+//		{{ $return := WriteFile .data.Source 0644 "dir1" "dir2/dir3" "filename.txt" }}
 func ToolWriteFile(contents interface{}, perms interface{}, file ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
@@ -62,7 +63,7 @@ func ToolWriteFile(contents interface{}, perms interface{}, file ...interface{})
 			ret.SetMode(*p)
 		}
 
-		ret.State.SetState(ret.WriteFile())
+		ret.State = ret.WriteFile()
 		if ret.State.IsError() {
 			break
 		}
@@ -91,7 +92,7 @@ func ToolRemoveFile(path ...interface{}) *TypeOsPath {
 		//if force {
 		//	ret.SetRemoveable()
 		//}
-		ret.State.SetState(ret.RemoveFile())
+		ret.State = ret.RemoveFile()
 		if ret.State.IsNotOk() {
 			break
 		}

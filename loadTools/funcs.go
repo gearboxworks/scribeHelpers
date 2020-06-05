@@ -334,7 +334,17 @@ func (at *TypeScribeArgs) CreateTemplate() (*template.Template, *ux.State) {
 		if at.State.IsNotOk() {
 			break
 		}
-		at.ImportTools(at.State.Response.(template.FuncMap))
+
+		//tfm := at.State.Response.(template.FuncMap)
+		resp := at.State.GetResponse()
+		if resp.IsOfType("template.FuncMap") {
+			fmt.Printf("YELLO!\n")
+			tfm := (resp.GetData()).(template.FuncMap)
+			at.ImportTools(tfm)
+			os.Exit(0)
+		}
+		fmt.Printf("NADA!\n")
+		os.Exit(1)
 
 		// Add inbuilt Tools.
 		at.Tools["PrintTools"] = PrintTools

@@ -76,7 +76,7 @@ func (p *TypeOsPath) Chmod(m os.FileMode) *ux.State {
 			break
 		}
 
-		p.State.SetState(p.StatPath())
+		p.State = p.StatPath()
 		if p.State.IsError() {
 			break
 		}
@@ -88,7 +88,7 @@ func (p *TypeOsPath) Chmod(m os.FileMode) *ux.State {
 			break
 		}
 
-		p.State.SetState(p.StatPath())
+		p.State = p.StatPath()
 		if p.State.IsError() {
 			break
 		}

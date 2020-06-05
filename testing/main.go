@@ -98,6 +98,24 @@ func Test_NewState() {
 	Test := ux.NewState("testing", globalDebug)
 	PrintTestResult(Test, test, "NewState(\"testing\", %v)", globalDebug)
 
+	t1 := []string{"1", "2", "3", "4"}
+	Test.SetResponse(&t1)
+	t1r := Test.GetResponse()
+	t1t := Test.GetResponseType()
+	t1d := Test.GetResponseData()
+	fmt.Printf("Test.GetResponse().GetType() - Name:%s String:%s\n",
+		t1r.GetType().Name(),
+		t1r.GetType().String(),
+		)
+	fmt.Printf("Test.GetResponseType() - Name:%s String:%s\n",
+		t1t.Name(),
+		t1t.String(),
+	)
+	if t1r.IsOfType("[]string") {
+		fmt.Printf("YES!\n")
+		fmt.Printf("Data: %v\n", t1d)
+	}
+
 	PrintTestStop(test)
 }
 

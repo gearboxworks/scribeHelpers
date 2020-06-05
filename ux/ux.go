@@ -60,7 +60,7 @@ var _name string
 func Open(name string) error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		Color = aurora.NewAurora(true)
 		_name = name
 		if name == "" {
@@ -250,7 +250,7 @@ func PrintflnError(format string, args ...interface{}) {
 func SprintError(err error) string {
 	var s string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if err == nil {
 			break
 		}

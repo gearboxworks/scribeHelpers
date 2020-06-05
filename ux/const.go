@@ -9,5 +9,5 @@ const (
 	StateExited = "exited"
 	StateDead = "dead"
 
-	OnlyOnce = "1"
+	onlyOnce = "1"
 )

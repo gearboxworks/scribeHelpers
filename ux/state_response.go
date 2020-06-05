@@ -8,11 +8,116 @@ import (
 	"strings"
 )
 
+//
+// Built-in string type:
+// string
+//
+// Built-in boolean type:
+// bool
+//
+// Built-in numeric types:
+// int8
+// uint8 (byte)
+// int16
+// uint16
+// int32 (rune)
+// uint32
+// int64
+// uint64
+// int
+// uint
+// uintptr
+// float32
+// float64
+// complex64
+// complex128
 
-func (state *State) ResponseToString() *string {
+
+type TypeResponse struct {
+	ofType reflect.Type
+	data   interface{}
+}
+func newResponse() TypeResponse {
+	return TypeResponse{ ofType: nil, data: nil }
+}
+func (state *State) GetResponse() *TypeResponse {
+	return &state.response
+}
+func (state *State) SetResponse(r interface{}) bool {
+	var ok bool
+
+	for range onlyOnce {
+		v := reflect.ValueOf(r)
+		if state.debug.Enabled {
+			PrintflnBlue("SetResponse() interface{} is a '%s' kind of type '%s'", v.Kind().String(), v.String())
+		}
+
+		if v.Kind() != reflect.Ptr {
+			PrintflnError("SetResponse requires a pointer type, but is a '%s' kind of type '%s'", v.Kind().String(), v.String())
+			PrintflnError("Example: State.SetResponse(&xyzzy)")
+			panic("ABORTING")
+			break
+		}
+
+		s := v.Elem()
+		state.response = TypeResponse{
+			ofType: s.Type(),
+			data:   r,
+		}
+		if state.debug.Enabled {
+			PrintflnBlue("Type: '%s' - '%s'", s.Type().String(), s.Type().Name())
+		}
+
+		ok = true
+	}
+
+	return ok
+}
+func (r *TypeResponse) IsOfType(t string) bool {
+	var ok bool
+
+	fmt.Printf("%s - %s\n", r.ofType.String(), r.ofType.Name())
+	for range onlyOnce {
+		if r.ofType.String() == t {
+			ok = true
+			break
+		}
+
+		if r.ofType.Name() == t {
+			ok = true
+			break
+		}
+
+		ok = false
+	}
+
+	return ok
+}
+func (state *State) GetResponseData() interface{} {
+	return state.response.data
+}
+func (r *TypeResponse) GetData() interface{} {
+	return r.data
+}
+func (state *State) GetResponseType() reflect.Type {
+	return state.response.ofType
+}
+func (r *TypeResponse) GetType() reflect.Type {
+	return r.ofType
+}
+func (r *TypeResponse) GetStringArray() *[]string {
+	if r.IsOfType("[]string") {
+		return (r.data).(*[]string)
+	}
+
+	return &[]string{}
+}
+
+
+func (r *TypeResponse) ResponseToString() *string {
 	var s *string
-	if IsReflectString(state.Response) {
-		s = ReflectString(state.Response)
+	if IsReflectString(r.data) {
+		s = ReflectString(r.data)
 	}
 	//if s == nil {
 	//	var ptr string
@@ -20,30 +125,30 @@ func (state *State) ResponseToString() *string {
 	//}
 	return s
 }
-func (state *State) ResponseToArray() *[]string {
+func (r *TypeResponse) ResponseToArray() *[]string {
 	var s *[]string
-	if IsReflectArray(state.Response) {
-		s = ReflectStringArray(state.Response)
+	if IsReflectArray(r.data) {
+		s = ReflectStringArray(r.data)
 	}
 	//if s == nil {
 	//	s = &[]string{}
 	//}
 	return s
 }
-func (state *State) ResponseToByteArray() *[]byte {
+func (r *TypeResponse) ResponseToByteArray() *[]byte {
 	var s *[]byte
-	if IsReflectArray(state.Response) {
-		s = ReflectByteArray(state.Response)
+	if IsReflectArray(r.data) {
+		s = ReflectByteArray(r.data)
 	}
 	//if s == nil {
 	//	s = &[]byte{}
 	//}
 	return s
 }
-func (state *State) ResponseToInt() *int64 {
+func (r *TypeResponse) ResponseToInt() *int64 {
 	var s *int64
-	if IsReflectArray(state.Response) {
-		s = ReflectInt(state.Response)
+	if IsReflectArray(r.data) {
+		s = ReflectInt(r.data)
 	}
 	//if s == nil {
 	//	var ptr int64
@@ -51,10 +156,10 @@ func (state *State) ResponseToInt() *int64 {
 	//}
 	return s
 }
-func (state *State) ResponseToUint() *uint64 {
+func (r *TypeResponse) ResponseToUint() *uint64 {
 	var s *uint64
-	if IsReflectArray(state.Response) {
-		s = ReflectUint(state.Response)
+	if IsReflectArray(r.data) {
+		s = ReflectUint(r.data)
 	}
 	//if s == nil {
 	//	var ptr uint64
@@ -62,10 +167,10 @@ func (state *State) ResponseToUint() *uint64 {
 	//}
 	return s
 }
-func (state *State) ResponseToFloat() *float64 {
+func (r *TypeResponse) ResponseToFloat() *float64 {
 	var s *float64
-	if IsReflectArray(state.Response) {
-		s = ReflectFloat(state.Response)
+	if IsReflectArray(r.data) {
+		s = ReflectFloat(r.data)
 	}
 	//if s == nil {
 	//	var ptr float64
@@ -192,7 +297,7 @@ func (state *State) ResponseToFloat() *float64 {
 //		case reflect.UnsafePointer:
 //	}
 //
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		if IsReflectString(ref) {
 //
 //		}
@@ -214,7 +319,7 @@ func (state *State) ResponseToFloat() *float64 {
 func ReflectString(ref interface{}) *string {
 	var s string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		//value := reflect.ValueOf(ref)
 		//if value.Kind() == reflect.String {
 		//	st := value.String()
@@ -253,7 +358,7 @@ func IsReflectString(i interface{}) bool {
 func ReflectStringArray(ref ...interface{}) *[]string {
 	var sa []string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		for _, r := range ref {
 			sa = append(sa, *ReflectString(r))
 		}
@@ -266,7 +371,7 @@ func ReflectStringArray(ref ...interface{}) *[]string {
 func ReflectByteArray(ref interface{}) *[]byte {
 	var s []byte
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		//value := reflect.ValueOf(ref)
 		//if value.Kind() != reflect.String {
 		//	break
@@ -298,7 +403,7 @@ func IsReflectByteArray(i interface{}) bool {
 func ReflectBool(ref interface{}) *bool {
 	var b *bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		if value.Kind() != reflect.Bool {
 			break
@@ -329,7 +434,7 @@ func IsReflectBool(i interface{}) bool {
 func ReflectBoolArg(ref interface{}) bool {
 	var s bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		switch value.Kind() {
 			case reflect.Bool:
@@ -358,7 +463,7 @@ func ReflectBoolArg(ref interface{}) bool {
 func ReflectInt(ref interface{}) *int64 {
 	var s int64
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		switch value.Kind() {
 			case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
@@ -420,7 +525,7 @@ func IsReflectUint(i interface{}) bool {
 func ReflectFloat(ref interface{}) *float64 {
 	var s float64
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		switch value.Kind() {
 			case reflect.Float32, reflect.Float64:

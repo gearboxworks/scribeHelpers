@@ -11,6 +11,9 @@ type TypeMultiExecCommand struct {
 	Exec    *TypeExecCommand
 	Paths   *toolPath.TypeOsPaths
 
+	chDir   bool
+	noAddFile bool
+
 	Runtime *toolRuntime.TypeRuntime
 	State   *ux.State
 }
@@ -172,6 +175,32 @@ func (e *TypeMultiExecCommand) FindRegex(re string, path ...string) *ux.State {
 }
 
 
+func (e *TypeMultiExecCommand) SetDontAppendFile() *ux.State {
+	if state := e.IsNil(); state.IsError() {
+		return state
+	}
+	e.noAddFile = true
+	return e.State
+}
+
+
+func (e *TypeMultiExecCommand) SetChdir() *ux.State {
+	if state := e.IsNil(); state.IsError() {
+		return state
+	}
+	e.chDir = true
+	return e.State
+}
+
+
+func (e *TypeMultiExecCommand) GetPaths() []*toolPath.TypeOsPath {
+	if state := e.IsNil(); state.IsError() {
+		return []*toolPath.TypeOsPath{}
+	}
+	return e.Paths.Paths
+}
+
+
 func (e *TypeMultiExecCommand) Run() *ux.State {
 	if state := e.IsNil(); state.IsError() {
 		return state
@@ -183,10 +212,24 @@ func (e *TypeMultiExecCommand) Run() *ux.State {
 			break
 		}
 
+		var saveOutput []string
 		saveArgs := e.Exec.GetArgs()
 		for _, p := range e.Paths.Paths {
-			foo := appendArgs(p.GetPath(), saveArgs...)
-			e.State = e.Exec.SetArgs(foo...)
+			if e.chDir {
+				e.State = p.Chdir()
+				if e.State.IsNotOk() {
+					break
+				}
+			}
+
+			var args []string
+			if !e.noAddFile {
+				args = appendArgs(p.GetPath(), saveArgs...)
+			} else {
+				args = saveArgs
+			}
+
+			e.State = e.Exec.SetArgs(args...)
 			if e.State.IsNotOk() {
 				break
 			}
@@ -195,7 +238,14 @@ func (e *TypeMultiExecCommand) Run() *ux.State {
 			if e.State.IsNotOk() {
 				break
 			}
+
+			//o2 := e.Exec.State.GetOutputArray()
+			o2 := e.State.GetOutputArray()
+			saveOutput = append(saveOutput, o2...)
+			//fmt.Printf("%v\n", len(saveOutput))
 		}
+
+		e.State.SetOutput(saveOutput)
 	}
 
 	return e.State

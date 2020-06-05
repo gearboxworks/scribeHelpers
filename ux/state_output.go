@@ -17,7 +17,7 @@ func (state *State) GetRunState() string {
 func (state *State) RunStateEquals(format string, args ...interface{}) bool {
 	var ret bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		s := fmt.Sprintf(format, args...)
 		if strings.Compare(state.RunState, s) == 0 {
 			ret = true
@@ -29,7 +29,7 @@ func (state *State) RunStateEquals(format string, args ...interface{}) bool {
 
 
 func (state *State) SetOutput(data ...interface{}) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		state.Output = ""
 		state.OutputArray = []string{}
 
@@ -38,7 +38,7 @@ func (state *State) SetOutput(data ...interface{}) {
 }
 
 func (state *State) OutputAppend(data ...interface{}) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state._Separator == "" {
 			state._Separator = DefaultSeparator
 		}
@@ -58,19 +58,41 @@ func (state *State) OutputAppend(data ...interface{}) {
 			switch d.(type) {
 				case []string:
 					for _, s := range d.([]string) {
+						if s != "" {
+							s = removeDupeEol(s)
+							sa = append(sa, strings.Split(s, state._Separator)...)
+						}
+					}
+
+				case string:
+					if d.(string) != "" {
+						s := removeDupeEol(d.(string))
 						sa = append(sa, strings.Split(s, state._Separator)...)
 					}
-				case string:
-					sa = append(sa, strings.Split(d.(string), state._Separator)...)
+
 				case []byte:
-					ts := d.([]byte)
-					sa = append(sa, strings.Split(string(ts), state._Separator)...)
+					s := removeDupeEol(string(d.([]byte)))
+					//s := removeDupeEol(d.(string))
+					sa = append(sa, strings.Split(s, state._Separator)...)
 			}
 
 			state.OutputArray = append(state.OutputArray, sa...)
 		}
 		state.Output = strings.Join(state.OutputArray, state._Separator)
 	}
+}
+
+func removeDupeEol(s string) string {
+	s = strings.ReplaceAll(s, `\n\n`, `\n`)
+	s = strings.ReplaceAll(s, `\r\n\r\n`, `\r\n`)
+
+	// @TODO better way to do this.
+	s = strings.ReplaceAll(s, `\n\n`, `\n`)
+	s = strings.ReplaceAll(s, `\r\n\r\n`, `\r\n`)
+
+	s = strings.TrimSpace(s)
+
+	return s
 }
 
 func (state *State) GetOutput() string {
@@ -86,7 +108,7 @@ func (state *State) GetOutputArray() []string {
 }
 
 func (state *State) SetSeparator(separator string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		state._Separator = separator
 		state.OutputArray = strings.Split(state.Output, state._Separator)
 	}
@@ -97,14 +119,14 @@ func (state *State) GetSeparator() string {
 }
 
 func (state *State) OutputTrim() {
-	for range OnlyOnce {
+	for range onlyOnce {
 		state.Output = strings.TrimSpace(state.Output)
 		state.OutputArray = strings.Split(state.Output, state._Separator)
 	}
 }
 
 func (state *State) OutputArrayTrim() {
-	for range OnlyOnce {
+	for range onlyOnce {
 		for _, s := range state.OutputArray {
 			state.OutputArray = append(state.OutputArray, strings.Split(s, state._Separator)...)
 		}
@@ -115,7 +137,7 @@ func (state *State) OutputArrayTrim() {
 func (state *State) OutputEquals(format string, args ...interface{}) bool {
 	var ret bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		s := fmt.Sprintf(format, args...)
 		if strings.Compare(state.Output, s) == 0 {
 			ret = true
@@ -128,7 +150,7 @@ func (state *State) OutputEquals(format string, args ...interface{}) bool {
 func (state *State) OutputParse(format string, args ...interface{}) bool {
 	var ret bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		s := fmt.Sprintf(format, args...)
 
 		ret = strings.Contains(state.Output, s)
@@ -140,7 +162,7 @@ func (state *State) OutputParse(format string, args ...interface{}) bool {
 func (state *State) OutputArrayGrep(format string, a ...interface{}) []string {
 	var ret []string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if len(state.OutputArray) == 0 {
 			break
 		}
@@ -160,7 +182,7 @@ func (state *State) OutputArrayGrep(format string, a ...interface{}) []string {
 func (state *State) OutputGrep(format string, a ...interface{}) string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state.Output == "" {
 			break
 		}

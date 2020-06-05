@@ -371,7 +371,7 @@ func (c *Container) ContainerCreate(gearName string, gearVersion string) *ux.Sta
 
 		// DockerMount
 		// ms := mount.Mount {
-		// 	Type:          "bind",
+		// 	ofType:          "bind",
 		// 	Source:        "/Users/mick/Documents/GitHub/containers/docker-golang",
 		// 	Target:        "/foo",
 		// 	ReadOnly:      false,

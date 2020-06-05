@@ -38,7 +38,7 @@ import (
 //	var err error
 //	me := &SshServer{}
 //
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		var _args SshServerArgs
 //		if len(args) > 0 {
 //			_args = args[0]

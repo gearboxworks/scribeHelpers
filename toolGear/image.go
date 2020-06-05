@@ -145,7 +145,7 @@ func (i *Image) Status() *ux.State {
 			i.GearConfig = gearConfig.New(nil)
 			i.GearConfig.ParseJson(i.Summary.Labels["gearbox.json"])
 			if i.GearConfig.State.IsError() {
-				i.State.SetState(i.GearConfig.State)
+				i.State = i.GearConfig.State
 				break
 			}
 		}

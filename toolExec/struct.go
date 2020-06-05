@@ -82,10 +82,10 @@ func (e *TypeExecCommand) IsNil() *ux.State {
 
 
 func (e *TypeExecCommand) IsRunnable() bool {
-	if state := e.IsNil(); state.IsError() {
-		return false
-	}
 	var ok bool
+	if state := e.IsNil(); state.IsError() {
+		return ok
+	}
 
 	for range onlyOnce {
 		_, err := exec.LookPath(e.cmd.GetPath())
@@ -93,6 +93,13 @@ func (e *TypeExecCommand) IsRunnable() bool {
 			e.State.SetError("Executable not found.")
 			break
 		}
+
+		e.State = e.cmd.StatPath()
+		if e.State.IsNotOk() {
+			break
+		}
+
+		ok = true
 	}
 
 	return ok
@@ -137,7 +144,7 @@ func (e *TypeExecCommand) Run() *ux.State {
 	}
 
 	for range onlyOnce {
-		if e.IsRunnable() {
+		if !e.IsRunnable() {
 			e.State.PrintResponse()
 			break
 		}
@@ -164,6 +171,9 @@ func (e *TypeExecCommand) Run() *ux.State {
 			e.stdout, err = c.CombinedOutput()
 			e.State.SetError(err)
 		}
+
+		e.State.SetOutput(e.stdout)
+		e.State.SetResponse(&e.stderr)
 
 		if e.State.IsError() {
 			if exitError, ok := err.(*exec.ExitError); ok {
@@ -219,21 +229,14 @@ func (e *TypeExecCommand) SetCmd(path ...string) *ux.State {
 			e.cmd = toolPath.New(e.Runtime)
 		}
 
-		if e.cmd.SetPath(path...) {
-			e.State.SetError("cannot set cmd path")
-			break
-		}
-
+		e.cmd.SetPath(path...)
 		if e.cmd.IsRelative() {
 			p, err := exec.LookPath(e.cmd.GetPath())
 			if err != nil {
 				e.State.SetError("Executable not found.")
 				break
 			}
-			if e.cmd.SetPath(p) {
-				e.State.SetError("cannot set cmd path")
-				break
-			}
+			e.cmd.SetPath(p)
 		}
 
 		if e.IsRunnable() {

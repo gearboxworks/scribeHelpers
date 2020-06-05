@@ -32,54 +32,108 @@ func (gr *TypeGoReleaser) SetBasePath(path ...string) *ux.State {
 }
 
 
-func (gr *TypeGoReleaser) Release() *ux.State {
+func (gr *TypeGoReleaser) Release(path ...string) *ux.State {
 	if state := gr.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
+		ux.PrintflnBlue("Generating release with GoReleaser...")
 
-		grFile := NewArgFile(gr.Debug)
-		gr.State = grFile.SetPath(DefaultFile)
-		if grFile.NotExists() {
-			gr.State = grFile.State
+		e := toolExec.NewMultiExec(gr.runtime)
+		if e.State.IsNotOk() {
+			gr.State = e.State
 			break
 		}
 
-		ux.PrintflnBlue("Found goreleaser file: %s", DefaultFile)
-		gr.State = exe.Exec("goreleaser", "--rm-dist")
+		gr.State = e.Set("goreleaser", "--rm-dist")
 		if gr.State.IsNotOk() {
-			ux.PrintflnWarning("Error with goreleaser.")
 			break
 		}
+
+		gr.State = e.SetDontAppendFile()
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		gr.State = e.SetChdir()
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		gr.State = e.ShowProgress()
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		gr.State = e.FindRegex(DefaultFile, path...)
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		p := e.GetPaths()
+		ux.PrintflnBlue("Releasing with GoReleaser in %d paths...", len(p))
+
+		gr.State = e.Run()
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		gr.State.SetOk("go module update OK")
 	}
 
 	return gr.State
 }
 
 
-func (gr *TypeGoReleaser) Build() *ux.State {
+func (gr *TypeGoReleaser) Build(path ...string) *ux.State {
 	if state := gr.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
-		grFile := NewArgFile(gr.runtime)
-		gr.State = grFile.SetPath(DefaultFile)
-		if grFile.NotExists() {
-			gr.State = grFile.State
+		ux.PrintflnBlue("Building with GoReleaser...")
+
+		e := toolExec.NewMultiExec(gr.runtime)
+		if e.State.IsNotOk() {
+			gr.State = e.State
 			break
 		}
 
-		exe := toolExec.New(gr.runtime)
-		exe.ShowProgress()
-
-		ux.PrintflnBlue("Found goreleaser file: %s", DefaultFile)
-		gr.State = exe.Exec("goreleaser", "--snapshot", "--skip-publish", "--rm-dist")
+		gr.State = e.Set("goreleaser", "--snapshot", "--skip-publish", "--rm-dist")
 		if gr.State.IsNotOk() {
-			//ux.PrintflnWarning("goreleaser failed to build.")
 			break
 		}
+
+		gr.State = e.SetDontAppendFile()
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		gr.State = e.SetChdir()
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		gr.State = e.ShowProgress()
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		gr.State = e.FindRegex(DefaultFile, path...)
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		p := e.GetPaths()
+		ux.PrintflnBlue("Building with GoReleaser in %d paths...", len(p))
+
+		gr.State = e.Run()
+		if gr.State.IsNotOk() {
+			break
+		}
+
+		gr.State.SetOk("GoReleaser build OK")
 	}
 
 	return gr.State

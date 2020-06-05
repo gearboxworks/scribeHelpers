@@ -9,7 +9,7 @@ import (
 // Usage:
 //		{{- $cmd := $git.GetBranch }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GetBranch() *ux.State {
+func (g *TypeGit) GetBranch() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -18,7 +18,7 @@ func (g *ToolGit) GetBranch() *ux.State {
 	for range onlyOnce {
 		g.State = g.Exec("symbolic-ref", "--short", "HEAD")
 		g.State.OutputTrim()
-		g.State.Response = g.State.Output
+		g.State.SetResponse(&g.State.Output)
 	}
 	return g.State
 }
@@ -27,7 +27,7 @@ func (g *ToolGit) GetBranch() *ux.State {
 // Usage:
 //		{{- $cmd := $git.GetBranch }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) BranchExists(branch interface{}) *ux.State {
+func (g *TypeGit) BranchExists(branch interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -46,7 +46,8 @@ func (g *ToolGit) BranchExists(branch interface{}) *ux.State {
 		}
 
 		if g.State.Output == *t {
-			g.State.Response = true
+			ok := true
+			g.State.SetResponse(&ok)
 		}
 	}
 	return g.State
@@ -56,7 +57,7 @@ func (g *ToolGit) BranchExists(branch interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GetTags }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GetTags() *ux.State {
+func (g *TypeGit) GetTags() *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -88,8 +89,8 @@ func (g *ToolGit) GetTags() *ux.State {
 		//	}
 		//	tags = append(tags, t[6:])
 		//}
-		//g.State.Response = tags
-		g.State.Response = g.State.GetOutputArray()
+		//g.State.SetResponse(tags)
+		g.State.SetResponse(g.State.GetOutputArray())
 	}
 
 	return g.State
@@ -99,7 +100,7 @@ func (g *ToolGit) GetTags() *ux.State {
 // Usage:
 //		{{- $cmd := $git.CreateTag "1.0" }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) CreateTag(tag interface{}) *ux.State {
+func (g *TypeGit) CreateTag(tag interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -125,7 +126,7 @@ func (g *ToolGit) CreateTag(tag interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.RemoveTag "1.0" }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) RemoveTag(tag interface{}) *ux.State {
+func (g *TypeGit) RemoveTag(tag interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -151,7 +152,7 @@ func (g *ToolGit) RemoveTag(tag interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.TagExists "1.0" }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) TagExists(tag interface{}) *ux.State {
+func (g *TypeGit) TagExists(tag interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -170,7 +171,8 @@ func (g *ToolGit) TagExists(tag interface{}) *ux.State {
 		}
 
 		if g.State.Output == *t {
-			g.State.Response = true
+			ok := true
+			g.State.SetResponse(ok)
 		}
 	}
 
@@ -181,7 +183,7 @@ func (g *ToolGit) TagExists(tag interface{}) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GetTagObject "1.0" }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GetTagObject(tag interface{}) *ux.State {
+func (g *TypeGit) GetTagObject(tag interface{}) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -211,7 +213,7 @@ func (g *ToolGit) GetTagObject(tag interface{}) *ux.State {
 			break
 		}
 
-		g.State.Response = to
+		g.State.SetResponse(to)
 	}
 
 	return g.State

@@ -100,7 +100,7 @@ func DiscoverTools() *ux.State {
 		}
 	}
 
-	state.Response = tfm
+	state.SetResponse(&tfm)
 	return state
 }
 
@@ -117,7 +117,7 @@ func AddTools(i interface{}) *ux.State {
 		//}
 	}
 
-	state.Response = tfm
+	state.SetResponse(&tfm)
 	return state
 }
 
@@ -130,15 +130,24 @@ func PrintTools() string {
 	for range OnlyOnce {
 		ret += ux.SprintfCyan("List of defined template functions:\n")
 
-		tfm := DiscoverTools()
-		if tfm.IsNotOk() {
+		state := DiscoverTools()
+		if state.IsNotOk() {
 			ret += ux.SprintfRed("Error discovering Tools.\n")
 			break
 		}
 
+		var tfm *template.FuncMap
+		resp := state.GetResponse()
+		fmt.Printf("type: %s - %s\n", resp.GetType().String(), resp.GetType().Name())
+		if !resp.IsOfType("template.FuncMap") {
+			ret += ux.SprintfRed("Error discovering Tools - invalid return map.\n")
+			break
+		}
+		tfm = resp.GetData().(*template.FuncMap)
+
 
 		files := make(Files)
-		for name, fn := range tfm.Response.(template.FuncMap) {
+		for name, fn := range *tfm {
 			Tool := _GetFunctionInfo(fn)
 
 			if _, ok := files[Tool.File]; !ok {

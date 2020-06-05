@@ -93,6 +93,7 @@ func (p *TypeOsPath) _AppendLocalPath(path ...string) bool {
 		p._IsDir = false
 		p._IsFile = false
 		p._Exists = false
+		p._Valid = true
 	}
 
 	return p._Valid
@@ -114,6 +115,7 @@ func (p *TypeOsPath) _AppendRelativeLocalPath(path ...string) bool {
 		p._IsDir = false
 		p._IsFile = false
 		p._Exists = false
+		p._Valid = true
 	}
 
 	return p._Valid

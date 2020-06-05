@@ -42,7 +42,7 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGit {
 		GitConfig:    nil,
 		GitOptions:   nil,
 		skipDirCheck: false,
-		client:       nil,
+		client:       gitcmd.New(&gitcmd.Config{}),
 		repository:   nil,
 
 		runtime:      runtime,
@@ -127,9 +127,9 @@ func (g *TypeGit) IsAvailable() bool {
 	ok := false
 
 	for range onlyOnce {
-		g.State.SetError(g.client.CanExec())
-		if g.State.IsError() {
-			g.State.SetError("`git` does not exist or its command file is not executable: %s", g.State.GetError())
+		err := g.client.CanExec()
+		if err != nil {
+			g.State.SetError("`git` does not exist or its command file is not executable: %s", err)
 			break
 		}
 		g.State.Clear()

@@ -15,7 +15,7 @@ import (
 //noinspection GoUnusedFunction
 func _Printf2(format string, args ...interface{}) {
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var w int
 		var h int
 		var err error
@@ -56,7 +56,7 @@ func _Printf2(format string, args ...interface{}) {
 //noinspection GoUnusedFunction
 func _Printf3(format string, args ...interface{}) {
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var w int
 		var h int
 		var err error
@@ -82,7 +82,7 @@ func _Printf3(format string, args ...interface{}) {
 func _Draw2() error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		p := widgets.NewParagraph()
 		p.Text = "Hello World!"
 		p.SetRect(0, 0, 25, 5)
@@ -164,7 +164,7 @@ func _Draw3() {
 func _Draw4() error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		rootDir := "."
 		root := tview.NewTreeNode(rootDir).
 			SetColor(tcell.ColorRed)
@@ -224,7 +224,7 @@ func _Draw4() error {
 func _Draw5() error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		app := tview.NewApplication()
 		table := tview.NewTable().
 			SetBorders(true)
@@ -269,7 +269,7 @@ func _Draw5() error {
 // 	"github.com/marcusolsson/tui-go"
 //func Draw() {
 //
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		t := tui.NewTheme()
 //		normal := tui.Style{Bg: tui.ColorWhite, Fg: tui.ColorBlack}
 //		t.SetStyle("normal", normal)

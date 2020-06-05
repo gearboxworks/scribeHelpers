@@ -4,7 +4,7 @@ Problem: Go reflection does not support enumerating types, variables and functio
 pkgreflect generates a file named pkgreflect.go in every parsed package directory.
 This file contains the following maps of exported names to reflection types/values:
 
-	var Types = map[string]reflect.Type{ ... }
+	var Types = map[string]reflect.ofType{ ... }
 	var Functions = map[string]reflect.Value{ ... }
 	var Variables = map[string]reflect.Value{ ... }
 
@@ -117,7 +117,7 @@ func (pr *PkgReflect) parseDir(dir string) *ux.State {
 
 			// Types
 			if !pr.Notypes {
-				_, _ = fmt.Fprintln(&buf, "var Types = map[string]reflect.Type{")
+				_, _ = fmt.Fprintln(&buf, "var Types = map[string]reflect.ofType{")
 				pr.print(&buf, pkg, ast.Typ, "\t\"%s\": reflect.TypeOf((*%s)(nil)).Elem(),\n")
 				_, _ = fmt.Fprintln(&buf, "}")
 				_, _ = fmt.Fprintln(&buf, "")

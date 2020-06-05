@@ -15,7 +15,7 @@ func (p *TypeOsPath) Chdir() *ux.State {
 			break
 		}
 
-		p.State.SetState(p.StatPath())
+		p.State = p.StatPath()
 		if p.State.IsError() {
 			break
 		}
@@ -56,8 +56,8 @@ func (p *TypeOsPath) GetCwd() *ux.State {
 		}
 
 
-		p.State.Response = ""
 		var cwd string
+		p.State.SetResponse(&cwd)
 		var err error
 		cwd, err = os.Getwd()
 		p.State.SetError(err)
@@ -65,7 +65,7 @@ func (p *TypeOsPath) GetCwd() *ux.State {
 			break
 		}
 
-		p.State.Response = cwd
+		p.State.SetResponse(&cwd)
 		p.State.Clear()
 	}
 
@@ -107,7 +107,8 @@ func (p *TypeOsPath) Mkdir() *ux.State {
 			p._Mode = 0644
 		}
 
-		p.State.Response = false
+		ok := false
+		p.State.SetResponse(&ok)
 		var err error
 		err = os.Mkdir(p._Path, p._Mode)
 		p.State.SetError(err)
@@ -115,7 +116,8 @@ func (p *TypeOsPath) Mkdir() *ux.State {
 			break
 		}
 
-		p.State.Response = true
+		ok = true
+		p.State.SetResponse(&ok)
 		p.State.Clear()
 		p.State.SetOk("mkdir OK")
 	}

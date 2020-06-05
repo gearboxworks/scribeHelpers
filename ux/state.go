@@ -51,8 +51,9 @@ type State struct {
 	Output      string
 	_Separator  string
 	OutputArray []string
+	response    TypeResponse
 	Response    interface{}
-	responseType reflect.Type
+	//responseType reflect.ofType
 }
 
 type RuntimeDebug struct {
@@ -79,7 +80,7 @@ func NewState(name string, debugMode bool) *State {
 }
 
 func (state *State) EnsureNotNil() *State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state == nil {
 			state = NewState("", false)
 		}
@@ -89,7 +90,7 @@ func (state *State) EnsureNotNil() *State {
 }
 
 func EnsureStateNotNil(p *State) *State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if p == nil {
 			p = NewState("", false)
 		}
@@ -143,7 +144,7 @@ func (state *State) Clear() {
 		state.Output = ""
 		state._Separator = DefaultSeparator
 		state.OutputArray = []string{}
-		state.Response = nil
+		state.response = newResponse()
 	} else {
 		panic(state)
 	}
@@ -238,9 +239,9 @@ func (state *State) GetState() *bool {
 }
 func (state *State) SetState(p *State) {
 	if state == nil {
-		state = NewState("", true)
-		state._Fatal = errors.New("SW ERROR")
-		state.ExitCode = 255
+		swerr := NewState("", true)
+		swerr._Fatal = errors.New("SW ERROR")
+		swerr.ExitCode = 255
 		return
 	}
 	state._Error =      p._Error
@@ -250,7 +251,7 @@ func (state *State) SetState(p *State) {
 	state.ExitCode =    p.ExitCode
 	state.Output =      p.Output
 	state.OutputArray = p.OutputArray
-	state.Response =    p.Response
+	state.SetResponse(p.response.data)
 	state.RunState =    p.RunState
 }
 
@@ -281,7 +282,9 @@ func (state *State) Sprint() string {
 			ret = SprintfWarning("WARNING: %s%s%s%s", pa, e, state._Warning, ou)
 
 		case state._Ok != nil:
-			ret = SprintfOk("%s%s", state._Ok, ou)
+			if state._Ok.Error() != "" {
+				ret = SprintfOk("%s%s", state._Ok, ou)
+			}
 
 		case state.debug.Enabled:
 			if state._Debug != nil {
@@ -300,7 +303,7 @@ func (state *State) DebugPrint() {
 func (state *State) SprintError() string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state._Ok != nil {
 			// If we have an OK response.
 			break
@@ -311,21 +314,11 @@ func (state *State) SprintError() string {
 
 	return ret
 }
-
-
 func (state *State) SprintResponse() string {
 	return state.Sprint()
 }
 func (state *State) PrintResponse() {
 	_, _ = fmt.Fprintf(os.Stdout, state.Sprint() + "\n")
-}
-func (state *State) GetResponse() (reflect.Type, interface{}) {
-	return state.responseType, state.Response
-}
-func (state *State) SetResponse(r interface{}) {
-	state.Response = r
-	s := reflect.ValueOf(r).Elem()
-	state.responseType = s.Type()
 }
 
 
@@ -364,7 +357,7 @@ func (state *State) IsOk() bool {
 func (state *State) IsNotOk() bool {
 	ok := true
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state._Warning != nil {
 			break
 		}
@@ -389,7 +382,7 @@ func (state *State) GetExitCode() int {
 
 
 func (state *State) SetError(error ...interface{}) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state == nil {
 			panic(state)
 			break
@@ -425,7 +418,7 @@ func (state *State) GetError() error {
 
 
 func (state *State) SetWarning(warning ...interface{}) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state == nil {
 			panic(state)
 			break
@@ -461,7 +454,7 @@ func (state *State) GetWarning() error {
 
 
 func (state *State) SetOk(msg ...interface{}) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state == nil {
 			panic(state)
 			break
@@ -612,7 +605,7 @@ func Exit(e int64, msg ...interface{}) string {
 func _Sprintf(msg ...interface{}) string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if len(msg) == 0 {
 			break
 		}
@@ -647,7 +640,7 @@ func _Sprintf(msg ...interface{}) string {
 
 
 func (p *RuntimeDebug) fetchRuntimeDebug(level int) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if p == nil {
 			break
 		}
@@ -675,7 +668,7 @@ func (p *RuntimeDebug) fetchRuntimeDebug(level int) {
 }
 
 func (state *State) DebugEnable() {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state == nil {
 			break
 		}
@@ -683,7 +676,7 @@ func (state *State) DebugEnable() {
 	}
 }
 func (state *State) DebugDisable() {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state == nil {
 			break
 		}
@@ -691,7 +684,7 @@ func (state *State) DebugDisable() {
 	}
 }
 func (state *State) DebugSet(d bool) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state == nil {
 			break
 		}
@@ -700,7 +693,7 @@ func (state *State) DebugSet(d bool) {
 }
 
 func (state *State) SetDebug(msg ...interface{}) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state == nil {
 			break
 		}

@@ -54,10 +54,7 @@ func (p *TypeOsPaths) SetBasePath(path ...string) *ux.State {
 			break
 		}
 
-		if !p.Base.SetPath(path...) {
-			p.State.SetError("no path specified")
-			break
-		}
+		p.Base.SetPath(path...)
 
 		p.State = p.Base.StatPath()
 		if p.State.IsNotOk() {

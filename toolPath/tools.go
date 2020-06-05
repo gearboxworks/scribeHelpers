@@ -43,7 +43,7 @@ func ToolNewPath(file ...interface{}) *TypeOsPath {
 			break
 		}
 
-		ret.State.SetState(ret.StatPath())
+		ret.State = ret.StatPath()
 		if ret.State.IsError() {
 			break
 		}
@@ -75,7 +75,7 @@ func ToolChmod(mode interface{}, path ...interface{}) *TypeOsPath {
 			break
 		}
 
-		ret.State.SetState(ret.Chmod(*m))
+		ret.State = ret.Chmod(*m)
 		if ret.State.IsError() {
 			break
 		}

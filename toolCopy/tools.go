@@ -148,7 +148,7 @@ func (c *ToolOsCopy) SetIncludePaths(include ...interface{}) *ux.State {
 
 
 // Usage:
-//		{{ $return := WriteFile "filename.txt" .Data.Source 0644 }}
+//		{{ $return := WriteFile "filename.txt" .data.Source 0644 }}
 func (c *ToolOsCopy) Run() *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
@@ -156,7 +156,7 @@ func (c *ToolOsCopy) Run() *ux.State {
 	c.State.SetFunction("")
 
 	for range onlyOnce {
-		c.State.SetState(c.Source.StatPath())
+		c.State = c.Source.StatPath()
 		if c.State.IsError() {
 			break
 		}

@@ -9,7 +9,7 @@ import (
 //		{{- $cmd := $git.GitClone }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
 // func (me *ToolGit) GitClone(args ...interface{}) *ux.State {
-func (g *ToolGit) GitClone(args ...string) *ux.State {
+func (g *TypeGit) GitClone(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -22,7 +22,7 @@ func (g *ToolGit) GitClone(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitInit }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitInit(args ...string) *ux.State {
+func (g *TypeGit) GitInit(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -35,7 +35,7 @@ func (g *ToolGit) GitInit(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitAdd }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitAdd(args ...string) *ux.State {
+func (g *TypeGit) GitAdd(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -48,7 +48,7 @@ func (g *ToolGit) GitAdd(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitMv }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitMv(args ...string) *ux.State {
+func (g *TypeGit) GitMv(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -61,7 +61,7 @@ func (g *ToolGit) GitMv(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitReset }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitReset(args ...string) *ux.State {
+func (g *TypeGit) GitReset(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -74,7 +74,7 @@ func (g *ToolGit) GitReset(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitRm }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitRm(args ...string) *ux.State {
+func (g *TypeGit) GitRm(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -87,7 +87,7 @@ func (g *ToolGit) GitRm(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitBisect }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitBisect(args ...string) *ux.State {
+func (g *TypeGit) GitBisect(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -100,7 +100,7 @@ func (g *ToolGit) GitBisect(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitGrep }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitGrep(args ...string) *ux.State {
+func (g *TypeGit) GitGrep(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -113,7 +113,7 @@ func (g *ToolGit) GitGrep(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitLog }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitLog(args ...string) *ux.State {
+func (g *TypeGit) GitLog(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -126,7 +126,7 @@ func (g *ToolGit) GitLog(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitShow }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitShow(args ...string) *ux.State {
+func (g *TypeGit) GitShow(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -139,7 +139,7 @@ func (g *ToolGit) GitShow(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitStatus }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitStatus(args ...string) *ux.State {
+func (g *TypeGit) GitStatus(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -152,7 +152,7 @@ func (g *ToolGit) GitStatus(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitBranch }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitBranch(args ...string) *ux.State {
+func (g *TypeGit) GitBranch(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -165,7 +165,7 @@ func (g *ToolGit) GitBranch(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitCheckout }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitCheckout(args ...string) *ux.State {
+func (g *TypeGit) GitCheckout(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -178,7 +178,7 @@ func (g *ToolGit) GitCheckout(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitCommit }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitCommit(args ...string) *ux.State {
+func (g *TypeGit) GitCommit(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -191,7 +191,7 @@ func (g *ToolGit) GitCommit(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitDiff }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitDiff(args ...string) *ux.State {
+func (g *TypeGit) GitDiff(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -204,7 +204,7 @@ func (g *ToolGit) GitDiff(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitMerge }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitMerge(args ...string) *ux.State {
+func (g *TypeGit) GitMerge(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -217,7 +217,7 @@ func (g *ToolGit) GitMerge(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitRebase }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitRebase(args ...string) *ux.State {
+func (g *TypeGit) GitRebase(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -230,7 +230,7 @@ func (g *ToolGit) GitRebase(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitTag }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitTag(args ...string) *ux.State {
+func (g *TypeGit) GitTag(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -243,7 +243,7 @@ func (g *ToolGit) GitTag(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitFetch }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitFetch(args ...string) *ux.State {
+func (g *TypeGit) GitFetch(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -256,7 +256,7 @@ func (g *ToolGit) GitFetch(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitPull }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitPull(args ...string) *ux.State {
+func (g *TypeGit) GitPull(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
@@ -269,7 +269,7 @@ func (g *ToolGit) GitPull(args ...string) *ux.State {
 // Usage:
 //		{{- $cmd := $git.GitPush }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *ToolGit) GitPush(args ...string) *ux.State {
+func (g *TypeGit) GitPush(args ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
