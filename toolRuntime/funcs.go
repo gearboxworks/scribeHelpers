@@ -1,10 +1,18 @@
 package toolRuntime
 
 import (
+	"fmt"
+	"github.com/newclarity/scribeHelpers/ux"
 	"path"
 	"path/filepath"
 	"strings"
 )
+
+
+func (r *TypeRuntime) PrintNameVersion() {
+	fmt.Printf("%s %s\n", ux.SprintfBlue("%s ", r.CmdName), ux.SprintfCyan("v%s", r.CmdVersion))
+}
+
 
 func (r *TypeRuntime) TimeStampString() string {
 	return r.TimeStamp.Format("2006-01-02T15:04:05-0700")
@@ -24,7 +32,7 @@ func (r *TypeRuntime) GetEnvMap() *Environment {
 func (r *TypeRuntime) GetArg(index int) string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if len(r.Args) > index {
 			ret = r.Args[index]
 		}
@@ -37,7 +45,7 @@ func (r *TypeRuntime) GetArg(index int) string {
 func (r *TypeRuntime) SetArgs(a ...string) error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		r.Args = a
 	}
 
@@ -53,7 +61,7 @@ func (r *TypeRuntime) GetArgs() []string {
 func (r *TypeRuntime) AddArgs(a ...string) error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		r.Args = append(r.Args, a...)
 	}
 
@@ -64,7 +72,7 @@ func (r *TypeRuntime) AddArgs(a ...string) error {
 func (r *TypeRuntime) SetFullArgs(a ...string) error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		r.FullArgs = a
 	}
 
@@ -80,7 +88,7 @@ func (r *TypeRuntime) GetFullArgs() []string {
 func (r *TypeRuntime) AddFullArgs(a ...string) error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		r.FullArgs = append(r.FullArgs, a...)
 	}
 
@@ -91,7 +99,7 @@ func (r *TypeRuntime) AddFullArgs(a ...string) error {
 func (r *TypeRuntime) SetCmd(a ...string) error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		r.Cmd, err = filepath.Abs(filepath.Join(a...))
 		if err != nil {
 			break

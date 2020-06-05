@@ -9,7 +9,7 @@ import (
 
 
 func (p *TypeOsPath) StatPath() *ux.State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p.State.SetFunction("")
 		p.State.Clear()
 
@@ -68,7 +68,7 @@ func (p *TypeOsPath) StatPath() *ux.State {
 
 
 func (p *TypeOsPath) Chmod(m os.FileMode) *ux.State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p.State.SetFunction("")
 		p.State.Clear()
 
@@ -97,4 +97,15 @@ func (p *TypeOsPath) Chmod(m os.FileMode) *ux.State {
 	}
 
 	return p.State
+}
+
+
+func (p *TypeOsPath) ChangeExtension(ext string) {
+	s := filepath.Ext(p._Path)
+	p._Path = p._Path[:len(p._Path) - len(s)] + ext
+}
+
+
+func (p *TypeOsPath) ChangeSuffix(ext string) {
+	p.ChangeExtension(ext)
 }

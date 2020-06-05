@@ -16,7 +16,7 @@ func (p *TypeOsPath) GetPath() string {
 func (p *TypeOsPath) GetPathAbs() string {
 	var s string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var err error
 		s, err = filepath.Abs(p._Path)
 		if err != nil {
@@ -30,7 +30,7 @@ func (p *TypeOsPath) GetPathAbs() string {
 func (p *TypeOsPath) GetPathRel() string {
 	var s string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var err error
 
 		s, err = os.Getwd()
@@ -55,13 +55,19 @@ func (p *TypeOsPath) SetPath(path ...string) bool {
 func (p *TypeOsPath) AppendPath(path ...string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if p._IsRemotePath(p._Path) {
 			ok = p._AppendRemotePath(path...)
 			break
 		}
+
 		if p._IsRemotePath(path...) {
 			ok = p._AppendRemotePath(path...)
+			break
+		}
+
+		if p._IsRelativeLocalPath(path...) {
+			ok = p._AppendRelativeLocalPath(path...)
 			break
 		}
 
@@ -71,7 +77,7 @@ func (p *TypeOsPath) AppendPath(path ...string) bool {
 	return ok
 }
 func (p *TypeOsPath) _AppendLocalPath(path ...string) bool {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p._Valid = false
 		p._Path = _GetAbsPath(path...)
 		if p._Path == "" {
@@ -91,8 +97,29 @@ func (p *TypeOsPath) _AppendLocalPath(path ...string) bool {
 
 	return p._Valid
 }
+func (p *TypeOsPath) _AppendRelativeLocalPath(path ...string) bool {
+	for range onlyOnce {
+		p._Valid = false
+		p._Path = filepath.Join(path...)
+		if p._Path == "" {
+			p.State.SetError("src path empty")
+			break
+		}
+		//p._Valid = true
+		p._Remote = false
+
+		// Reset these until a later StatPath()
+		p._Dirname = ""
+		p._Filename = ""
+		p._IsDir = false
+		p._IsFile = false
+		p._Exists = false
+	}
+
+	return p._Valid
+}
 func (p *TypeOsPath) _AppendRemotePath(path ...string) bool {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p._Valid = false
 		// @TODO - May have to change this logic to:
 		// @TODO - p._Path = strings.Join(path, "")
@@ -109,6 +136,17 @@ func (p *TypeOsPath) _AppendRemotePath(path ...string) bool {
 }
 func (p *TypeOsPath) _IsRemotePath(path ...string) bool {
 	return strings.ContainsAny(strings.Join(path, ""), ":@")
+}
+func (p *TypeOsPath) _IsRelativeLocalPath(path ...string) bool {
+	return !filepath.IsAbs(filepath.Join(path...))
+}
+
+
+func (p *TypeOsPath) IsAbs() bool {
+	return filepath.IsAbs(p._Path)
+}
+func (p *TypeOsPath) IsRelative() bool {
+	return !p.IsAbs()
 }
 
 
@@ -175,7 +213,7 @@ func (p *TypeOsPath) GetSize() int64 {
 func (p *TypeOsPath) Exists() bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if !p.IsValid() {
 			break
 		}
@@ -195,7 +233,7 @@ func (p *TypeOsPath) NotExists() bool {
 func (p *TypeOsPath) FileExists() bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if !p.IsValid() {
 			break
 		}
@@ -216,7 +254,7 @@ func (p *TypeOsPath) FileExists() bool {
 func (p *TypeOsPath) DirExists() bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if !p.IsValid() {
 			break
 		}
@@ -263,7 +301,7 @@ func (p *TypeOsPath) _SetInvalid() {
 	p._Valid = false
 }
 func (p *TypeOsPath) IsValid() bool {
-	for range OnlyOnce {
+	for range onlyOnce {
 		//if !p._Valid {
 		//	p.State.SetError("path not valid")
 		//	break
@@ -312,7 +350,7 @@ func (p *TypeOsPath) IsRemoveable() bool {
 func ReflectFileMode(ref interface{}) *os.FileMode {
 	var fm os.FileMode
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		if value.Kind() != reflect.Uint32 {
 			break
@@ -328,7 +366,7 @@ func ReflectFileMode(ref interface{}) *os.FileMode {
 func ReflectPath(ref ...interface{}) *string {
 	var fp string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var path []string
 		for _, r := range ref {
 			// Sometimes we can have dirs within each string slice.
@@ -348,7 +386,7 @@ func ReflectPath(ref ...interface{}) *string {
 func ReflectAbsPath(ref ...interface{}) *string {
 	var fp string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		path := ReflectPath(ref...)
 
 		var err error
@@ -365,7 +403,7 @@ func ReflectAbsPath(ref ...interface{}) *string {
 func _GetAbsPath(p ...string) string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret = filepath.Join(p...)
 
 		if filepath.IsAbs(ret) {

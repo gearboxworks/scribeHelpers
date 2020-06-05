@@ -24,6 +24,8 @@ type TypeScribeArgs struct {
 	RemoveOutput   bool // Flag: --rm-out
 	QuietProgress  bool // Flag: --quiet
 	Debug          bool // Flag: --debug
+	StripHashBang  bool // If set, strips #! at the start of the template file.
+	AddBrackets    bool // If set, adds {{ and }} to the template file.
 
 	HelpAll        bool
 	HelpFunctions  bool
@@ -55,6 +57,8 @@ func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
 		ForceOverwrite: false,
 		RemoveOutput:   false,
 		Debug:          false,
+		StripHashBang:  false,
+		AddBrackets:    false,
 
 		JsonStruct:     nil,
 

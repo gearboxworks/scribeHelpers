@@ -15,7 +15,7 @@ func (g *ToolGit) Pull(opts ...*PullOptions) *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if len(opts) == 0 {
 			opts = []*PullOptions{}
 		}

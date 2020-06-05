@@ -10,7 +10,7 @@ import (
 func ToolReadFile(file ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		f := ReflectPath(file...)
@@ -38,7 +38,7 @@ func ToolReadFile(file ...interface{}) *TypeOsPath {
 func ToolWriteFile(contents interface{}, perms interface{}, file ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		f := ReflectPath(file...)
@@ -78,7 +78,7 @@ func ToolWriteFile(contents interface{}, perms interface{}, file ...interface{})
 func ToolRemoveFile(path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		f := ReflectPath(path...)

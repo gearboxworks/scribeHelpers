@@ -18,7 +18,7 @@ func (g *ToolGit) Clone() *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if g.Reflect().IsNotAvailable() {
 			break
 		}
@@ -38,14 +38,14 @@ func (g *ToolGit) Clone() *ux.State {
 
 		ux.PrintfWhite("Cloning %s into %s\n", g.Url, g.Base.GetPath())
 		g.skipDirCheck = true
-		g.State.SetState(g.Exec(gitCommandClone, g.Url, g.Base.GetPath()))
+		g.State = g.Exec(gitCommandClone, g.Url, g.Base.GetPath())
 		g.skipDirCheck = false
 	}
 
 	return g.State
 }
 //func (g *ToolGit) Clone() *ux.State {
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		if g.Reflect().IsNotOk() {
 //			break
 //		}
@@ -78,7 +78,7 @@ func (g *ToolGit) Clone() *ux.State {
 //
 //		ux.PrintfWhite("Cloning %s into %s\n", g.Url, g.Base.GetPath())
 //		g.skipDirCheck = true
-//		g.State.SetState(g.Exec(gitCommandClone, g.Url, g.Base.GetPath()))
+//		g.State = g.Exec(gitCommandClone, g.Url, g.Base.GetPath())
 //		g.skipDirCheck = false
 //	}
 //
@@ -99,7 +99,7 @@ func (g *ToolGit) IsExisting() bool {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if g.Reflect().IsNotAvailable() {
 			break
 		}
@@ -122,7 +122,7 @@ func (g *ToolGit) Open() *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if g.Reflect().IsNotAvailable() {
 			break
 		}
@@ -165,7 +165,7 @@ func (g *ToolGit) SetPath(path ...interface{}) *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if g.Reflect().IsNotAvailable() {
 			break
 		}
@@ -186,9 +186,9 @@ func (g *ToolGit) SetPath(path ...interface{}) *ux.State {
 			break
 		}
 
-		g.State.SetState(g.Base.StatPath())
+		g.State = g.Base.StatPath()
 		//if state.IsError() {
-		//	g.State.SetState(state)
+		//	g.State = state
 		//	break
 		//}
 
@@ -200,7 +200,7 @@ func (g *ToolGit) SetPath(path ...interface{}) *ux.State {
 			g.State.SetError("path repo '%s' exists and is a file", *p)
 			break
 		}
-		g.State.SetState(g.Chdir())
+		g.State = g.Chdir()
 	}
 
 	return g.State
@@ -216,8 +216,8 @@ func (g *ToolGit) GetUrl() *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
-		g.State.SetState(g.Exec("config", "--get", "remote.origin.url"))
+	for range onlyOnce {
+		g.State = g.Exec("config", "--get", "remote.origin.url")
 		if g.State.IsError() {
 			break
 		}
@@ -253,8 +253,8 @@ func (g *ToolGit) Remove() *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
-		g.State.SetState(g.Base.StatPath())
+	for range onlyOnce {
+		g.State = g.Base.StatPath()
 		if g.State.IsError() {
 			break
 		}
@@ -296,7 +296,7 @@ func (g *ToolGit) Lock() *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		g.State = g.GetTagObject(LockTag)
 		if g.State.IsError() {
 			break
@@ -321,7 +321,7 @@ func (g *ToolGit) GetStatus() *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var wt *git.Worktree
 		var err error
 		wt, err = g.repository.Worktree()

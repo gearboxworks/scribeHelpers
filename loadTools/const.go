@@ -3,6 +3,7 @@ package loadTools
 const (
 	SelectStdout = "select:stdout"
 	SelectConvert = "select:convert"
+	SelectIgnore = "select:ignore"
 
 	DefaultJsonString 		= "{}"
 	DefaultTemplateString 	= "{{ .Exec.CmdName }}"

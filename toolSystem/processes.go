@@ -12,7 +12,7 @@ func (p *TypeProcesses) FindByName(name string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		procs, err := process.Processes()
 		if err != nil {
 			p.State.SetError(err)
@@ -24,7 +24,7 @@ func (p *TypeProcesses) FindByName(name string) *ux.State {
 				continue
 			}
 
-			newProc := NewProcess(p.Debug)
+			newProc := NewProcess(p.runtime)
 			newProc.populateStruct(proc)
 			p.procs = append(p.procs, newProc)
 		}
@@ -39,7 +39,7 @@ func (p *TypeProcesses) FindByPid(pid int32) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		procs, err := process.Processes()
 		if err != nil {
 			p.State.SetError(err)
@@ -51,7 +51,7 @@ func (p *TypeProcesses) FindByPid(pid int32) *ux.State {
 				continue
 			}
 
-			newProc := NewProcess(p.Debug)
+			newProc := NewProcess(p.runtime)
 			newProc.populateStruct(proc)
 			p.procs = append(p.procs, newProc)
 		}
@@ -64,7 +64,7 @@ func (p *TypeProcesses) FindByPid(pid int32) *ux.State {
 func matchProcName(name string, proc *process.Process) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		n, err := proc.Name()
 		if err != nil {
 			break

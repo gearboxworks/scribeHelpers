@@ -23,7 +23,7 @@ type Gear struct {
 func NewGear(runtime *toolRuntime.TypeRuntime) *Gear {
 	var gear Gear
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		runtime = runtime.EnsureNotNil()
 
 		gear = Gear{
@@ -67,7 +67,7 @@ func (gear *Gear) IsNil() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		gear.State = gear.State.EnsureNotNil()
 
 		gear.State = gear.Docker.IsNil()
@@ -90,7 +90,7 @@ func (gear *Gear) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		gear.State = gear.State.EnsureNotNil()
 	}
 
@@ -103,7 +103,7 @@ func (gear *Gear) Status() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		gear.State = gear.Docker.Container.Status()
 		if gear.State.IsError() {
 			break
@@ -145,7 +145,7 @@ func (gear *Gear) FindContainer(gearName string, gearVersion string) (bool, *ux.
 		return false, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		found, gear.State = gear.Docker.FindContainer(gearName, gearVersion)
 		if !found {
 			break
@@ -172,7 +172,7 @@ func (gear *Gear) FindImage(gearName string, gearVersion string) (bool, *ux.Stat
 		return false, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		found, gear.State = gear.Docker.FindImage(gearName, gearVersion)
 		if !found {
 			//state.ClearError()
@@ -203,7 +203,7 @@ func (gear *Gear) DecodeError(err error) (bool, *ux.State) {
 		return false, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		switch {
 			case err != nil:
 				ok = true
@@ -226,7 +226,7 @@ func (gear *Gear) CreateLinks(version string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		gear.State = gear.GearConfig.CreateLinks(version)
 	}
 
@@ -239,7 +239,7 @@ func (gear *Gear) RemoveLinks(version string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		gear.State = gear.GearConfig.RemoveLinks(version)
 	}
 

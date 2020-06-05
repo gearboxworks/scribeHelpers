@@ -21,7 +21,7 @@ type TypeGetRepository struct {
 func (gh *TypeGitHub) GetRepository(owner interface{}, repo interface{}) *TypeGetRepository {
 	var ret TypeGetRepository
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		op := toolTypes.ReflectString(owner)
 		if op == nil {
 			break
@@ -50,7 +50,7 @@ func (gh *TypeGitHub) GetRepository(owner interface{}, repo interface{}) *TypeGe
 func (me *TypeGetRepository) GetName() toolTypes.TypeGenericStringArray {
 	var ret toolTypes.TypeGenericStringArray
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.Array = append(ret.Array, *me.Data.Name)
 		ret.Valid = true
 	}
@@ -61,7 +61,7 @@ func (me *TypeGetRepository) GetName() toolTypes.TypeGenericStringArray {
 func (me *TypeGetRepository) GetFullName() toolTypes.TypeGenericStringArray {
 	var ret toolTypes.TypeGenericStringArray
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.Array = append(ret.Array, *me.Data.FullName)
 		ret.Valid = true
 	}
@@ -72,7 +72,7 @@ func (me *TypeGetRepository) GetFullName() toolTypes.TypeGenericStringArray {
 func (me *TypeGetRepository) GetUrl() toolTypes.TypeGenericStringArray {
 	var ret toolTypes.TypeGenericStringArray
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.Array = append(ret.Array, *me.Data.URL)
 		ret.Valid = true
 	}
@@ -86,7 +86,7 @@ func (me *TypeGetRepository) GetHeadBranch() toolTypes.TypeGenericString {
 
 	ret.String = me.Data.GetDefaultBranch()
 
-	//for range OnlyOnce {
+	//for range onlyOnce {
 	//	ret.Data = me.Data.GetDefaultBranch()
 	//
 	//	branchRefs, ret.Error = me.Data.Branches()
@@ -121,7 +121,7 @@ func (me *TypeGetRepository) GetHeadBranch() toolTypes.TypeGenericString {
 func (me *TypeGetRepository) GetCurrentCommitFromRepository() toolTypes.TypeGenericString {
 	var ret toolTypes.TypeGenericString
 
-	//for range OnlyOnce {
+	//for range onlyOnce {
 	//	headRef, ret.Error = repository.Head()
 	//	if ret.Error != nil {
 	//		break
@@ -136,7 +136,7 @@ func (me *TypeGetRepository) GetCurrentCommitFromRepository() toolTypes.TypeGene
 func (me *TypeGetRepository) GetLatestTagFromRepository() toolTypes.TypeGenericString {
 	var ret toolTypes.TypeGenericString
 
-	//for range OnlyOnce {
+	//for range onlyOnce {
 	//	tagRefs, ret.Error = repository.Tags()
 	//	if ret.Error != nil {
 	//		break
@@ -192,7 +192,7 @@ type TypeGetRepositories struct {
 func (gh *TypeGitHub) GetRepositories(owner interface{}) *TypeGetRepositories {
 	var ret TypeGetRepositories
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		op := toolTypes.ReflectString(owner)
 		if op == nil {
 			break
@@ -219,7 +219,7 @@ func (gh *TypeGitHub) GetRepositories(owner interface{}) *TypeGetRepositories {
 func (me *TypeGetRepositories) GetNames() toolTypes.TypeGenericStringArray {
 	var ret toolTypes.TypeGenericStringArray
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		for _, v := range me.Data {
 			ret.Array = append(ret.Array, *v.Name)
 		}
@@ -236,7 +236,7 @@ func (me *TypeGetRepositories) GetNames() toolTypes.TypeGenericStringArray {
 func (me *TypeGetRepositories) GetFullNames() toolTypes.TypeGenericStringArray {
 	var ret toolTypes.TypeGenericStringArray
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		for _, v := range me.Data {
 			ret.Array = append(ret.Array, *v.FullName)
 		}
@@ -253,7 +253,7 @@ func (me *TypeGetRepositories) GetFullNames() toolTypes.TypeGenericStringArray {
 func (me *TypeGetRepositories) GetUrls() toolTypes.TypeGenericStringArray {
 	var ret toolTypes.TypeGenericStringArray
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		for _, v := range me.Data {
 			ret.Array = append(ret.Array, *v.URL)
 		}

@@ -4,17 +4,17 @@ import "github.com/newclarity/scribeHelpers/ux"
 
 
 type ToolExample TypeExample
-func (g *ToolExample) Reflect() *TypeExample {
-	return (*TypeExample)(g)
+func (e *ToolExample) Reflect() *TypeExample {
+	return (*TypeExample)(e)
 }
-func (g *TypeExample) Reflect() *ToolExample {
-	return (*ToolExample)(g)
+func (e *TypeExample) Reflect() *ToolExample {
+	return (*ToolExample)(e)
 }
 
-func (c *ToolExample) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(c); state.IsError() {
+func (e *ToolExample) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(e); state.IsError() {
 		return state
 	}
-	c.State = c.State.EnsureNotNil()
-	return c.State
+	e.State = e.State.EnsureNotNil()
+	return e.State
 }

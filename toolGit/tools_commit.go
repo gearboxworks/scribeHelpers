@@ -25,8 +25,8 @@ func (g *ToolGit) Commit(format interface{}, a ...interface{}) *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
-		g.State.SetState(g.Exec("rev-parse", "--verify", "HEAD"))
+	for range onlyOnce {
+		g.State = g.Exec("rev-parse", "--verify", "HEAD")
 		if g.State.IsError() {
 			break
 		}
@@ -47,8 +47,8 @@ func (g *ToolGit) LastCommitMessage(format interface{}, a ...interface{}) *ux.St
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
-		g.State.SetState(g.Exec("git", "log", "-1", "--pretty=%B"))
+	for range onlyOnce {
+		g.State = g.Exec("git", "log", "-1", "--pretty=%B")
 		if g.State.IsError() {
 			break
 		}

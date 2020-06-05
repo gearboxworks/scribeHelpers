@@ -13,8 +13,6 @@ type OsPathGetter interface {
 
 
 type TypeOsPath struct {
-	State         *ux.State
-
 	_Path         string
 	_Filename     string
 	_Dirname      string
@@ -35,6 +33,8 @@ type TypeOsPath struct {
 	_CanOverwrite bool
 	_CanRemove    bool
 	_Remote       bool
+
+	State         *ux.State
 }
 
 

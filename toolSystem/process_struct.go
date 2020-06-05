@@ -2,6 +2,7 @@ package toolSystem
 
 import (
 	"github.com/newclarity/scribeHelpers/toolPath"
+	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/shirou/gopsutil/process"
 )
@@ -11,10 +12,10 @@ type ProcessGetter interface {
 
 
 type TypeProcesses struct {
-	procs []*TypeProcess
+	procs   []*TypeProcess
 
-	State *ux.State
-	Debug bool
+	runtime *toolRuntime.TypeRuntime
+	State   *ux.State
 }
 
 type TypeProcess struct {
@@ -27,13 +28,15 @@ type TypeProcess struct {
 	pathCwd   *toolPath.TypeOsPath
 	openFiles *TypeOpenFiles
 
+	runtime   *toolRuntime.TypeRuntime
 	State     *ux.State
-	Debug     bool
 }
 
 type TypeOpenFiles struct {
-	Files []*toolPath.TypeOsPath
-	State *ux.State
+	Files   []*toolPath.TypeOsPath
+
+	runtime *toolRuntime.TypeRuntime
+	State   *ux.State
 }
 
 
@@ -50,19 +53,23 @@ func (p *TypeProcess) IsNil() *ux.State {
 }
 
 
-func NewProcesses(debugMode bool) *TypeProcesses {
-	ret := &TypeProcesses {
-		procs: nil,
+func NewProcesses(runtime *toolRuntime.TypeRuntime) *TypeProcesses {
+	runtime = runtime.EnsureNotNil()
 
-		Debug: debugMode,
-		State: ux.NewState(debugMode),
+	ret := &TypeProcesses {
+		procs:   nil,
+
+		runtime: runtime,
+		State:   ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 
 	return ret
 }
 
 
-func NewProcess(debugMode bool) *TypeProcess {
+func NewProcess(runtime *toolRuntime.TypeRuntime) *TypeProcess {
+	runtime = runtime.EnsureNotNil()
+
 	p := &TypeProcess{
 		name:      "",
 		ppid:      0,
@@ -72,10 +79,10 @@ func NewProcess(debugMode bool) *TypeProcess {
 		pathExe:   nil,	// toolPath.ToolNewPath(),
 		pathCwd:   nil,	// toolPath.ToolNewPath(),
 
-		openFiles: NewOpenFiles(debugMode),
+		openFiles: NewOpenFiles(runtime),
 
-		Debug:     debugMode,
-		State:     ux.NewState(debugMode),
+		runtime:   runtime,
+		State:     ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	p.State.SetPackage("")
 	p.State.SetFunctionCaller()
@@ -84,10 +91,14 @@ func NewProcess(debugMode bool) *TypeProcess {
 }
 
 
-func NewOpenFiles(debugMode bool) *TypeOpenFiles {
+func NewOpenFiles(runtime *toolRuntime.TypeRuntime) *TypeOpenFiles {
+	runtime = runtime.EnsureNotNil()
+
 	ret := &TypeOpenFiles {
 		Files: nil,
-		State: ux.NewState(debugMode),
+
+		runtime: runtime,
+		State: ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 
 	return ret

@@ -21,7 +21,7 @@ func (d *Docker) ContainerList(f string) (int, *ux.State) {
 		return 0, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -122,7 +122,7 @@ func (d *Docker) FindContainer(org string, name string, version string) (bool, *
 		return false, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if name == "" {
 			d.State.SetError("empty name")
 			break

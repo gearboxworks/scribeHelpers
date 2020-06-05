@@ -33,7 +33,7 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeService {
 
 	s := TypeService{
 		name: "",
-		path:   toolPath.New(runtime.Debug),
+		path:   toolPath.New(runtime),
 
 		Debug:  runtime.Debug,
 		State:  ux.NewState(runtime.CmdName, runtime.Debug),
@@ -55,7 +55,7 @@ func (s *TypeService) IsNil() *ux.State {
 
 func (s *TypeService) EnsureNotNil() *TypeService {
 	if s == nil {
-		return New(true)
+		return New(nil)
 	}
 	return s
 }

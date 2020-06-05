@@ -11,10 +11,11 @@ type ExampleGetter interface {
 
 
 type TypeExample struct {
-	name  string
-	path  *toolPath.TypeOsPath
+	name    string
+	path    *toolPath.TypeOsPath
 
-	State *ux.State
+	runtime *toolRuntime.TypeRuntime
+	State   *ux.State
 }
 
 
@@ -22,10 +23,11 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeExample {
 	runtime = runtime.EnsureNotNil()
 
 	te := TypeExample{
-		name:  "",
-		path:  toolPath.New(runtime),
+		name:    "",
+		path:    toolPath.New(runtime),
 
-		State: ux.NewState(runtime.CmdName, runtime.Debug),
+		runtime: runtime,
+		State:   ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	te.State.SetPackage("")
 	te.State.SetFunctionCaller()
@@ -34,18 +36,18 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeExample {
 
 
 type State ux.State
-func (p *State) Reflect() *ux.State {
-	return (*ux.State)(p)
+func (s *State) Reflect() *ux.State {
+	return (*ux.State)(s)
 }
-func ReflectToolExample(p *TypeExample) *ToolExample {
-	return (*ToolExample)(p)
+func ReflectToolExample(e *TypeExample) *ToolExample {
+	return (*ToolExample)(e)
 }
 
-func (c *TypeExample) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(c); state.IsError() {
+func (e *TypeExample) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(e); state.IsError() {
 		return state
 	}
-	c.State = c.State.EnsureNotNil()
-	return c.State
+	e.State = e.State.EnsureNotNil()
+	return e.State
 }
 

@@ -62,7 +62,7 @@ func NewContainer(runtime *toolRuntime.TypeRuntime) *Container {
 
 
 func (i *Container) EnsureNotNil() *Container {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if i == nil {
 			i = NewContainer(nil)
 		}
@@ -86,7 +86,7 @@ func (c *Container) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		c.State = c.State.EnsureNotNil()
 
 		if c.ID == "" {
@@ -119,7 +119,7 @@ func (c *Container) Status() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		df := filters.NewArgs()
 		df.Add("id", c.ID)
 
@@ -177,7 +177,7 @@ func (c *Container) WaitForState(s string, t time.Duration) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		until := time.Now()
 		until.Add(t)
 
@@ -204,7 +204,7 @@ func (c *Container) Start() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		c.State = c.Status()
 		if c.State.IsError() {
 			break
@@ -268,7 +268,7 @@ func (c *Container) ContainerCreate(gearName string, gearVersion string) *ux.Sta
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		//if c.runtime.Debug {
 		//	fmt.Printf("DEBUG: ContainerCreate(%s, %s)\n", gearName, gearVersion)
 		//}
@@ -289,7 +289,7 @@ func (c *Container) ContainerCreate(gearName string, gearVersion string) *ux.Sta
 		}
 		if !ok {
 			// Find Gear image since we don't have a container.
-			for range OnlyOnce {
+			for range onlyOnce {
 				ok, c.State = c._Parent.FindImage(gearName, gearVersion)
 				if c.State.IsError() {
 					ok = false
@@ -486,7 +486,7 @@ func (c *Container) Stop() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -512,7 +512,7 @@ func (c *Container) Remove() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -546,7 +546,7 @@ func (c *Container) Logs() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -575,7 +575,7 @@ func (c *Container) Commit() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -620,7 +620,7 @@ func (c *Container) GetContainerSsh() (string, *ux.State) {
 		return "", state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var found bool
 		for _, p := range c.Summary.Ports {
 			if p.PrivatePort == 22 {

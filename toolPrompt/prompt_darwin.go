@@ -15,7 +15,7 @@ import (
 func (p *TypePrompt) UserPrompt() string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		fmt.Printf("%s", p.string)
 
 		r := bufio.NewReader(os.Stdin)
@@ -37,7 +37,7 @@ func (p *TypePrompt) UserPrompt() string {
 func (p *TypePrompt) UserPromptHidden() string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		fmt.Printf("%s", p.string)
 
 		hidden, err := terminal.ReadPassword(syscall.Stdin)

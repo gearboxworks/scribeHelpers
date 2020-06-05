@@ -21,7 +21,7 @@ func ToolIsInt(i interface{}) bool {
 func ReflectInt(ref interface{}) *int64 {
 	var s int64
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		switch value.Kind() {
 			case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint32, reflect.Uint64:
@@ -38,7 +38,7 @@ func ReflectInt(ref interface{}) *int64 {
 func ReflectInt32(ref interface{}) *int32 {
 	var s int32
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		switch value.Kind() {
 			case reflect.Int, reflect.Int32, reflect.Uint32:
@@ -55,7 +55,7 @@ func ReflectInt32(ref interface{}) *int32 {
 func ReflectFloat(ref interface{}) *float64 {
 	var s float64
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		switch value.Kind() {
 			case reflect.Float32, reflect.Float64:

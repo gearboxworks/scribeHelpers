@@ -6,16 +6,23 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 )
 
 
 func ToolExecBash(cmd ...interface{}) *ux.State {
-	ret := New(false)
+	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		a := toolTypes.ReflectStrings(cmd...)
 
-		ret.exe = "bash"
+		bash, err := exec.LookPath("bash")
+		if err != nil {
+			ret.State.SetError("Executable not found.")
+			break
+		}
+		ret.cmd.SetPath(bash)
+
 		ret.args = []string{"-c"}
 		ret.args = append(ret.args, *a...)
 		ret.ShowProgress()
@@ -27,10 +34,16 @@ func ToolExecBash(cmd ...interface{}) *ux.State {
 
 
 func ToolNewBash(cmd ...interface{}) *ToolExecCommand {
-	ret := New(false)
+	ret := New(nil)
 
-	for range OnlyOnce {
-		ret.exe = "bash"
+	for range onlyOnce {
+		bash, err := exec.LookPath("bash")
+		if err != nil {
+			ret.State.SetError("Executable not found.")
+			break
+		}
+		ret.cmd.SetPath(bash)
+
 		ret.args = []string{"-c"}
 
 		a := toolTypes.ReflectStrings(cmd...)
@@ -52,7 +65,7 @@ func (e *ToolExecCommand) AppendCommands(cmd ...interface{}) *ux.State {
 	}
 	e.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		a := toolTypes.ReflectStrings(cmd...)
 		e.args = append(e.args, *a...)
 	}
@@ -70,14 +83,21 @@ func (e *ToolExecCommand) Run() *ux.State {
 	}
 	e.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		file, err := ioutil.TempFile("tmp", "scribe-shell")
 		if err != nil {
 			log.Fatal(err)
 		}
+		//noinspection ALL
 		defer os.Remove(file.Name())
 
-		e.Reflect().exe = "bash"
+		bash, err := exec.LookPath("bash")
+		if err != nil {
+			e.State.SetError("Executable not found.")
+			break
+		}
+		e.cmd.SetPath(bash)
+
 		e.Reflect().args = []string{"-c"}
 		e.Reflect().ShowProgress()
 		e.State = e.Reflect().Run()

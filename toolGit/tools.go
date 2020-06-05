@@ -26,16 +26,16 @@ func (g *ToolGit) IsNil() *ux.State {
 // Usage:
 //		{{ $git := NewGit }}
 func ToolNewGit(path ...interface{}) *ToolGit {
-	ret := New(false)
+	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		p := toolPath.ReflectAbsPath(path...)
 		if p == nil {
 			break
 		}
 		if ret.Base.SetPath(*p) {
 			state := ret.Base.StatPath()
-			ret.State.SetState(state)
+			ret.State = state
 			if ret.Base.Exists() {
 
 			}
@@ -90,7 +90,7 @@ func (g *ToolGit) Exec(cmd string, args ...string) *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if g.Reflect().IsNotAvailable() {
 			break
 		}
@@ -116,7 +116,7 @@ func (g *ToolGit) Exec(cmd string, args ...string) *ux.State {
 		a := g.GitOptions
 		a = append(a, args...)
 
-		for range OnlyOnce {
+		for range onlyOnce {
 			if g.skipDirCheck {
 				break
 			}
@@ -152,7 +152,7 @@ func (g *ToolGit) Exec(cmd string, args ...string) *ux.State {
 ////		{{- $cmd := $git.IsExec }}
 ////		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
 //func (g *ToolGit) IsAvailable() *ux.State {
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		if g.Reflect().IsNotAvailable() {
 //			break
 //		}

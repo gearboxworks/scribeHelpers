@@ -11,23 +11,25 @@ import (
 
 
 type TypeRuntime struct {
-	CmdName     string		`json:"cmd_name" mapstructure:"cmd_name"`
-	CmdVersion  string		`json:"cmd_version" mapstructure:"cmd_version"`
+	CmdName        string		`json:"cmd_name" mapstructure:"cmd_name"`
+	CmdVersion     string		`json:"cmd_version" mapstructure:"cmd_version"`
+	CmdSourceRepo  string		`json:"cmd_source_repo" mapstructure:"cmd_source_repo"`
+	CmdBinaryRepo  string		`json:"cmd_binary_repo" mapstructure:"cmd_binary_repo"`
 
-	Cmd         string		`json:"cmd" mapstructure:"cmd"`
-	CmdDir      string		`json:"cmd_dir" mapstructure:"cmd_dir"`
-	CmdFile     string		`json:"cmd_file" mapstructure:"cmd_file"`
+	Cmd            string		`json:"cmd" mapstructure:"cmd"`
+	CmdDir         string		`json:"cmd_dir" mapstructure:"cmd_dir"`
+	CmdFile        string		`json:"cmd_file" mapstructure:"cmd_file"`
 
-	FullArgs    ExecArgs	`json:"full_args" mapstructure:"full_args"`
-	Args        ExecArgs	`json:"args" mapstructure:"args"`
+	FullArgs       ExecArgs	`json:"full_args" mapstructure:"full_args"`
+	Args           ExecArgs	`json:"args" mapstructure:"args"`
 
-	Env         ExecEnv		`json:"env" mapstructure:"env"`
-	EnvMap      Environment	`json:"env_map" mapstructure:"env_map"`
+	Env            ExecEnv		`json:"env" mapstructure:"env"`
+	EnvMap         Environment	`json:"env_map" mapstructure:"env_map"`
 
-	TimeStamp   time.Time	`json:"timestamp" mapstructure:"timestamp"`
+	TimeStamp      time.Time	`json:"timestamp" mapstructure:"timestamp"`
 
-	Debug       bool        `json:"debug" mapstructure:"debug"`
-	State       *ux.State	`json:"state" mapstructure:"state"`
+	Debug          bool        `json:"debug" mapstructure:"debug"`
+	State          *ux.State	`json:"state" mapstructure:"state"`
 }
 
 type ExecArgs []string
@@ -50,7 +52,7 @@ var globalRuntime *TypeRuntime
 func New(binary string, version string, debugFlag bool) *TypeRuntime {
 	var ret *TypeRuntime
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if globalRuntime != nil {
 			// Instead of creating every time, let's cache the initial result in a global variable.
 			//globalRuntime.TimeStamp = time.Now()
@@ -106,10 +108,22 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 	return ret
 }
 
+
+func (r *TypeRuntime) SetRepos(source string, binary string) *ux.State {
+	if state := ux.IfNilReturnError(r); state.IsError() {
+		return state
+	}
+	r.CmdSourceRepo = source
+	r.CmdBinaryRepo = binary
+
+	return r.State
+}
+
+
 // func New(binary string, version string, debugFlag bool) *TypeRuntime {
 //	ret := &TypeRuntime{}
 //
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		if globalRuntime == nil {
 //			// Instead of creating every time, let's cache the initial result in a global variable.
 //			ret = globalRuntime
@@ -174,7 +188,7 @@ func (r *TypeRuntime) IsNil() *ux.State {
 
 func (r *TypeRuntime) EnsureNotNil() *TypeRuntime {
 	if r == nil {
-		return New("binary", "version", true)
+		return New("binary", "version", false)
 	}
 	return r
 }

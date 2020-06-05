@@ -24,7 +24,7 @@ func ToolUserPromptHidden(prompt string, args ...interface{}) string {
 func ToolUserPromptBool(prompt string, args ...interface{}) bool {
 	var ret bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		str := UserPrompt(prompt, args...)
 		str = strings.TrimSpace(str)
 		str = strings.ToUpper(str)

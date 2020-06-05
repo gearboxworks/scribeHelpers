@@ -22,7 +22,7 @@ func (d *Docker) ImageList(f string) (int, *ux.State) {
 		return 0, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		df := filters.NewArgs()
 		//if f != "" {
 		//	df.Add("label", f)
@@ -80,7 +80,7 @@ func (d *Docker) FindImage(org string, name string, version string) (bool, *ux.S
 		return false, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if name == "" {
 			d.State.SetError("empty name")
 			break
@@ -156,7 +156,7 @@ func (d *Docker) Search(org string, name string, version string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var repo string
 		if version == "" {
 			repo = fmt.Sprintf("%s/%s", org, name)

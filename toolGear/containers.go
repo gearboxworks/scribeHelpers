@@ -21,7 +21,7 @@ func (gear *DockerGear) ContainerList(f string) (int, *ux.State) {
 		return 0, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -144,7 +144,7 @@ func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool
 		return false, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if gearName == "" {
 			gear.State.SetError("empty gearname")
 			break
@@ -221,7 +221,7 @@ func MatchContainer(m *types.Container, match TypeMatchContainer) (bool, *gearCo
 	var ok bool
 	gc := gearConfig.New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if MatchTag("<none>:<none>", m.Names) {
 			ok = false
 			break
@@ -272,7 +272,7 @@ func MatchContainer(m *types.Container, match TypeMatchContainer) (bool, *gearCo
 			}
 		}
 
-		for range OnlyOnce {
+		for range onlyOnce {
 			if m.Labels["gearbox.version"] == match.Version {
 				ok = true
 				break

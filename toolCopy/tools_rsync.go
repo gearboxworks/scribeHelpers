@@ -11,9 +11,9 @@ import (
 // Usage:
 //		{{ $return := WriteFile "filename.txt" .Data.Source 0644 }}
 func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *ux.State {
-	c := New(false)
+	c := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		s := toolPath.ReflectAbsPath(src)
 		if s == nil {
 			break
@@ -37,7 +37,7 @@ func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *u
 		if !c.Destination.SetPath(*d) {
 			break
 		}
-		for range OnlyOnce {
+		for range onlyOnce {
 			c.State.SetState(c.Destination.StatPath())
 			if c.Destination.NotExists() {
 				c.State.Clear()
@@ -124,7 +124,7 @@ func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *u
 //func ToolRsync(src interface{}, dest interface{}, options interface{}, exclude ...interface{}) *ToolOsCopy {
 //	ret := NewOsCopy()
 //
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		s := toolTypes.ReflectString(src)
 //		if s == nil {
 //			ret.State.SetError("rsync source empty")

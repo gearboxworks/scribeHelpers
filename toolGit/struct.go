@@ -28,7 +28,7 @@ type TypeGit struct {
 	client       gitcmd.Client
 	repository   *git.Repository
 
-	Debug        bool
+	runtime      *toolRuntime.TypeRuntime
 	State        *ux.State
 }
 
@@ -45,7 +45,7 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGit {
 		client:       nil,
 		repository:   nil,
 
-		Debug:        runtime.Debug,
+		runtime:      runtime,
 		State:        ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	p.State.SetPackage("")
@@ -72,7 +72,7 @@ func (g *TypeGit) IsOk() bool {
 		return false
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if !g.IsAvailable() {
 			break
 		}
@@ -101,7 +101,7 @@ func (g *TypeGit) IsNil() *ux.State {
 
 func (g *TypeGit) EnsureNotNil() *TypeGit {
 	if g == nil {
-		return New(true)
+		return New(nil)
 	}
 	return g
 }
@@ -110,7 +110,7 @@ func (g *TypeGit) EnsureNotNil() *TypeGit {
 func (g *TypeGit) IsNilRepository() bool {
 	ok := true
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if g.repository == nil {
 			g.State.SetError("repository not open")
 			break
@@ -126,7 +126,7 @@ func (g *TypeGit) IsNilRepository() bool {
 func (g *TypeGit) IsAvailable() bool {
 	ok := false
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		g.State.SetError(g.client.CanExec())
 		if g.State.IsError() {
 			g.State.SetError("`git` does not exist or its command file is not executable: %s", g.State.GetError())
@@ -140,6 +140,21 @@ func (g *TypeGit) IsAvailable() bool {
 }
 func (g *TypeGit) IsNotAvailable() bool {
 	return !g.IsAvailable()
+}
+
+
+func (g *TypeGit) SetConfig(config gitcmd.Config) *ux.State {
+	if state := g.IsNil(); state.IsError() {
+		return state
+	}
+	g.State.SetFunction("")
+
+	for range onlyOnce {
+		g.GitConfig = &config
+		g.client = gitcmd.New(&config)
+	}
+
+	return g.State
 }
 
 

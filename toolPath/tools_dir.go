@@ -7,7 +7,7 @@ package toolPath
 func ToolChdir(dir ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		f := ReflectPath(dir...)
@@ -30,7 +30,7 @@ func ToolChdir(dir ...interface{}) *TypeOsPath {
 func ToolGetCwd() *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		state := ret.GetCwd()
@@ -50,7 +50,7 @@ func ToolGetCwd() *TypeOsPath {
 func ToolIsCwd() *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		if ret.IsCwd() {
@@ -70,7 +70,7 @@ func ToolIsCwd() *TypeOsPath {
 func ToolCreateDir(path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		f := ReflectPath(path...)
@@ -96,7 +96,7 @@ func ToolCreateDir(path ...interface{}) *TypeOsPath {
 func ToolRemoveDir(path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		f := ReflectPath(path...)

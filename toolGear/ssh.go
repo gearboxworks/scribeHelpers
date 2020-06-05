@@ -17,7 +17,7 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		// Get Docker container SSH port.
 		var clientPort string
 		clientPort, gear.State = gear.Container.GetContainerSsh()
@@ -125,7 +125,7 @@ func (gear *DockerGear) SetMountPath(mp string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var err error
 		var cwd string
 

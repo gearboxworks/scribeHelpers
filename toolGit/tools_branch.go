@@ -15,8 +15,8 @@ func (g *ToolGit) GetBranch() *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
-		g.State.SetState(g.Exec("symbolic-ref", "--short", "HEAD"))
+	for range onlyOnce {
+		g.State = g.Exec("symbolic-ref", "--short", "HEAD")
 		g.State.OutputTrim()
 		g.State.Response = g.State.Output
 	}
@@ -33,14 +33,14 @@ func (g *ToolGit) BranchExists(branch interface{}) *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		t := toolTypes.ReflectString(branch)
 		if t == nil {
 			g.State.SetError("branch is nil")
 			break
 		}
 
-		g.State.SetState(g.Exec("branch", "--list", *t))
+		g.State = g.Exec("branch", "--list", *t)
 		if g.State.IsError() {
 			break
 		}
@@ -62,7 +62,7 @@ func (g *ToolGit) GetTags() *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		// git show-ref --tag
 		//
 		// 	tagrefs, err := r.Tags()
@@ -73,8 +73,8 @@ func (g *ToolGit) GetTags() *ux.State {
 		//	})
 
 		g.State.SetSeparator(",")
-		//g.State.SetState(g.Exec("log", "-1", "--decorate=short", "--pretty=format:%D"))
-		g.State.SetState(g.Exec("tag", "-l"))
+		//g.State = g.Exec("log", "-1", "--decorate=short", "--pretty=format:%D")
+		g.State = g.Exec("tag", "-l")
 		if g.State.IsError() {
 			break
 		}
@@ -105,14 +105,14 @@ func (g *ToolGit) CreateTag(tag interface{}) *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		t := toolTypes.ReflectString(tag)
 		if t == nil {
 			g.State.SetError("tag is nil")
 			break
 		}
 
-		g.State.SetState(g.Exec("tag", *t))
+		g.State = g.Exec("tag", *t)
 		if g.State.IsError() {
 			break
 		}
@@ -131,14 +131,14 @@ func (g *ToolGit) RemoveTag(tag interface{}) *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		t := toolTypes.ReflectString(tag)
 		if t == nil {
 			g.State.SetError("tag is nil")
 			break
 		}
 
-		g.State.SetState(g.Exec("tag", "-d", *t))
+		g.State = g.Exec("tag", "-d", *t)
 		if g.State.IsError() {
 			break
 		}
@@ -157,14 +157,14 @@ func (g *ToolGit) TagExists(tag interface{}) *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		t := toolTypes.ReflectString(tag)
 		if t == nil {
 			g.State.SetError("tag is nil")
 			break
 		}
 
-		g.State.SetState(g.Exec("tag", "-l", *t))
+		g.State = g.Exec("tag", "-l", *t)
 		if g.State.IsError() {
 			break
 		}
@@ -187,7 +187,7 @@ func (g *ToolGit) GetTagObject(tag interface{}) *ux.State {
 	}
 	g.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		t := toolTypes.ReflectString(tag)
 		if t == nil {
 			g.State.SetError("tag is nil")

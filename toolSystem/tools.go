@@ -22,9 +22,9 @@ func (s *ToolSystem) IsNil() *ux.State {
 // Usage:
 //		{{ $sys := NewSystem }}
 func ToolNewSystem() *ToolSystem {
-	ret := New(false)
+	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 	}
 
 	return ReflectToolSystem(ret)

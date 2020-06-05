@@ -27,9 +27,9 @@ func (c *ToolOsCopy) IsNil() *ux.State {
 // Usage:
 //		{{ $copy := CopyFiles }}
 func ToolCopyFiles() *ToolOsCopy {
-	ret := New(false)
+	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.Clear()
 	}
 
@@ -46,7 +46,7 @@ func (c *ToolOsCopy) SetSourcePath(src ...interface{}) *ux.State {
 	}
 	c.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		p := toolTypes.ReflectStrings(src...)
 		if p == nil {
 			c.State.SetError("%s source empty", c.Method.GetName())
@@ -79,7 +79,7 @@ func (c *ToolOsCopy) SetDestinationPath(dest ...interface{}) *ux.State {
 	}
 	c.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		p := toolTypes.ReflectStrings(dest...)
 		if p == nil {
 			c.State.SetError("%s destination empty", c.Method.GetName())
@@ -108,7 +108,7 @@ func (c *ToolOsCopy) SetExcludePaths(exclude ...interface{}) *ux.State {
 	}
 	c.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		e := toolTypes.ReflectStrings(exclude...)
 		if e == nil {
 			break
@@ -132,7 +132,7 @@ func (c *ToolOsCopy) SetIncludePaths(include ...interface{}) *ux.State {
 	}
 	c.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		i := toolTypes.ReflectStrings(include...)
 		if i == nil {
 			break
@@ -155,7 +155,7 @@ func (c *ToolOsCopy) Run() *ux.State {
 	}
 	c.State.SetFunction("")
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		c.State.SetState(c.Source.StatPath())
 		if c.State.IsError() {
 			break
@@ -197,7 +197,7 @@ func (c *ToolOsCopy) Run() *ux.State {
 ////		{{ $copy := CopyFiles }}
 ////		{{ $state := SetSourcePath "filename.txt" }}
 //func (c *ToolOsCopy) SetOptions(src interface{}) *ux.State {
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		e := toolTypes.ReflectStrings(exclude...)
 //		if e == nil {
 //			break

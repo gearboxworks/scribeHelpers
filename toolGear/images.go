@@ -23,7 +23,7 @@ func (gear *DockerGear) ImageList(f string) (int, *ux.State) {
 		return 0, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		df := filters.NewArgs()
 		//if f != "" {
 		//	df.Add("label", f)
@@ -101,7 +101,7 @@ func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, *u
 		return false, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if gearName == "" {
 			gear.State.SetError("empty gear name")
 			break
@@ -181,7 +181,7 @@ func (gear *DockerGear) Search(gearName string, gearVersion string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var repo string
 		if gearVersion == "" {
 			repo = fmt.Sprintf("gearboxworks/%s", gearName)
@@ -220,7 +220,7 @@ func MatchImage(m *types.ImageSummary, match TypeMatchImage) (bool, *gearConfig.
 	var ok bool
 	gc := gearConfig.New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if MatchTag("<none>:<none>", m.RepoTags) {
 			ok = false
 			break
@@ -270,7 +270,7 @@ func MatchImage(m *types.ImageSummary, match TypeMatchImage) (bool, *gearConfig.
 			}
 		}
 
-		for range OnlyOnce {
+		for range onlyOnce {
 			if m.Labels["gearbox.version"] == match.Version {
 				ok = true
 				break

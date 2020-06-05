@@ -13,7 +13,7 @@ const DefaultSeparator = "\n"
 
 
 func (p *TypeOsPath) LoadContents(data ...interface{}) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p._String = ""
 		p._Array = []string{}
 
@@ -26,7 +26,7 @@ func (p *TypeOsPath) SetContents(data ...interface{}) {
 
 
 func (p *TypeOsPath) AppendContents(data ...interface{}) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if p._Separator == "" {
 			p._Separator = DefaultSeparator
 		}
@@ -76,7 +76,7 @@ func (p *TypeOsPath) GetContentArray() []string {
 
 
 func (p *TypeOsPath) SetSeparator(separator string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p._Separator = separator
 		p._Array = strings.Split(p._String, p._Separator)
 	}
@@ -89,7 +89,7 @@ func (p *TypeOsPath) GetSeparator() string {
 
 
 func (p *TypeOsPath) ReadFile() *ux.State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p.State.SetFunction("")
 		p.State.Clear()
 
@@ -128,7 +128,7 @@ func (p *TypeOsPath) ReadFile() *ux.State {
 
 
 func (p *TypeOsPath) WriteFile() *ux.State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p.State.SetFunction("")
 		p.State.Clear()
 
@@ -142,7 +142,7 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 			break
 		}
 
-		for range OnlyOnce {
+		for range onlyOnce {
 			p.StatPath()
 			if p._IsDir {
 				p.State.SetError("path '%s' is a directory", p._Path)
@@ -185,7 +185,7 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 
 
 func (p *TypeOsPath) OpenFile() *ux.State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p.State.SetFunction("")
 		p.State.Clear()
 
@@ -194,7 +194,7 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 			break
 		}
 
-		for range OnlyOnce {
+		for range onlyOnce {
 			p.StatPath()
 			if p._IsDir {
 				p.State.SetError("path '%s' is a directory", p._Path)
@@ -241,7 +241,7 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 
 
 func (p *TypeOsPath) SetFileHandle(fh *os.File) *ux.State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p.fileHandle = fh
 		p.SetPath(p.fileHandle.Name())
 		p.State.Clear()
@@ -252,7 +252,7 @@ func (p *TypeOsPath) SetFileHandle(fh *os.File) *ux.State {
 
 
 func (p *TypeOsPath) GetFileHandle() (*os.File, *ux.State) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p.State.SetFunction("")
 		p.State.Clear()
 
@@ -269,7 +269,7 @@ func (p *TypeOsPath) GetFileHandle() (*os.File, *ux.State) {
 
 
 func (p *TypeOsPath) CloseFile() *ux.State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		p.State.SetFunction("")
 		p.State.Clear()
 

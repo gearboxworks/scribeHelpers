@@ -14,7 +14,7 @@ type Environment map[string]string
 func PrintEnv() string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var env Environment
 		var err error
 		env, err = GetEnv()
@@ -49,7 +49,7 @@ func GetEnv() (Environment, error) {
 	var e Environment
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		e = make(Environment)
 		for _, item := range os.Environ() {
 			s := strings.SplitN(item, "=", 2)
@@ -63,7 +63,7 @@ func GetEnv() (Environment, error) {
 func (me *Environment) ToString() string {
 	var s string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		s = fmt.Sprintf("%s", *me)
 	}
 

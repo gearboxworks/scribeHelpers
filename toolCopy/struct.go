@@ -48,9 +48,6 @@ func ReflectToolOsCopy(p *TypeOsCopy) *ToolOsCopy {
 
 
 func New(runtime *toolRuntime.TypeRuntime) *TypeOsCopy {
-	// if state := runtime.IsNil(); state.IsError() {
-	// 	return &TypeOsCopy{State: state}
-	// }
 	runtime = runtime.EnsureNotNil()
 
 	c := &TypeOsCopy{

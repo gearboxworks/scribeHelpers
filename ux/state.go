@@ -52,6 +52,7 @@ type State struct {
 	_Separator  string
 	OutputArray []string
 	Response    interface{}
+	responseType reflect.Type
 }
 
 type RuntimeDebug struct {
@@ -70,18 +71,21 @@ func NewState(name string, debugMode bool) *State {
 	me.Clear()
 	me.debug.Enabled = debugMode
 	me._Executable = name	// @TODO - Add this to debugging.
+	//if debugMode {
+	//	PrintflnWarning("%s - DEBUG MODE ENABLED", name)
+	//}
 
 	return &me
 }
 
-func (p *State) EnsureNotNil() *State {
+func (state *State) EnsureNotNil() *State {
 	for range OnlyOnce {
-		if p == nil {
-			p = NewState("", false)
+		if state == nil {
+			state = NewState("", false)
 		}
-		p.Clear()
+		state.Clear()
 	}
-	return p
+	return state
 }
 
 func EnsureStateNotNil(p *State) *State {
@@ -127,35 +131,35 @@ func SearchStructureForUxState(m interface{}) *State {
 	return state
 }
 
-func (p *State) Clear() {
-	if p != nil {
-		p._Debug = nil
-		p._Fatal = nil
-		p._Error = nil
-		p._Warning = nil
-		p._Ok = errors.New("")
-		p.ExitCode = 0
+func (state *State) Clear() {
+	if state != nil {
+		state._Debug = nil
+		state._Fatal = nil
+		state._Error = nil
+		state._Warning = nil
+		state._Ok = errors.New("")
+		state.ExitCode = 0
 
-		p.Output = ""
-		p._Separator = DefaultSeparator
-		p.OutputArray = []string{}
-		p.Response = nil
+		state.Output = ""
+		state._Separator = DefaultSeparator
+		state.OutputArray = []string{}
+		state.Response = nil
 	} else {
-		panic(p)
+		panic(state)
 	}
 }
 
 
-func (p *State) GetPrefix() string {
-	return p.prefix
+func (state *State) GetPrefix() string {
+	return state.prefix
 }
-func (p *State) GetPackage() string {
-	return p._Package
+func (state *State) GetPackage() string {
+	return state._Package
 }
-func (p *State) GetFunction() string {
-	return p._Function
+func (state *State) GetFunction() string {
+	return state._Function
 }
-func (p *State) SetPackage(s string) {
+func (state *State) SetPackage(s string) {
 	if s == "" {
 		// Discover package name.
 		//pc, file, no, ok := runtime.Caller(1)
@@ -171,15 +175,15 @@ func (p *State) SetPackage(s string) {
 		}
 	}
 
-	p._Package = s
-	if p._Function == "" {
-		p.prefix = p._Package
+	state._Package = s
+	if state._Function == "" {
+		state.prefix = state._Package
 	} else {
-		p.prefix = p._Package + "." + p._Function + "()"
-		p.prefixArray = append(p.prefixArray, p.prefix)
+		state.prefix = state._Package + "." + state._Function + "()"
+		state.prefixArray = append(state.prefixArray, state.prefix)
 	}
 }
-func (p *State) SetFunction(s string) {
+func (state *State) SetFunction(s string) {
 	if s == "" {
 		// Discover function name.
 		//pc, file, no, ok := runtime.Caller(1)
@@ -201,16 +205,16 @@ func (p *State) SetFunction(s string) {
 		}
 	}
 
-	p._Function = s
-	if p._Package == "" {
-		p.prefix = p._Function + "()"
+	state._Function = s
+	if state._Package == "" {
+		state.prefix = state._Function + "()"
 	} else {
-		p.prefix = p._Package + "." + p._Function + "()"
+		state.prefix = state._Package + "." + state._Function + "()"
 	}
 
-	p.prefixArray = append(p.prefixArray, p.prefix)
+	state.prefixArray = append(state.prefixArray, state.prefix)
 }
-func (p *State) SetFunctionCaller() {
+func (state *State) SetFunctionCaller() {
 	var s string
 	// Discover function name.
 	pc, _, _, ok := runtime.Caller(2)
@@ -224,137 +228,147 @@ func (p *State) SetFunctionCaller() {
 		}
 	}
 
-	p.SetFunction(s)
+	state.SetFunction(s)
 }
 
 
-func (p *State) GetState() *bool {
+func (state *State) GetState() *bool {
 	var b bool
 	return &b
 }
-func (s *State) SetState(p *State) {
-	if s == nil {
-		s = NewState("", true)
-		s._Fatal = errors.New("SW ERROR")
-		s.ExitCode = 255
+func (state *State) SetState(p *State) {
+	if state == nil {
+		state = NewState("", true)
+		state._Fatal = errors.New("SW ERROR")
+		state.ExitCode = 255
 		return
 	}
-	s._Error =      p._Error
-	s._Warning =    p._Warning
-	s._Ok =         p._Ok
-	s._Debug =      p._Debug
-	s.ExitCode =    p.ExitCode
-	s.Output =      p.Output
-	s.OutputArray = p.OutputArray
-	s.Response =    p.Response
-	s.RunState =    p.RunState
+	state._Error =      p._Error
+	state._Warning =    p._Warning
+	state._Ok =         p._Ok
+	state._Debug =      p._Debug
+	state.ExitCode =    p.ExitCode
+	state.Output =      p.Output
+	state.OutputArray = p.OutputArray
+	state.Response =    p.Response
+	state.RunState =    p.RunState
 }
 
 
-func (p *State) Sprint() string {
+func (state *State) Sprint() string {
 	var ret string
 
 	e := ""
-	if p.ExitCode != 0 {
-		e = fmt.Sprintf("Exit(%d) - ", p.ExitCode)
+	if state.ExitCode != 0 {
+		e = fmt.Sprintf("Exit(%d) - ", state.ExitCode)
 	}
 
 	pa := ""
-	if len(p.prefixArray) > 0 {
-		pa = fmt.Sprintf("[%s] - ", p.prefixArray[0])
+	if len(state.prefixArray) > 0 {
+		pa = fmt.Sprintf("[%s] - ", state.prefixArray[0])
 	}
 
 	ou := ""
-	if p.Output != "" {
-		ou = "\n" + SprintfOk("%s ", p.Output)
+	if state.Output != "" {
+		ou = "\n" + SprintfOk("%s ", state.Output)
 	}
 
 	switch {
-		case p._Error != nil:
-			ret = SprintfError("ERROR: %s%s%s%s", pa, e, p._Error, ou)
+		case state._Error != nil:
+			ret = SprintfError("ERROR: %s%s%s%s", pa, e, state._Error, ou)
 
-		case p._Warning != nil:
-			ret = SprintfWarning("WARNING: %s%s%s%s", pa, e, p._Warning, ou)
+		case state._Warning != nil:
+			ret = SprintfWarning("WARNING: %s%s%s%s", pa, e, state._Warning, ou)
 
-		case p._Ok != nil:
-			ret = SprintfOk("%s%s", p._Ok, ou)
+		case state._Ok != nil:
+			ret = SprintfOk("%s%s", state._Ok, ou)
 
-		case p.debug.Enabled:
-			if p._Debug != nil {
-				ret = SprintfDebug("%s%s", p._Debug, ou)
+		case state.debug.Enabled:
+			if state._Debug != nil {
+				ret = SprintfDebug("%s%s", state._Debug, ou)
 			}
 	}
 
 	return ret
 }
-func (p *State) SprintResponse() string {
-	return p.Sprint()
-}
-func (p *State) PrintResponse() {
-	_, _ = fmt.Fprintf(os.Stdout, p.Sprint() + "\n")
-}
-func (p *State) DebugPrint() {
-	if !p.debug.Enabled {
+func (state *State) DebugPrint() {
+	if !state.debug.Enabled {
 		return
 	}
-	_, _ = fmt.Fprintf(os.Stderr, p.Sprint() + "\n")
+	_, _ = fmt.Fprintf(os.Stderr, state.Sprint() + "\n")
 }
-func (p *State) SprintError() string {
+func (state *State) SprintError() string {
 	var ret string
 
 	for range OnlyOnce {
-		if p._Ok != nil {
+		if state._Ok != nil {
 			// If we have an OK response.
 			break
 		}
 
-		ret = p.Sprint()
+		ret = state.Sprint()
 	}
 
 	return ret
 }
 
 
-func (p *State) IsError() bool {
+func (state *State) SprintResponse() string {
+	return state.Sprint()
+}
+func (state *State) PrintResponse() {
+	_, _ = fmt.Fprintf(os.Stdout, state.Sprint() + "\n")
+}
+func (state *State) GetResponse() (reflect.Type, interface{}) {
+	return state.responseType, state.Response
+}
+func (state *State) SetResponse(r interface{}) {
+	state.Response = r
+	s := reflect.ValueOf(r).Elem()
+	state.responseType = s.Type()
+}
+
+
+func (state *State) IsError() bool {
 	var ok bool
 
-	if p == nil {
+	if state == nil {
 		//fmt.Printf("DUH\n")
 		ok = true
-	} else if p._Error != nil {
+	} else if state._Error != nil {
 		ok = true
 	}
 
 	return ok
 }
 
-func (p *State) IsWarning() bool {
+func (state *State) IsWarning() bool {
 	var ok bool
 
-	if p._Warning != nil {
+	if state._Warning != nil {
 		ok = true
 	}
 
 	return ok
 }
 
-func (p *State) IsOk() bool {
+func (state *State) IsOk() bool {
 	var ok bool
 
-	if p._Ok != nil {
+	if state._Ok != nil {
 		ok = true
 	}
 
 	return ok
 }
-func (p *State) IsNotOk() bool {
+func (state *State) IsNotOk() bool {
 	ok := true
 
 	for range OnlyOnce {
-		if p._Warning != nil {
+		if state._Warning != nil {
 			break
 		}
-		if p._Error != nil {
+		if state._Error != nil {
 			break
 		}
 		ok = false
@@ -363,222 +377,222 @@ func (p *State) IsNotOk() bool {
 	return ok
 }
 
-func (p *State) SetExitCode(e int) {
-	if p == nil {
+func (state *State) SetExitCode(e int) {
+	if state == nil {
 		return
 	}
-	p.ExitCode = e
+	state.ExitCode = e
 }
-func (p *State) GetExitCode() int {
-	return p.ExitCode
+func (state *State) GetExitCode() int {
+	return state.ExitCode
 }
 
 
-func (p *State) SetError(error ...interface{}) {
+func (state *State) SetError(error ...interface{}) {
 	for range OnlyOnce {
-		if p == nil {
-			panic(p)
+		if state == nil {
+			panic(state)
 			break
 		}
-		p.debug.fetchRuntimeDebug(2)
+		state.debug.fetchRuntimeDebug(2)
 
-		p._Ok = nil
-		p._Warning = nil
+		state._Ok = nil
+		state._Warning = nil
 
 		if len(error) == 0 {
-			p._Error = errors.New("ERROR")
+			state._Error = errors.New("ERROR")
 			break
 		}
 
 		if error[0] == nil {
-			p._Error = nil
+			state._Error = nil
 			break
 		}
 
 		debugPrefix := ""
-		if p.debug.Enabled {
-			debugPrefix = SprintfCyan("%s:%d [%s] - ", p.debug.File, p.debug.Line, p.debug.Function)
+		if state.debug.Enabled {
+			debugPrefix = SprintfCyan("%s:%d [%s] - ", state.debug.File, state.debug.Line, state.debug.Function)
 		}
-		p._Error = errors.New(debugPrefix + _Sprintf(error...))
-		if p.debug.Enabled {
-			p.PrintResponse()
+		state._Error = errors.New(debugPrefix + _Sprintf(error...))
+		if state.debug.Enabled {
+			state.PrintResponse()
 		}
 	}
 }
-func (p *State) GetError() error {
-	return p._Error
+func (state *State) GetError() error {
+	return state._Error
 }
 
 
-func (p *State) SetWarning(warning ...interface{}) {
+func (state *State) SetWarning(warning ...interface{}) {
 	for range OnlyOnce {
-		if p == nil {
-			panic(p)
+		if state == nil {
+			panic(state)
 			break
 		}
-		p.debug.fetchRuntimeDebug(2)
+		state.debug.fetchRuntimeDebug(2)
 
-		p._Ok = nil
-		p._Error = nil
+		state._Ok = nil
+		state._Error = nil
 
 		if len(warning) == 0 {
-			p._Warning = errors.New("WARNING")
+			state._Warning = errors.New("WARNING")
 			break
 		}
 
 		if warning[0] == nil {
-			p._Warning = nil
+			state._Warning = nil
 			break
 		}
 
 		debugPrefix := ""
-		if p.debug.Enabled {
-			debugPrefix = SprintfCyan("%s:%d [%s] - ", p.debug.File, p.debug.Line, p.debug.Function)
+		if state.debug.Enabled {
+			debugPrefix = SprintfCyan("%s:%d [%s] - ", state.debug.File, state.debug.Line, state.debug.Function)
 		}
-		p._Warning = errors.New(debugPrefix + _Sprintf(warning...))
-		if p.debug.Enabled {
-			p.PrintResponse()
+		state._Warning = errors.New(debugPrefix + _Sprintf(warning...))
+		if state.debug.Enabled {
+			state.PrintResponse()
 		}
 	}
 }
-func (p *State) GetWarning() error {
-	return p._Warning
+func (state *State) GetWarning() error {
+	return state._Warning
 }
 
 
-func (p *State) SetOk(msg ...interface{}) {
+func (state *State) SetOk(msg ...interface{}) {
 	for range OnlyOnce {
-		if p == nil {
-			panic(p)
+		if state == nil {
+			panic(state)
 			break
 		}
-		p.debug.fetchRuntimeDebug(2)
+		state.debug.fetchRuntimeDebug(2)
 
-		p._Error = nil
-		p._Warning = nil
-		p.ExitCode = 0
+		state._Error = nil
+		state._Warning = nil
+		state.ExitCode = 0
 
 		if len(msg) == 0 {
-			p._Ok = errors.New("")
+			state._Ok = errors.New("")
 			break
 		}
 
 		if msg[0] == nil {
-			p._Ok = errors.New("")
+			state._Ok = errors.New("")
 			break
 		}
 
 		debugPrefix := ""
-		if p.debug.Enabled {
-			debugPrefix = SprintfCyan("%s:%d [%s] - ", p.debug.File, p.debug.Line, p.debug.Function)
+		if state.debug.Enabled {
+			debugPrefix = SprintfCyan("%s:%d [%s] - ", state.debug.File, state.debug.Line, state.debug.Function)
 		}
-		p._Ok = errors.New(debugPrefix + _Sprintf(msg...))
-		if p.debug.Enabled {
-			p.PrintResponse()
+		state._Ok = errors.New(debugPrefix + _Sprintf(msg...))
+		if state.debug.Enabled {
+			state.PrintResponse()
 		}
 	}
 }
-func (p *State) GetOk() error {
-	return p._Ok
+func (state *State) GetOk() error {
+	return state._Ok
 }
 
 
-func (p *State) ClearError() {
-	p._Error = nil
+func (state *State) ClearError() {
+	state._Error = nil
 }
 
 
-func (p *State) IsRunning() bool {
+func (state *State) IsRunning() bool {
 	var ok bool
-	if p.RunState == StateRunning {
+	if state.RunState == StateRunning {
 		ok = true
 	}
 	return ok
 }
 
-func (p *State) IsPaused() bool {
+func (state *State) IsPaused() bool {
 	var ok bool
-	if p.RunState == StatePaused {
+	if state.RunState == StatePaused {
 		ok = true
 	}
 	return ok
 }
 
-func (p *State) IsCreated() bool {
+func (state *State) IsCreated() bool {
 	var ok bool
-	if p.RunState == StateCreated {
+	if state.RunState == StateCreated {
 		ok = true
 	}
 	return ok
 }
 
-func (p *State) IsRestarting() bool {
+func (state *State) IsRestarting() bool {
 	var ok bool
-	if p.RunState == StateRestarting {
+	if state.RunState == StateRestarting {
 		ok = true
 	}
 	return ok
 }
 
-func (p *State) IsRemoving() bool {
+func (state *State) IsRemoving() bool {
 	var ok bool
-	if p.RunState == StateRemoving {
+	if state.RunState == StateRemoving {
 		ok = true
 	}
 	return ok
 }
 
-func (p *State) IsExited() bool {
+func (state *State) IsExited() bool {
 	var ok bool
-	if p.RunState == StateExited {
+	if state.RunState == StateExited {
 		ok = true
 	}
 	return ok
 }
 
-func (p *State) IsDead() bool {
+func (state *State) IsDead() bool {
 	var ok bool
-	if p.RunState == StateDead {
+	if state.RunState == StateDead {
 		ok = true
 	}
 	return ok
 }
 
 
-func (p *State) ExitOnNotOk() string {
-	if p.IsNotOk() {
-		_, _ = fmt.Fprintf(os.Stderr, p.Sprint() + "\n")
-		os.Exit(p.ExitCode)
+func (state *State) ExitOnNotOk() string {
+	if state.IsNotOk() {
+		_, _ = fmt.Fprintf(os.Stderr, state.Sprint() + "\n")
+		os.Exit(state.ExitCode)
 	}
 	return ""
 }
 
 
-func (p *State) ExitOnError() string {
-	if p.IsWarning() {
-		_, _ = fmt.Fprintf(os.Stderr, p.Sprint() + "\n")
+func (state *State) ExitOnError() string {
+	if state.IsWarning() {
+		_, _ = fmt.Fprintf(os.Stderr, state.Sprint() + "\n")
 	}
-	if p.IsError() {
-		_, _ = fmt.Fprintf(os.Stderr, p.Sprint() + "\n")
-		os.Exit(p.ExitCode)
-	}
-	return ""
-}
-
-
-func (p *State) ExitOnWarning() string {
-	if p.IsWarning() {
-		_, _ = fmt.Fprintf(os.Stderr, p.Sprint() + "\n")
-		os.Exit(p.ExitCode)
+	if state.IsError() {
+		_, _ = fmt.Fprintf(os.Stderr, state.Sprint() + "\n")
+		os.Exit(state.ExitCode)
 	}
 	return ""
 }
 
 
-func (p *State) Exit(e int) string {
-	p.ExitCode = e
-	_, _ = fmt.Fprintf(os.Stdout, p.Sprint())
-	os.Exit(p.ExitCode)
+func (state *State) ExitOnWarning() string {
+	if state.IsWarning() {
+		_, _ = fmt.Fprintf(os.Stderr, state.Sprint() + "\n")
+		os.Exit(state.ExitCode)
+	}
+	return ""
+}
+
+
+func (state *State) Exit(e int) string {
+	state.ExitCode = e
+	_, _ = fmt.Fprintf(os.Stdout, state.Sprint())
+	os.Exit(state.ExitCode)
 	return ""
 }
 
@@ -660,58 +674,58 @@ func (p *RuntimeDebug) fetchRuntimeDebug(level int) {
 	}
 }
 
-func (p *State) DebugEnable() {
+func (state *State) DebugEnable() {
 	for range OnlyOnce {
-		if p == nil {
+		if state == nil {
 			break
 		}
-		p.debug.Enabled = true
+		state.debug.Enabled = true
 	}
 }
-func (p *State) DebugDisable() {
+func (state *State) DebugDisable() {
 	for range OnlyOnce {
-		if p == nil {
+		if state == nil {
 			break
 		}
-		p.debug.Enabled = false
+		state.debug.Enabled = false
 	}
 }
-func (p *State) DebugSet(d bool) {
+func (state *State) DebugSet(d bool) {
 	for range OnlyOnce {
-		if p == nil {
+		if state == nil {
 			break
 		}
-		p.debug.Enabled = d
+		state.debug.Enabled = d
 	}
 }
 
-func (p *State) SetDebug(msg ...interface{}) {
+func (state *State) SetDebug(msg ...interface{}) {
 	for range OnlyOnce {
-		if p == nil {
+		if state == nil {
 			break
 		}
-		p.debug.fetchRuntimeDebug(2)
+		state.debug.fetchRuntimeDebug(2)
 
 		if len(msg) == 0 {
-			p._Debug = errors.New("DEBUG")
+			state._Debug = errors.New("DEBUG")
 			break
 		}
 
 		if msg[0] == nil {
-			p._Debug = errors.New("DEBUG")
+			state._Debug = errors.New("DEBUG")
 			break
 		}
 
 		debugPrefix := ""
-		if p.debug.Enabled {
-			debugPrefix = SprintfCyan("%s:%d [%s] - ", p.debug.File, p.debug.Line, p.debug.Function)
+		if state.debug.Enabled {
+			debugPrefix = SprintfCyan("%s:%d [%s] - ", state.debug.File, state.debug.Line, state.debug.Function)
 		}
-		p._Debug = errors.New(debugPrefix + _Sprintf(msg...))
-		if p.debug.Enabled {
-			p.PrintResponse()
+		state._Debug = errors.New(debugPrefix + _Sprintf(msg...))
+		if state.debug.Enabled {
+			state.PrintResponse()
 		}
 	}
 }
-func (p *State) GetDebug() error {
-	return p._Debug
+func (state *State) GetDebug() error {
+	return state._Debug
 }

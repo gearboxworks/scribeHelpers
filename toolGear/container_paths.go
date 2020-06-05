@@ -7,7 +7,7 @@ type VolumeMounts map[string]string
 func (m *VolumeMounts) Add(local string, remote string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if m == nil {
 			break
 		}
@@ -34,7 +34,7 @@ type SshfsMounts map[string]string
 func (m *SshfsMounts) Add(local string, remote string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if state := ux.IfNilReturnError(m); state.IsError() {
 			break
 		}

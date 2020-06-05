@@ -45,7 +45,7 @@ func (p *ToolProcesses) FindByName(name interface{}) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		n := toolTypes.ReflectString(name)
 		if n == nil {
 			p.State.SetError("process name undefined")
@@ -70,7 +70,7 @@ func (p *ToolProcesses) FindByPid(pid interface{}) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		n := toolTypes.ReflectInt32(pid)
 		if n == nil {
 			p.State.SetError("PID undefined")
@@ -96,7 +96,7 @@ func (p *ToolProcesses) Print() string {
 	}
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		for _, proc := range p.procs {
 			ret += ux.SprintfWhite("%d %d %s\n",
 				proc.GetPid(),
@@ -112,7 +112,7 @@ func (p *ToolProcesses) Print() string {
 
 // Usage:
 func ToolFindProcByName(name interface{}) *ToolProcesses {
-	p := NewProcesses(false)
+	p := NewProcesses(nil)
 	p.State = p.Reflect().FindByName(name)
 	return p.Reflect()
 }
@@ -120,7 +120,7 @@ func ToolFindProcByName(name interface{}) *ToolProcesses {
 
 // Usage:
 func ToolFindProcByPid(pid interface{}) *ToolProcesses {
-	p := NewProcesses(false)
+	p := NewProcesses(nil)
 	p.State = p.Reflect().FindByPid(pid)
 	return p.Reflect()
 }

@@ -45,7 +45,7 @@ func (gh *TypeGitHub) IsNil() *ux.State {
 
 func (gh *TypeGitHub) EnsureNotNil() *TypeGitHub {
 	if gh == nil {
-		return New(true)
+		return New(nil)
 	}
 	return gh
 }

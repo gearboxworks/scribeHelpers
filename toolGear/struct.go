@@ -33,7 +33,7 @@ func New(runtime *toolRuntime.TypeRuntime) *DockerGear {
 	var gear DockerGear
 	runtime = runtime.EnsureNotNil()
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		gear.State = ux.NewState(runtime.CmdName, runtime.Debug)
 
 		gear.Image = NewImage(runtime)
@@ -80,7 +80,7 @@ func (gear *DockerGear) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		gear.State = gear.State.EnsureNotNil()
 
 		if gear.Client == nil {

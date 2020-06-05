@@ -28,6 +28,8 @@ func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 		}
 
 
+		////////////////////////////////////////////////////
+		// Fetch input files.
 		for range OnlyOnce {
 			// Validate json and template files/strings.
 			if at.Json.Filename == DefaultJsonFile {
@@ -35,8 +37,8 @@ func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 			}
 			at.Json.SetInputFile(at.Json.Filename, false)
 
-			if at.Json.Filename == DefaultTemplateFile {
-				at.Json.Filename = DefaultTemplateString
+			if at.Template.Filename == DefaultTemplateFile {
+				at.Template.Filename = DefaultTemplateString
 			}
 			at.Template.SetInputFile(at.Template.Filename, at.RemoveTemplate)
 
@@ -96,6 +98,46 @@ func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 
 		if at.State.IsNotOk() {
 			break
+		}
+
+
+		////////////////////////////////////////////////////
+		// Strip out #! at start of template.
+		for range OnlyOnce {
+			if !at.StripHashBang {
+				break
+			}
+
+			ca := at.Template.File.GetContentArray()
+			if len(ca) == 0 {
+				break
+			}
+
+			if !strings.HasPrefix(ca[0], "#!") {
+				break
+			}
+
+			at.Template.File.SetContents(ca[1:])
+		}
+
+
+		////////////////////////////////////////////////////
+		// Add {{ and }} to template file.
+		for range OnlyOnce {
+			if !at.AddBrackets {
+				break
+			}
+
+			ca := at.Template.File.GetContentArray()
+			if len(ca) == 0 {
+				break
+			}
+
+			for l := range ca {
+				ca[l] = fmt.Sprintf("{{- %s }}", ca[l])
+			}
+
+			at.Template.File.SetContents(ca)
 		}
 
 
@@ -224,7 +266,7 @@ func (at *TypeScribeArgs) Run() *ux.State {
 				break
 			}
 
-			at.State = exe.SetPath(path)
+			at.State = exe.SetCmd(path)
 			if at.State.IsError() {
 				at.State.SetError("Shell script error: %s", at.State.GetError())
 				break
@@ -292,7 +334,7 @@ func (at *TypeScribeArgs) CreateTemplate() (*template.Template, *ux.State) {
 		if at.State.IsNotOk() {
 			break
 		}
-		at.LoadTools(at.State.Response.(template.FuncMap))
+		at.ImportTools(at.State.Response.(template.FuncMap))
 
 		// Add inbuilt Tools.
 		at.Tools["PrintTools"] = PrintTools
@@ -306,8 +348,8 @@ func (at *TypeScribeArgs) CreateTemplate() (*template.Template, *ux.State) {
 
 // Ability to import from an external package.
 // You need to run `pkgreflect scribe/tools` after code changes.
-// func (at *TypeScribeArgs) LoadTools(h map[string]reflect.Value) *ux.State {
-func (at *TypeScribeArgs) LoadTools(h template.FuncMap) *ux.State {
+// func (at *TypeScribeArgs) ImportTools(h map[string]reflect.Value) *ux.State {
+func (at *TypeScribeArgs) ImportTools(h template.FuncMap) *ux.State {
 	if state := at.IsNil(); state.IsError() {
 		return state
 	}

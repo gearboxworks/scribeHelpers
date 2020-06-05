@@ -82,7 +82,7 @@ func ToolToString(i interface{}) string {
 func ToolContains(s interface{}, substr interface{}) bool {
 	var ret bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		sp := ReflectString(s)
 		if sp == nil {
 			break
@@ -105,7 +105,7 @@ func ToolContains(s interface{}, substr interface{}) bool {
 func ToolSprintf(format interface{}, a ...interface{}) string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		p := ReflectString(format)
 		if p == nil {
 			break
@@ -122,7 +122,7 @@ func ToolSprintf(format interface{}, a ...interface{}) string {
 func ToolGrepArray(str interface{}, format interface{}, a ...interface{}) []string {
 	var ret []string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		s := ReflectString(str)
 		if s == nil {
 			break
@@ -153,7 +153,7 @@ func ToolGrepArray(str interface{}, format interface{}, a ...interface{}) []stri
 func ToolGrep(str interface{}, format interface{}, a ...interface{}) string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		sa := ToolGrepArray(str, format, a...)
 
 		ret = strings.Join(sa, "\n")

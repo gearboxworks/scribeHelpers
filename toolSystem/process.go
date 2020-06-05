@@ -57,7 +57,7 @@ func (p *TypeProcess) GetOpenFiles() *TypeOpenFiles {
 		return &TypeOpenFiles{State: state}
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		of, err := p.proc.OpenFiles()
 		if err != nil {
 			p.State.SetError(err)
@@ -65,7 +65,7 @@ func (p *TypeProcess) GetOpenFiles() *TypeOpenFiles {
 		}
 
 		for _, f := range of {
-			path := toolPath.New(p.Debug)
+			path := toolPath.New(p.runtime)
 			path.SetPath(f.Path)
 			p.openFiles.Files = append(p.openFiles.Files, path)
 		}
@@ -81,7 +81,7 @@ func (p *TypeProcess) GetOpenFiles() *TypeOpenFiles {
 //		return state
 //	}
 //
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		p.State.SetOk()
 //
 //		if p.name != "" {
@@ -106,7 +106,7 @@ func (p *TypeProcess) GetOpenFiles() *TypeOpenFiles {
 //		return state
 //	}
 //
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		procs, err := process.Processes()
 //		if err != nil {
 //			p.State.SetError(err)
@@ -131,7 +131,7 @@ func (p *TypeProcess) GetOpenFiles() *TypeOpenFiles {
 //		return state
 //	}
 //
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		procs, err := process.Processes()
 //		if err != nil {
 //			p.State.SetError(err)
@@ -183,7 +183,7 @@ func (p *TypeProcess) populateStruct(proc *process.Process) {
 		return
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		p.proc = proc
 		p.pid = proc.Pid
 

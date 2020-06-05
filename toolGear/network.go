@@ -19,7 +19,7 @@ func (gear *DockerGear) NetworkList(f string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -67,7 +67,7 @@ func (gear *DockerGear) FindNetwork(netName string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if netName == "" {
 			gear.State.SetError("empty gear name")
 			break
@@ -103,7 +103,7 @@ func (gear *DockerGear) NetworkCreate(netName string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		gear.State = gear.FindNetwork(netName)
 		if gear.State.IsError() {
 			break

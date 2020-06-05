@@ -6,6 +6,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
@@ -65,7 +66,7 @@ func (c *Container) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		c.State = c.State.EnsureNotNil()
 
 		if c.ID == "" {
@@ -98,7 +99,7 @@ func (c *Container) Status() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		df := filters.NewArgs()
 		df.Add("id", c.ID)
 
@@ -145,7 +146,7 @@ func (c *Container) WaitForState(s string, t time.Duration) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		until := time.Now()
 		until.Add(t)
 
@@ -172,7 +173,7 @@ func (c *Container) Start() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		c.State = c.Status()
 		if c.State.IsError() {
 			break
@@ -231,12 +232,12 @@ func (c *Container) Start() *ux.State {
 // This first example shows how to run a container using the Docker API.
 // On the command line, you would use the docker run command, but this is just as easy to do from your own apps too.
 // This is the equivalent of typing docker run alpine echo hello world at the command prompt:
-func (c *Container) ContainerCreate(org string, name string, version string, mount string) *ux.State {
+func (c *Container) ContainerCreate(org string, name string, version string, fsmount string) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if name == "" {
 			c.State.SetError("empty container name")
 			break
@@ -253,7 +254,7 @@ func (c *Container) ContainerCreate(org string, name string, version string, mou
 		}
 		if !ok {
 			// Find image since we don't have a container.
-			for range OnlyOnce {
+			for range onlyOnce {
 				ok, c.State = c._Parent.FindImage(org, name, version)
 				if c.State.IsError() {
 					ok = false
@@ -296,8 +297,8 @@ func (c *Container) ContainerCreate(org string, name string, version string, mou
 		tag := fmt.Sprintf("%s/%s:%s", org, c.Name, c.Version)
 		gn := fmt.Sprintf("%s-%s", c.Name, c.Version)
 		var binds []string
-		if mount != DefaultPathNone {
-			binds = append(binds, fmt.Sprintf("%s:%s", mount, DefaultProject))
+		if fsmount != DefaultPathNone {
+			binds = append(binds, fmt.Sprintf("%s:%s", fsmount, DefaultProject))
 		}
 
 		config := container.Config {
@@ -447,7 +448,7 @@ func (c *Container) Stop() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -473,7 +474,7 @@ func (c *Container) Remove() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -507,7 +508,7 @@ func (c *Container) Logs() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -536,7 +537,7 @@ func (c *Container) Commit() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -581,7 +582,7 @@ func (c *Container) GetContainerSsh() (string, *ux.State) {
 		return "", state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var found bool
 		for _, p := range c.Summary.Ports {
 			if p.PrivatePort == 22 {

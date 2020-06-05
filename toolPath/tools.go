@@ -29,7 +29,7 @@ func (c *ToolOsPath) IsNil() *ux.State {
 func ToolNewPath(file ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		f := ReflectPath(file...)
@@ -60,7 +60,7 @@ func ToolNewPath(file ...interface{}) *TypeOsPath {
 func ToolChmod(mode interface{}, path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret.State.SetFunction("")
 
 		f := ReflectPath(path...)

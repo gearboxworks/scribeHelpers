@@ -10,13 +10,13 @@ func (c *TypeOsCopy) Copy() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if !c.Source.Exists() {
 			c.State.SetError("src path not found")
 			break
 		}
 
-		for range OnlyOnce {
+		for range onlyOnce {
 			if c.Destination.NotExists() {
 				break
 			}

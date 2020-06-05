@@ -19,7 +19,7 @@ func (d *Docker) NetworkList(f string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -67,7 +67,7 @@ func (d *Docker) FindNetwork(netName string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if netName == "" {
 			d.State.SetError("empty name")
 			break
@@ -103,7 +103,7 @@ func (d *Docker) NetworkCreate(netName string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		d.State = d.FindNetwork(netName)
 		if d.State.IsError() {
 			break

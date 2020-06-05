@@ -30,7 +30,7 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeSystem {
 	runtime = runtime.EnsureNotNil()
 
 	s := TypeSystem {
-		Procs: NewProcesses(runtime.Debug),
+		Procs: NewProcesses(runtime),
 		Env:   &Environment{},
 
 		State: ux.NewState(runtime.CmdName, runtime.Debug),

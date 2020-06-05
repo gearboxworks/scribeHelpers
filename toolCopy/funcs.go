@@ -4,7 +4,7 @@ package toolCopy
 func (c *TypeOsCopy) SetSourcePath(path ...string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ok = c.Source.SetPath(path...)
 		if !ok {
 			break
@@ -27,7 +27,7 @@ func (c *TypeOsCopy) GetSourcePath() string {
 func (c *TypeOsCopy) SetDestinationPath(path ...string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ok = c.Destination.SetPath(path...)
 		if !ok {
 			break

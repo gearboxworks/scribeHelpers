@@ -9,10 +9,10 @@ import (
 )
 
 
-func (p *State) ResponseToString() *string {
+func (state *State) ResponseToString() *string {
 	var s *string
-	if IsReflectString(p.Response) {
-		s = ReflectString(p.Response)
+	if IsReflectString(state.Response) {
+		s = ReflectString(state.Response)
 	}
 	//if s == nil {
 	//	var ptr string
@@ -20,30 +20,30 @@ func (p *State) ResponseToString() *string {
 	//}
 	return s
 }
-func (p *State) ResponseToArray() *[]string {
+func (state *State) ResponseToArray() *[]string {
 	var s *[]string
-	if IsReflectArray(p.Response) {
-		s = ReflectStringArray(p.Response)
+	if IsReflectArray(state.Response) {
+		s = ReflectStringArray(state.Response)
 	}
 	//if s == nil {
 	//	s = &[]string{}
 	//}
 	return s
 }
-func (p *State) ResponseToByteArray() *[]byte {
+func (state *State) ResponseToByteArray() *[]byte {
 	var s *[]byte
-	if IsReflectArray(p.Response) {
-		s = ReflectByteArray(p.Response)
+	if IsReflectArray(state.Response) {
+		s = ReflectByteArray(state.Response)
 	}
 	//if s == nil {
 	//	s = &[]byte{}
 	//}
 	return s
 }
-func (p *State) ResponseToInt() *int64 {
+func (state *State) ResponseToInt() *int64 {
 	var s *int64
-	if IsReflectArray(p.Response) {
-		s = ReflectInt(p.Response)
+	if IsReflectArray(state.Response) {
+		s = ReflectInt(state.Response)
 	}
 	//if s == nil {
 	//	var ptr int64
@@ -51,10 +51,10 @@ func (p *State) ResponseToInt() *int64 {
 	//}
 	return s
 }
-func (p *State) ResponseToUint() *uint64 {
+func (state *State) ResponseToUint() *uint64 {
 	var s *uint64
-	if IsReflectArray(p.Response) {
-		s = ReflectUint(p.Response)
+	if IsReflectArray(state.Response) {
+		s = ReflectUint(state.Response)
 	}
 	//if s == nil {
 	//	var ptr uint64
@@ -62,10 +62,10 @@ func (p *State) ResponseToUint() *uint64 {
 	//}
 	return s
 }
-func (p *State) ResponseToFloat() *float64 {
+func (state *State) ResponseToFloat() *float64 {
 	var s *float64
-	if IsReflectArray(p.Response) {
-		s = ReflectFloat(p.Response)
+	if IsReflectArray(state.Response) {
+		s = ReflectFloat(state.Response)
 	}
 	//if s == nil {
 	//	var ptr float64

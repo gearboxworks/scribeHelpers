@@ -2,8 +2,8 @@ package toolExec
 
 import (
 	"bytes"
-	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/toolPath"
+	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/toolTypes"
 	"github.com/newclarity/scribeHelpers/ux"
 	"io"
@@ -18,16 +18,16 @@ type TypeExecCommandGetter interface {
 }
 
 type TypeExecCommand struct {
-	exe    string
-	args   []string
+	cmd     *toolPath.TypeOsPath
+	args    []string
 
-	show   bool
-	stdout []byte
-	stderr []byte
-	exit   int
+	show    bool
+	stdout  []byte
+	stderr  []byte
+	exit    int
 
-	Debug  bool
-	State  *ux.State
+	Runtime *toolRuntime.TypeRuntime
+	State   *ux.State
 }
 
 
@@ -35,7 +35,7 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeExecCommand {
 	runtime = runtime.EnsureNotNil()
 
 	ret := &TypeExecCommand {
-		exe:    "",
+		cmd:    toolPath.New(runtime),
 		args:   nil,
 
 		show:   false,
@@ -43,8 +43,7 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeExecCommand {
 		stderr: []byte{},
 		exit:   0,
 
-		Debug:  runtime.Debug,
-
+		Runtime:  runtime,
 		State:   ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	ret.State.SetPackage("")
@@ -56,13 +55,13 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeExecCommand {
 func ReflectExecCommand(ref ...interface{}) *TypeExecCommand {
 	ec := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		s := *toolTypes.ReflectStrings(ref)
 		if len(s) == 0 {
 			break
 		}
 		if len(s) >= 1 {
-			ec.SetPath(s[0])
+			ec.SetCmd(s[0])
 		}
 		if len(s) >= 2 {
 			ec.SetArgs(s[1:]...)
@@ -88,8 +87,8 @@ func (e *TypeExecCommand) IsRunnable() bool {
 	}
 	var ok bool
 
-	for range OnlyOnce {
-		_, err := exec.LookPath(e.exe)
+	for range onlyOnce {
+		_, err := exec.LookPath(e.cmd.GetPath())
 		if err != nil {
 			e.State.SetError("Executable not found.")
 			break
@@ -105,14 +104,9 @@ func (e *TypeExecCommand) Exec(cmd string, args ...string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
-		e.State = e.SetPath(cmd)
+	for range onlyOnce {
+		e.State = e.SetCmd(cmd)
 		if e.State.IsNotOk() {
-			e.State.PrintResponse()
-			break
-		}
-
-		if e.IsRunnable() {
 			e.State.PrintResponse()
 			break
 		}
@@ -123,8 +117,8 @@ func (e *TypeExecCommand) Exec(cmd string, args ...string) *ux.State {
 			break
 		}
 
-		if e.Debug {
-			ux.PrintflnBlue("# Executing: %s %s", e.exe, strings.Join(e.args, " "))
+		if e.Runtime.Debug {
+			ux.PrintflnBlue("# Executing: %s %s", e.cmd, strings.Join(e.args, " "))
 		}
 		e.State = e.Run()
 		if e.State.IsNotOk() {
@@ -142,9 +136,14 @@ func (e *TypeExecCommand) Run() *ux.State {
 		return nil
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
+		if e.IsRunnable() {
+			e.State.PrintResponse()
+			break
+		}
+
 		//c := exec.Command((*cmds)[0], (*cmds)[1:]...)
-		c := exec.Command(e.exe, e.args...)
+		c := exec.Command(e.cmd.GetPath(), e.args...)
 
 		var err error
 		if e.show {
@@ -198,22 +197,59 @@ func (e *TypeExecCommand) SilenceProgress() {
 }
 
 
-func (e *TypeExecCommand) GetExe() string {
-	return e.exe
+func (e *TypeExecCommand) GetCmd() *toolPath.TypeOsPath {
+	return e.cmd
 }
-func (e *TypeExecCommand) GetPath() string {
-	return e.exe
+func (e *TypeExecCommand) GetCmdPath() string {
+	return e.cmd.GetPath()
 }
-func (e *TypeExecCommand) SetPath(path ...string) *ux.State {
+//func (e *TypeExecCommand) GetExe() string {
+//	return e.exe
+//}
+//func (e *TypeExecCommand) GetPath() string {
+//	return e.exe
+//}
+func (e *TypeExecCommand) SetCmd(path ...string) *ux.State {
 	if state := e.IsNil(); state.IsError() {
 		return nil
 	}
 
-	ep := toolPath.ToolNewPath()
-	ep.SetPath(path...)
-	e.exe = ep.GetPath()
+	for range onlyOnce {
+		if e.cmd == nil {
+			e.cmd = toolPath.New(e.Runtime)
+		}
+
+		if e.cmd.SetPath(path...) {
+			e.State.SetError("cannot set cmd path")
+			break
+		}
+
+		if e.cmd.IsRelative() {
+			p, err := exec.LookPath(e.cmd.GetPath())
+			if err != nil {
+				e.State.SetError("Executable not found.")
+				break
+			}
+			if e.cmd.SetPath(p) {
+				e.State.SetError("cannot set cmd path")
+				break
+			}
+		}
+
+		if e.IsRunnable() {
+			// Will set e.State, if error.
+			break
+		}
+	}
+
 	return e.State
 }
+//func (e *TypeExecCommand) SetExe(path ...string) *ux.State {
+//	return e.SetCmd(path...)
+//}
+//func (e *TypeExecCommand) SetPath(path ...string) *ux.State {
+//	return e.SetCmd(path...)
+//}
 
 
 func (e *TypeExecCommand) GetArgs() []string {

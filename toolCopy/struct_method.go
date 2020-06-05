@@ -79,7 +79,7 @@ func _ExecExists(e string) (string, bool) {
 	var path string
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var err error
 		path, err = exec.LookPath(e)
 		if err != nil {
@@ -95,7 +95,7 @@ func _ExecExists(e string) (string, bool) {
 func NewCopyMethod() *TypeCopyMethods {
 	var ret TypeCopyMethods
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		// Set priority of use.
 		ret.All = append(ret.All, _CopyMethodRsync())
 		ret.All = append(ret.All, _CopyMethodTar())
@@ -135,7 +135,7 @@ func (p *TypeCopyMethods) GetAvailable() bool {
 func (p *TypeCopyMethods) SelectMethod(method string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		for _, m := range p.All {
 			if m.Name != method {
 				continue

@@ -10,7 +10,7 @@ import (
 func ReflectString(ref interface{}) *string {
 	var s string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		switch ref.(type) {
 			case []byte:
 				s = ref.(string)
@@ -33,7 +33,7 @@ func ReflectString(ref interface{}) *string {
 func ReflectStrings(ref ...interface{}) *[]string {
 	var sa []string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		for _, r := range ref {
 			sa = append(sa, *ReflectString(r))
 		}
@@ -45,7 +45,7 @@ func ReflectStrings(ref ...interface{}) *[]string {
 func ReflectByteArray(ref interface{}) *[]byte {
 	var s []byte
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		switch ref.(type) {
 			case []byte:
 				s = ref.([]byte)
@@ -68,7 +68,7 @@ func ReflectByteArray(ref interface{}) *[]byte {
 func ReflectBool(ref interface{}) *bool {
 	var b *bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		if value.Kind() != reflect.Bool {
 			break
@@ -84,7 +84,7 @@ func ReflectBool(ref interface{}) *bool {
 func ReflectBoolArg(ref interface{}) bool {
 	var s bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := reflect.ValueOf(ref)
 		switch value.Kind() {
 			case reflect.Bool:

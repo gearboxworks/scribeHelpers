@@ -6,28 +6,28 @@ import (
 
 
 type ToolExecCommand TypeExecCommand
-func (g *ToolExecCommand) Reflect() *TypeExecCommand {
-	return (*TypeExecCommand)(g)
+func (e *ToolExecCommand) Reflect() *TypeExecCommand {
+	return (*TypeExecCommand)(e)
 }
 func (e *TypeExecCommand) Reflect() *ToolExecCommand {
 	return (*ToolExecCommand)(e)
 }
 
-func (c *ToolExecCommand) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(c); state.IsError() {
+func (e *ToolExecCommand) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(e); state.IsError() {
 		return state
 	}
-	c.State = c.State.EnsureNotNil()
-	return c.State
+	e.State = e.State.EnsureNotNil()
+	return e.State
 }
 
 
 // Usage:
 //		{{ $output := ExecCommand "ps %s" "-eaf" ... }}
 func ToolExecCmd(cmd ...interface{}) *ux.State {
-	ret := New(false)
+	ret := New(nil)
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ec := ReflectExecCommand(cmd...)
 		if ec == nil {
 			break
@@ -71,7 +71,7 @@ func (e *TypeExecCommand) ExitOnWarning() string {
 // Usage:
 //		{{ OsExit 1 }}
 func ToolOsExit(e ...interface{}) string {
-	for range OnlyOnce {
+	for range onlyOnce {
 		value := ux.ReflectInt(e)
 		ux.Exit(*value)
 	}

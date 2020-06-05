@@ -79,7 +79,7 @@ func (ghr *GitHubRepo) ShowReleases() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ux.Printf("Latest release: %v\n\n", ghr.Latest)
 		for _, release := range ghr.Map {
 			ux.Printf("Assets for release:	%v\n", release.Instance.GetName())
@@ -118,7 +118,7 @@ func (r *Release) ShowRelease() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if r.Instance.Name == nil {
 			r.State.SetError("no release version specified")
 			break
@@ -151,7 +151,7 @@ func (ghr *GitHubRepo) UpdateReleases() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if ghr.BaseDir == nil {
 			ghr.BaseDir = toolPath.ToolNewPath("")
 			_ = ghr.BaseDir.AppendPath("iso")
@@ -236,7 +236,7 @@ func (ghr *GitHubRepo) SelectRelease(selector ReleaseSelector) *Release {
 		return &Release{ State: state }
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		//err = ghr.UpdateReleases()
 		//if err != nil {
 		//	break
@@ -256,7 +256,7 @@ func (r *Release) GetIso() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if r.File.GetPath() == "" {
 			r.State.SetError(fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath()))
 			break
@@ -355,7 +355,7 @@ func (r *Release) IsIsoFilePresent() (int, *ux.State) {
 		return 0, state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if r.File.GetPath() == "" {
 			r.State.SetError( fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath()))
 			break
@@ -408,7 +408,7 @@ func (ghr *GitHubRepo) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ghr.State = ghr.State.EnsureNotNil()
 	}
 
@@ -430,7 +430,7 @@ func (r *Release) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		r.State = r.State.EnsureNotNil()
 	}
 

@@ -5,7 +5,7 @@ import (
 	"text/template"
 )
 
-const OnlyOnce = "1"
+const onlyOnce = "1"
 const ToolPrefix = "Tool"
 var GetTools template.FuncMap
 func init() {

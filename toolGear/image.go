@@ -52,7 +52,7 @@ func NewImage(runtime *toolRuntime.TypeRuntime) *Image {
 }
 
 func (i *Image) EnsureNotNil() *Image {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if i == nil {
 			i = NewImage(nil)
 		}
@@ -74,7 +74,7 @@ func (i *Image) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		i.State = i.State.EnsureNotNil()
 
 		if i.ID == "" {
@@ -107,7 +107,7 @@ func (i *Image) Status() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if i.Summary == nil {
 			ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 			//noinspection GoDeferInLoop
@@ -171,7 +171,7 @@ func (i *Image) Pull() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var repo string
 		if i.Version == "" {
 			repo = fmt.Sprintf("gearboxworks/%s", i.Name)
@@ -271,7 +271,7 @@ func (i *Image) ImageAuthPull() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		authConfig := types.AuthConfig{
 			Username: "username",
 			Password: "password",
@@ -312,7 +312,7 @@ func (i *Image) Remove() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
