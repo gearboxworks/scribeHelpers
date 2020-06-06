@@ -9,7 +9,7 @@ import (
 
 func (p *TypeOsPath) Remove() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {
@@ -51,7 +51,7 @@ func (p *TypeOsPath) Remove() *ux.State {
 
 func (p *TypeOsPath) RemoveFile() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {
@@ -97,7 +97,7 @@ func (p *TypeOsPath) RemoveFile() *ux.State {
 
 func (p *TypeOsPath) RemoveDir() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {

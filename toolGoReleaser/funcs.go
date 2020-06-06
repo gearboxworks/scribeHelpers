@@ -126,7 +126,15 @@ func (gr *TypeGoReleaser) Build(path ...string) *ux.State {
 		}
 
 		p := e.GetPaths()
+		if len(p) == 0 {
+			ux.PrintflnYellow("No '%s' files found. Aborting.", DefaultFile)
+			break
+		}
+
 		ux.PrintflnBlue("Building with GoReleaser in %d paths...", len(p))
+		for _, pp := range p {
+			ux.PrintflnBlue("%s => %s", pp.GetDirname(), pp.GetFilename())
+		}
 
 		gr.State = e.Run()
 		if gr.State.IsNotOk() {

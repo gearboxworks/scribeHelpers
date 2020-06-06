@@ -44,7 +44,7 @@ func (c *ToolOsCopy) SetSourcePath(src ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
-	c.State.SetFunction("")
+	c.State.SetFunction()
 
 	for range onlyOnce {
 		p := toolTypes.ReflectStrings(src...)
@@ -65,7 +65,7 @@ func (c *ToolOsCopy) SetSource(dest ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
-	c.State.SetFunction("")
+	c.State.SetFunction()
 	return c.SetSourcePath(dest...)
 }
 
@@ -77,7 +77,7 @@ func (c *ToolOsCopy) SetDestinationPath(dest ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
-	c.State.SetFunction("")
+	c.State.SetFunction()
 
 	for range onlyOnce {
 		p := toolTypes.ReflectStrings(dest...)
@@ -106,7 +106,7 @@ func (c *ToolOsCopy) SetExcludePaths(exclude ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
-	c.State.SetFunction("")
+	c.State.SetFunction()
 
 	for range onlyOnce {
 		e := toolTypes.ReflectStrings(exclude...)
@@ -130,7 +130,7 @@ func (c *ToolOsCopy) SetIncludePaths(include ...interface{}) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
-	c.State.SetFunction("")
+	c.State.SetFunction()
 
 	for range onlyOnce {
 		i := toolTypes.ReflectStrings(include...)
@@ -153,7 +153,7 @@ func (c *ToolOsCopy) Run() *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
-	c.State.SetFunction("")
+	c.State.SetFunction()
 
 	for range onlyOnce {
 		c.State = c.Source.StatPath()

@@ -63,7 +63,7 @@ func (e *ToolExecCommand) AppendCommands(cmd ...interface{}) *ux.State {
 	if state := e.IsNil(); state.IsError() {
 		return state
 	}
-	e.State.SetFunction("")
+	e.State.SetFunction()
 
 	for range onlyOnce {
 		a := toolTypes.ReflectStrings(cmd...)
@@ -81,7 +81,7 @@ func (e *ToolExecCommand) Run() *ux.State {
 	if state := e.IsNil(); state.IsError() {
 		return state
 	}
-	e.State.SetFunction("")
+	e.State.SetFunction()
 
 	for range onlyOnce {
 		file, err := ioutil.TempFile("tmp", "scribe-shell")

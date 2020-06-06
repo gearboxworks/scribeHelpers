@@ -8,6 +8,7 @@ var Types = map[string]reflect.Type{
 	"RuntimeDebug": reflect.TypeOf((*RuntimeDebug)(nil)).Elem(),
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
 	"StateGetter": reflect.TypeOf((*StateGetter)(nil)).Elem(),
+	"TypeResponse": reflect.TypeOf((*TypeResponse)(nil)).Elem(),
 	"Ux": reflect.TypeOf((*Ux)(nil)).Elem(),
 	"UxGetter": reflect.TypeOf((*UxGetter)(nil)).Elem(),
 }
@@ -85,7 +86,6 @@ var Variables = map[string]reflect.Value{
 
 var Consts = map[string]reflect.Value{
 	"DefaultSeparator": reflect.ValueOf(DefaultSeparator),
-	"onlyOnce": reflect.ValueOf(onlyOnce),
 	"StateCreated": reflect.ValueOf(StateCreated),
 	"StateDead": reflect.ValueOf(StateDead),
 	"StateExited": reflect.ValueOf(StateExited),

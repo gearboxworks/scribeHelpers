@@ -19,11 +19,11 @@ type SelfUpdateArgs struct {
 }
 
 type TypeSelfUpdate struct {
-	name       *stringValue
-	version    *versionValue
-	sourceRepo *stringValue
-	binaryRepo *stringValue
-	logging    *flagValue
+	name       *StringValue
+	version    *VersionValue
+	sourceRepo *StringValue
+	binaryRepo *StringValue
+	logging    *FlagValue
 
 	useRepo    string
 

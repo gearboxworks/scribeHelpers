@@ -6,4 +6,4 @@ const (
 	LatestVersion = "latest"
 )
 
-var defaultFalse = flagValue(false)
+var defaultFalse = FlagValue(false)

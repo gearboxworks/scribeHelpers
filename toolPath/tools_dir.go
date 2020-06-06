@@ -8,7 +8,7 @@ func ToolChdir(dir ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range onlyOnce {
-		ret.State.SetFunction("")
+		ret.State.SetFunction()
 
 		f := ReflectPath(dir...)
 		if f == nil {
@@ -31,7 +31,7 @@ func ToolGetCwd() *TypeOsPath {
 	ret := New(nil)
 
 	for range onlyOnce {
-		ret.State.SetFunction("")
+		ret.State.SetFunction()
 
 		state := ret.GetCwd()
 		ret.State = state
@@ -51,7 +51,7 @@ func ToolIsCwd() *TypeOsPath {
 	ret := New(nil)
 
 	for range onlyOnce {
-		ret.State.SetFunction("")
+		ret.State.SetFunction()
 
 		ok := ret.IsCwd()
 		ret.State.SetResponse(&ok)
@@ -68,7 +68,7 @@ func ToolCreateDir(path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range onlyOnce {
-		ret.State.SetFunction("")
+		ret.State.SetFunction()
 
 		f := ReflectPath(path...)
 		if f == nil {
@@ -94,7 +94,7 @@ func ToolRemoveDir(path ...interface{}) *TypeOsPath {
 	ret := New(nil)
 
 	for range onlyOnce {
-		ret.State.SetFunction("")
+		ret.State.SetFunction()
 
 		f := ReflectPath(path...)
 		if f == nil {

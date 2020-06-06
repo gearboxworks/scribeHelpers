@@ -43,7 +43,7 @@ func DiscoverTools() *ux.State {
 	state := ux.NewState("scribe", false)
 	var tfm template.FuncMap
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		// Define additional template functions.
 		tfm = sprig.TxtFuncMap()
 
@@ -111,7 +111,7 @@ func AddTools(i interface{}) *ux.State {
 	state := ux.NewState("scribe", false)
 	var tfm template.FuncMap
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		//for name, fn := range deploywp.GetTools {
 		//	tfm[name] = fn
 		//}
@@ -127,7 +127,7 @@ func AddTools(i interface{}) *ux.State {
 func PrintTools() string {
 	var ret string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ret += ux.SprintfCyan("List of defined template functions:\n")
 
 		state := DiscoverTools()
@@ -136,15 +136,10 @@ func PrintTools() string {
 			break
 		}
 
-		var tfm *template.FuncMap
-		resp := state.GetResponse()
-		fmt.Printf("type: %s - %s\n", resp.GetType().String(), resp.GetType().Name())
-		if !resp.IsOfType("template.FuncMap") {
-			ret += ux.SprintfRed("Error discovering Tools - invalid return map.\n")
-			break
+		tfm := responseToFuncMap(state.GetResponse())
+		if tfm == nil {
+			ret += ux.SprintfRed("Error discovering Tools.\n")
 		}
-		tfm = resp.GetData().(*template.FuncMap)
-
 
 		files := make(Files)
 		for name, fn := range *tfm {
@@ -190,10 +185,24 @@ func (a SortedTools) Less(i, j int) bool {
 }
 
 
+func responseToFuncMap(r *ux.TypeResponse) *template.FuncMap {
+	var tfm *template.FuncMap
+
+	for range onlyOnce {
+		if !r.IsOfType("template.FuncMap") {
+			break
+		}
+		tfm = r.GetData().(*template.FuncMap)
+	}
+
+	return tfm
+}
+
+
 func _GetFunctionInfo(i interface{}) *Tool {
 	var Tool Tool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ptr := reflect.ValueOf(i).Pointer()
 		ptrs := reflect.ValueOf(i).String()
 		ptrn := runtime.FuncForPC(ptr).Name()

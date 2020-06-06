@@ -8,6 +8,24 @@ var Types = map[string]reflect.Type{
 }
 
 var Functions = map[string]reflect.Value{
+	"PrintTestResult": reflect.ValueOf(PrintTestResult),
+	"PrintTestStart": reflect.ValueOf(PrintTestStart),
+	"PrintTestStop": reflect.ValueOf(PrintTestStop),
+	"Test_NewMultiExec": reflect.ValueOf(Test_NewMultiExec),
+	"Test_NewState": reflect.ValueOf(Test_NewState),
+	"Test_loadTools": reflect.ValueOf(Test_loadTools),
+	"Test_toolCopy": reflect.ValueOf(Test_toolCopy),
+	"Test_toolDocker": reflect.ValueOf(Test_toolDocker),
+	"Test_toolExec": reflect.ValueOf(Test_toolExec),
+	"Test_toolGear": reflect.ValueOf(Test_toolGear),
+	"Test_toolGit": reflect.ValueOf(Test_toolGit),
+	"Test_toolGitHub": reflect.ValueOf(Test_toolGitHub),
+	"Test_toolPath": reflect.ValueOf(Test_toolPath),
+	"Test_toolPaths": reflect.ValueOf(Test_toolPaths),
+	"Test_toolPrompt": reflect.ValueOf(Test_toolPrompt),
+	"Test_toolRuntime": reflect.ValueOf(Test_toolRuntime),
+	"Test_toolService": reflect.ValueOf(Test_toolService),
+	"Test_toolSystem": reflect.ValueOf(Test_toolSystem),
 }
 
 var Variables = map[string]reflect.Value{

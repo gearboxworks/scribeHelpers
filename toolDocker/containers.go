@@ -59,7 +59,7 @@ func (d *Docker) ContainerList(f string) (int, *ux.State) {
 					sshPort = fmt.Sprintf("%d", p.PublicPort)
 					continue
 				}
-				//ports += fmt.Sprintf("%s://%s:%d => %d\n", p.ofType, p.IP, p.PublicPort, p.PrivatePort)
+				//ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
 				if p.IP == "0.0.0.0" {
 					ports += fmt.Sprintf("%d => %d\n", p.PublicPort, p.PrivatePort)
 				} else {
@@ -72,7 +72,7 @@ func (d *Docker) ContainerList(f string) (int, *ux.State) {
 
 			var mounts string
 			for _, m := range c.Mounts {
-				// ms += fmt.Sprintf("%s(%s) host:%s => container:%s (RW:%v)\n", m.Name, m.ofType, m.Source, m.Destination, m.RW)
+				// ms += fmt.Sprintf("%s(%s) host:%s => container:%s (RW:%v)\n", m.Name, m.Type, m.Source, m.Destination, m.RW)
 				mounts += fmt.Sprintf("host:%s\n\t=> container:%s (RW:%v)\n", m.Source, m.Destination, m.RW)
 			}
 

@@ -4,7 +4,7 @@ Problem: Go reflection does not support enumerating types, variables and functio
 pkgreflect generates a file named pkgreflect.go in every parsed package directory.
 This file contains the following maps of exported names to reflection types/values:
 
-	var Types = map[string]reflect.ofType{ ... }
+	var Types = map[string]reflect.Type{ ... }
 	var Functions = map[string]reflect.Value{ ... }
 	var Variables = map[string]reflect.Value{ ... }
 
@@ -33,6 +33,7 @@ import (
 	"strings"
 )
 
+const DefaultPkgReflectFile = "pkgreflect.go"
 
 type PkgReflect struct {
 	//Paths      []toolPath.TypeOsPath
@@ -54,11 +55,11 @@ type PkgReflect struct {
 
 func PackageReflect(pr PkgReflect, paths ...string) *ux.State {
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		pr.State = ux.NewState("scribe", false)
 
 		if pr.Gofile == "" {
-			pr.Gofile = "pkgreflect.go"
+			pr.Gofile = DefaultPkgReflectFile
 		}
 
 		if len(paths) == 0 {
@@ -66,11 +67,15 @@ func PackageReflect(pr PkgReflect, paths ...string) *ux.State {
 			break
 		}
 
+		ux.PrintflnBlue("Running pkgreflect on paths...")
 		for _, p := range paths {
+			ux.PrintfBlue("%s - ", p)
 			pr.State = pr.parseDir(p)
 			if pr.State.IsNotOk() {
-				break
+				ux.PrintflnRed("FAILED")
+				continue
 			}
+			ux.PrintflnOk("PASSED")
 		}
 	}
 
@@ -80,7 +85,7 @@ func PackageReflect(pr PkgReflect, paths ...string) *ux.State {
 
 func (pr *PkgReflect) parseDir(dir string) *ux.State {
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		dirFile, err := os.Open(dir)
 		if err != nil {
 			pr.State.SetError("PackageReflect: Cannot open directory '%s'", dir)
@@ -117,7 +122,7 @@ func (pr *PkgReflect) parseDir(dir string) *ux.State {
 
 			// Types
 			if !pr.Notypes {
-				_, _ = fmt.Fprintln(&buf, "var Types = map[string]reflect.ofType{")
+				_, _ = fmt.Fprintln(&buf, "var Types = map[string]reflect.Type{")
 				pr.print(&buf, pkg, ast.Typ, "\t\"%s\": reflect.TypeOf((*%s)(nil)).Elem(),\n")
 				_, _ = fmt.Fprintln(&buf, "}")
 				_, _ = fmt.Fprintln(&buf, "")
@@ -189,7 +194,7 @@ func (pr *PkgReflect) parseDir(dir string) *ux.State {
 
 func (pr *PkgReflect) print(w io.Writer, pkg *ast.Package, kind ast.ObjKind, format string) *ux.State {
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var names []string
 		for _, f := range pkg.Files {
 			for name, object := range f.Scope.Objects {
@@ -212,7 +217,7 @@ func (pr *PkgReflect) print(w io.Writer, pkg *ast.Package, kind ast.ObjKind, for
 func (pr *PkgReflect) filter(info os.FileInfo) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		name := info.Name()
 
 		if info.IsDir() {

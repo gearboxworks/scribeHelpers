@@ -22,4 +22,5 @@ const (
 	gitCommandFetch = "fetch"
 	gitCommandPull = "pull"
 	gitCommandPush = "push"
+	gitCommandRevParse = "rev-parse"
 )

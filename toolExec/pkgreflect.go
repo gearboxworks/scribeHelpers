@@ -8,10 +8,12 @@ var Types = map[string]reflect.Type{
 	"ToolExecCommand": reflect.TypeOf((*ToolExecCommand)(nil)).Elem(),
 	"TypeExecCommand": reflect.TypeOf((*TypeExecCommand)(nil)).Elem(),
 	"TypeExecCommandGetter": reflect.TypeOf((*TypeExecCommandGetter)(nil)).Elem(),
+	"TypeMultiExecCommand": reflect.TypeOf((*TypeMultiExecCommand)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
 	"New": reflect.ValueOf(New),
+	"NewMultiExec": reflect.ValueOf(NewMultiExec),
 	"ReflectExecCommand": reflect.ValueOf(ReflectExecCommand),
 	"ToolExec": reflect.ValueOf(ToolExec),
 	"ToolExecBash": reflect.ValueOf(ToolExecBash),
@@ -25,7 +27,6 @@ var Variables = map[string]reflect.Value{
 }
 
 var Consts = map[string]reflect.Value{
-	"onlyOnce": reflect.ValueOf(onlyOnce),
 	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

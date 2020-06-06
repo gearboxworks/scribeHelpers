@@ -52,8 +52,7 @@ type State struct {
 	_Separator  string
 	OutputArray []string
 	response    TypeResponse
-	Response    interface{}
-	//responseType reflect.ofType
+	//Response    interface{}
 }
 
 type RuntimeDebug struct {
@@ -184,8 +183,9 @@ func (state *State) SetPackage(s string) {
 		state.prefixArray = append(state.prefixArray, state.prefix)
 	}
 }
-func (state *State) SetFunction(s string) {
-	if s == "" {
+func (state *State) SetFunction(s ...string) {
+	st := strings.Join(s, " ")
+	if st == "" {
 		// Discover function name.
 		//pc, file, no, ok := runtime.Caller(1)
 		pc, _, _, ok := runtime.Caller(1)
@@ -193,20 +193,20 @@ func (state *State) SetFunction(s string) {
 			//s = file + ":" + string(no)
 			details := runtime.FuncForPC(pc)
 			foo := details.Name()
-			s = filepath.Base(foo)
-			sa := strings.Split(s, ".")
+			st = filepath.Base(foo)
+			sa := strings.Split(st, ".")
 			switch {
 				case len(sa) > 2:
-					s = sa[2]
+					st = sa[2]
 				case len(sa) > 1:
-					s = sa[1]
+					st = sa[1]
 				case len(sa) > 0:
-					s = sa[0]
+					st = sa[0]
 			}
 		}
 	}
 
-	state._Function = s
+	state._Function = st
 	if state._Package == "" {
 		state.prefix = state._Function + "()"
 	} else {
@@ -318,7 +318,7 @@ func (state *State) SprintResponse() string {
 	return state.Sprint()
 }
 func (state *State) PrintResponse() {
-	_, _ = fmt.Fprintf(os.Stdout, state.Sprint() + "\n")
+	_, _ = fmt.Fprintf(os.Stdout, state.Sprint())
 }
 
 

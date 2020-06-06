@@ -16,13 +16,13 @@ func TestToolExecCommand(t *testing.T) {
 			ExitCode:    0,
 			Output:      "",
 			OutputArray: nil,
-			Response:    nil,
+			//response:    nil,
 		}},
 		{[]string{"/usr/bin/false"}, ux.State {
 			ExitCode:    1,
 			Output:      "",
 			OutputArray: nil,
-			Response:    nil,
+			//response:    nil,
 		}},
 	} {
 		returned := ToolExecCmd(c.cmd)

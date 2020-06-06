@@ -1,7 +1,7 @@
 package toolRuntime
 
 import (
-	"fmt"
+	"github.com/blang/semver"
 	"github.com/newclarity/scribeHelpers/ux"
 	"path"
 	"path/filepath"
@@ -9,8 +9,18 @@ import (
 )
 
 
+type VersionValue semver.Version
+
+
+func (r *TypeRuntime) GetSemVer() *VersionValue {
+	v := (VersionValue)(semver.MustParse(r.CmdVersion))
+	return &v
+}
+
+
 func (r *TypeRuntime) PrintNameVersion() {
-	fmt.Printf("%s %s\n", ux.SprintfBlue("%s ", r.CmdName), ux.SprintfCyan("v%s", r.CmdVersion))
+	ux.PrintfBlue("%s ", r.CmdName)
+	ux.PrintflnCyan("v%s", r.CmdVersion)
 }
 
 

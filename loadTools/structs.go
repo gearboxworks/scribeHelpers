@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-const OnlyOnce = "1"
+const onlyOnce = "1"
 
 
 type TypeScribeArgs struct {
@@ -16,6 +16,7 @@ type TypeScribeArgs struct {
 	TemplateRef     *template.Template
 	Output          *TypeArgFile
 	OutputFh        *os.File
+	WorkingPath     *TypeArgFile
 
 	ExecShell      bool // Cmd: "run"
 	Chdir          bool // Flag: --chdir
@@ -50,6 +51,7 @@ func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
 		TemplateRef:    nil,
 		Output:         &TypeArgFile{State: ux.NewState(binary, debugFlag)},
 		OutputFh:       nil,
+		WorkingPath:    &TypeArgFile{State: ux.NewState(binary, debugFlag)},
 
 		ExecShell:      false,
 		Chdir:          false,

@@ -8,7 +8,7 @@ import (
 
 func (p *TypeOsPath) Chdir() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {
@@ -48,7 +48,7 @@ func (p *TypeOsPath) Chdir() *ux.State {
 
 func (p *TypeOsPath) GetCwd() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {
@@ -57,7 +57,7 @@ func (p *TypeOsPath) GetCwd() *ux.State {
 
 
 		var cwd string
-		p.State.SetResponse(&cwd)
+		//p.State.SetResponse(&cwd)
 		var err error
 		cwd, err = os.Getwd()
 		p.State.SetError(err)
@@ -77,16 +77,19 @@ func (p *TypeOsPath) IsCwd() bool {
 	var ok bool
 
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 
-		state := p.GetCwd()
-		if state.IsError() {
+		cwd, err := os.Getwd()
+		p.State.SetError(err)
+		if p.State.IsError() {
 			break
 		}
 
-		if state.Response != p._Path {
+		if cwd != p._Path {
 			break
 		}
+
+		ok = true
 	}
 
 	return ok
@@ -95,7 +98,7 @@ func (p *TypeOsPath) IsCwd() bool {
 
 func (p *TypeOsPath) Mkdir() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {

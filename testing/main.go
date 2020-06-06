@@ -100,7 +100,7 @@ func Test_NewState() {
 
 	t1 := []string{"1", "2", "3", "4"}
 	Test.SetResponse(&t1)
-	t1r := Test.GetResponse()
+	t1r := Test.GetResponse()	// @TODO - TO CHECK
 	t1t := Test.GetResponseType()
 	t1d := Test.GetResponseData()
 	fmt.Printf("Test.GetResponse().GetType() - Name:%s String:%s\n",

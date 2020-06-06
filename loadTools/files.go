@@ -16,7 +16,7 @@ func (at *TypeScribeArgs) LoadJsonFile() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if at.JsonStruct == nil {
 			at.State.SetError("Json structure is nil")
 			break
@@ -49,7 +49,7 @@ func (at *TypeScribeArgs) LoadTemplateFile() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if at.JsonStruct == nil {
 			at.State.SetError("Json structure is nil")
 			break
@@ -86,7 +86,7 @@ func (at *TypeScribeArgs) LoadOutputFile() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if at.JsonStruct == nil {
 			at.State.SetError("Json structure is nil")
 			break
@@ -132,6 +132,7 @@ type TypeArgFile struct {
 	Filename string
 	String   string
 	isFile   bool
+	isDir    bool
 	isString bool
 
 	State    *ux.State
@@ -150,7 +151,7 @@ func (at *TypeArgFile) IsNil() *ux.State {
 func (at *TypeArgFile) IsOk() bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if at.File == nil {
 			ok = false
 			break
@@ -184,6 +185,22 @@ func (at *TypeArgFile) ChangeSuffix(suffix string) {
 }
 
 
+func (at *TypeArgFile) GetPath() string {
+	return at.File.GetPath()
+}
+func (at *TypeArgFile) GetPathAbs() string {
+	return at.File.GetPathAbs()
+}
+func (at *TypeArgFile) GetPathRel() string {
+	return at.File.GetPathRel()
+}
+
+
+func (at *TypeArgFile) Exists() bool {
+	return at.File.Exists()
+}
+
+
 func (at *TypeArgFile) IsAFile() bool {
 	var ok bool
 	if at.File.Exists() {
@@ -205,7 +222,7 @@ func (at *TypeArgFile) IsAString() bool {
 func (at *TypeArgFile) IsStdFd() bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if at.File.Exists() {
 			break
 		}
@@ -235,7 +252,7 @@ func (at *TypeArgFile) IsStdin() bool {
 func (at *TypeArgFile) isAString(arg string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ok = isAString(arg)
 		if ok {
 			break
@@ -271,7 +288,7 @@ func (at *TypeArgFile) isAString(arg string) bool {
 func isAString(arg string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if arg == "" {
 			ok = false
 			break
@@ -295,9 +312,15 @@ func isAString(arg string) bool {
 
 
 func (at *TypeArgFile) SetInputFile(file string, remove bool) *ux.State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		if file == "" {
 			at.State.SetError("No input file specified.")
+			break
+		}
+
+		if at.Filename == SelectIgnore {
+			at.isFile = false
+			at.isString = true
 			break
 		}
 
@@ -345,7 +368,7 @@ func (at *TypeArgFile) SetInputFile(file string, remove bool) *ux.State {
 
 func (at *TypeArgFile) SetOutputFile(file string, overwrite bool) *ux.State {
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if file == "" {
 			// Assume STDOUT
 			file = DefaultOutFile
@@ -368,6 +391,44 @@ func (at *TypeArgFile) SetOutputFile(file string, overwrite bool) *ux.State {
 		if overwrite {
 			at.State.SetOk("Output file '%s' set to writeable.", at.Filename)
 			at.File.SetOverwriteable()
+		}
+	}
+
+	return at.State
+}
+
+
+func (at *TypeArgFile) SetWorkingPath(file string, changeDir bool) *ux.State {
+
+	for range onlyOnce {
+		if file == "" {
+			file = DefaultWorkingPath
+		}
+
+		if at.File == nil {
+			at.File = toolPath.ToolNewPath(file)
+		}
+		at.isDir = true
+
+		at.State = at.File.StatPath()
+		if at.File.NotExists() {
+			at.State.SetError("Error directory '%s' does not exist.")
+			break
+		}
+
+		if file == DefaultWorkingPath {
+			// No need to change dir to "."
+			break
+		}
+
+		if !changeDir {
+			break
+		}
+
+		at.State = at.File.Chdir()
+		if at.State.IsNotOk() {
+			at.State.SetError("Error changing directory: %s")
+			break
 		}
 	}
 

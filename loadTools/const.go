@@ -11,6 +11,7 @@ const (
 	DefaultJsonFile 		= "scribe.json"
 	DefaultTemplateFile 	= "scribe.tmpl"
 	DefaultOutFile 			= "/dev/stdout"
+	DefaultWorkingPath	    = "."
 
 	DefaultJsonFileSuffix 		= ".json"
 	DefaultTemplateFileSuffix 	= ".tmpl"
@@ -23,10 +24,12 @@ const (
 	CmdBuild 			= "build"
 	CmdPush 			= "push"
 	CmdRelease 			= "release"
+	CmdSelfUpdate		= "selfupdate"
 
 	FlagJsonFile     	= "json"
 	FlagTemplateFile	= "template"
 	FlagOutputFile	    = "out"
+	FlagWorkingPath	    = "path"
 
 	FlagChdir       	= "chdir"
 	FlagForce 			= "force"

@@ -99,7 +99,7 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 		}
 
 		ret.State.SetPackage("")
-		ret.State.SetFunction("")
+		ret.State.SetFunction()
 
 		// Instead of creating every time, let's cache the initial result in a global variable.
 		globalRuntime = ret
@@ -119,63 +119,6 @@ func (r *TypeRuntime) SetRepos(source string, binary string) *ux.State {
 	return r.State
 }
 
-
-// func New(binary string, version string, debugFlag bool) *TypeRuntime {
-//	ret := &TypeRuntime{}
-//
-//	for range onlyOnce {
-//		if globalRuntime == nil {
-//			// Instead of creating every time, let's cache the initial result in a global variable.
-//			ret = globalRuntime
-//		}
-//
-//		ret.State = ux.NewState(binary, debugFlag)
-//		ret.State.SetPackage("")
-//		ret.State.SetFunction("")
-//
-//		ret.CmdName = binary	// defaults.BinaryName
-//		ret.CmdVersion = version	// defaults.BinaryVersion
-//
-//		var err error
-//		ret.Cmd, err = osext.Executable()
-//		if err != nil {
-//			ret.State.SetError(err)
-//			break
-//		}
-//		//ret.Cmd, err = os.Executable()
-//		//if err != nil {
-//		//	ret.State.SetError(err)
-//		//	break
-//		//}
-//		//ret.Cmd, err = filepath.Abs(ret.Cmd)
-//		//if err != nil {
-//		//	ret.State.SetError(err)
-//		//	break
-//		//}
-//
-//		ret.CmdDir = path.Dir(ret.Cmd)
-//		ret.CmdFile = path.Base(ret.Cmd)
-//
-//		ret.FullArgs = os.Args[1:]
-//		ret.Args = ret.FullArgs
-//
-//		ret.Env = os.Environ()
-//		ret.EnvMap = make(Environment)
-//		for _, item := range os.Environ() {
-//			s := strings.SplitN(item, "=", 2)
-//			ret.EnvMap[s[0]] = s[1]
-//		}
-//
-//		ret.TimeStamp= time.Now()
-//		//ret.Epoch = now.Unix()
-//		//ret.TimeStamp = now.Format("2006-01-02T15:04:05-0700")
-//
-//		// Instead of creating every time, let's cache the initial result in a global variable.
-//		globalRuntime = &ret
-//	}
-//
-//	return &ret
-//}
 
 func (r *TypeRuntime) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(r); state.IsError() {

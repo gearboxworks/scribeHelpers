@@ -10,7 +10,7 @@ import (
 
 func (p *TypeOsPath) StatPath() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if p._Path == "" {
@@ -69,7 +69,7 @@ func (p *TypeOsPath) StatPath() *ux.State {
 
 func (p *TypeOsPath) Chmod(m os.FileMode) *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {

@@ -25,6 +25,8 @@ var Types = map[string]reflect.Type{
 }
 
 var Functions = map[string]reflect.Value{
+	"GitClone": reflect.ValueOf(GitClone),
+	"GitOpen": reflect.ValueOf(GitOpen),
 	"New": reflect.ValueOf(New),
 	"ReflectToolGit": reflect.ValueOf(ReflectToolGit),
 	"ToolNewGit": reflect.ValueOf(ToolNewGit),
@@ -37,7 +39,6 @@ var Variables = map[string]reflect.Value{
 var Consts = map[string]reflect.Value{
 	"LockMsg": reflect.ValueOf(LockMsg),
 	"LockTag": reflect.ValueOf(LockTag),
-	"onlyOnce": reflect.ValueOf(onlyOnce),
 	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

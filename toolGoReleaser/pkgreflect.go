@@ -21,7 +21,8 @@ var Variables = map[string]reflect.Value{
 }
 
 var Consts = map[string]reflect.Value{
-	"onlyOnce": reflect.ValueOf(onlyOnce),
+	"DefaultCmd": reflect.ValueOf(DefaultCmd),
+	"DefaultFile": reflect.ValueOf(DefaultFile),
 	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

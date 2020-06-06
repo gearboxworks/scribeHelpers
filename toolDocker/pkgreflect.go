@@ -31,7 +31,6 @@ var Consts = map[string]reflect.Value{
 	"DefaultPathNone": reflect.ValueOf(DefaultPathNone),
 	"DefaultProject": reflect.ValueOf(DefaultProject),
 	"DefaultTimeout": reflect.ValueOf(DefaultTimeout),
-	"onlyOnce": reflect.ValueOf(onlyOnce),
 	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

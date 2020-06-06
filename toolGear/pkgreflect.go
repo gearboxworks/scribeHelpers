@@ -61,7 +61,6 @@ var Consts = map[string]reflect.Value{
 	"IsoFileDownloaded": reflect.ValueOf(IsoFileDownloaded),
 	"IsoFileIsDownloading": reflect.ValueOf(IsoFileIsDownloading),
 	"IsoFileNeedsToDownload": reflect.ValueOf(IsoFileNeedsToDownload),
-	"onlyOnce": reflect.ValueOf(onlyOnce),
 	"ProviderDocker": reflect.ValueOf(ProviderDocker),
 	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }

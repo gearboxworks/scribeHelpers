@@ -2,67 +2,67 @@ package toolSelfUpdate
 
 import "github.com/blang/semver"
 
-type stringValue string
-type versionValue semver.Version
-type flagValue bool
+type StringValue string
+type VersionValue semver.Version
+type FlagValue bool
 
 
-func ReflectStringValue(ref interface{}) *stringValue {
-	var ret *stringValue
+func ReflectStringValue(ref interface{}) *StringValue {
+	var ret *StringValue
 	switch ref.(type) {
 		case *[]byte:
-			ret = ref.(*stringValue)
+			ret = ref.(*StringValue)
 		case *string:
-			ret = ref.(*stringValue)
+			ret = ref.(*StringValue)
 		case []byte:
-			ret = ref.(*stringValue)
+			ret = ref.(*StringValue)
 		case string:
-			ret = ref.(*stringValue)
+			ret = ref.(*StringValue)
 	}
 	return ret
 }
 
 
-func ReflectVersionValue(ref interface{}) *versionValue {
-	var ret versionValue
+func ReflectVersionValue(ref interface{}) *VersionValue {
+	var ret VersionValue
 	switch ref.(type) {
 		case *[]byte:
-			ret = versionValue(semver.MustParse(*(ref.(*string))))
+			ret = VersionValue(semver.MustParse(*(ref.(*string))))
 		case *string:
-			ret = versionValue(semver.MustParse(*(ref.(*string))))
+			ret = VersionValue(semver.MustParse(*(ref.(*string))))
 		case []byte:
-			ret = versionValue(semver.MustParse((ref.(string))))
+			ret = VersionValue(semver.MustParse((ref.(string))))
 		case string:
-			ret = versionValue(semver.MustParse((ref.(string))))
+			ret = VersionValue(semver.MustParse((ref.(string))))
 	}
 	return &ret
 }
 
 
-func ReflectFlagValue(ref interface{}) *flagValue {
-	var ret *flagValue
+func ReflectFlagValue(ref interface{}) *FlagValue {
+	var ret *FlagValue
 	switch ref.(type) {
 		case *bool:
-			ret = ref.(*flagValue)
+			ret = ref.(*FlagValue)
 	}
 	return ret
 }
 
 
-func (v *versionValue) ToString() string {
+func (v *VersionValue) ToString() string {
 	return (semver.Version)(*v).String()
 }
-func toVersionValue(version string) *versionValue {
-	v := versionValue(semver.MustParse(version))
+func toVersionValue(version string) *VersionValue {
+	v := VersionValue(semver.MustParse(version))
 	return &v
 }
 func toSemVer(version string) semver.Version {
 	return semver.MustParse(version)
 }
-func (v *versionValue) ToSemVer() semver.Version {
+func (v *VersionValue) ToSemVer() semver.Version {
 	return semver.Version(*v)
 }
-func (v *versionValue) IsValid() bool {
+func (v *VersionValue) IsValid() bool {
 	var ok bool
 	for range onlyOnce {
 		if v == nil {
@@ -78,29 +78,29 @@ func (v *versionValue) IsValid() bool {
 	}
 	return ok
 }
-func (v *versionValue) IsNotValid() bool {
+func (v *VersionValue) IsNotValid() bool {
 	return !v.IsValid()
 }
-func (v *versionValue) IsLatest() bool {
+func (v *VersionValue) IsLatest() bool {
 	return (semver.Version)(*v).String() == LatestVersion
 }
 
 
-func (v *stringValue) ToString() string {
+func (v *StringValue) ToString() string {
 	return string(*v)
 }
-func toStringValue(s string) *stringValue {
-	v := stringValue(s)
+func toStringValue(s string) *StringValue {
+	v := StringValue(s)
 	return &v
 }
 
-func toBoolValue(b bool) *flagValue {
-	v := flagValue(b)
+func toBoolValue(b bool) *FlagValue {
+	v := FlagValue(b)
 	return &v
 }
 
 
-func (v *stringValue) IsValid() bool {
+func (v *StringValue) IsValid() bool {
 	var ok bool
 	for range onlyOnce {
 		if v == nil {
@@ -113,28 +113,28 @@ func (v *stringValue) IsValid() bool {
 	}
 	return ok
 }
-func (v *stringValue) IsNotValid() bool {
+func (v *StringValue) IsNotValid() bool {
 	return !v.IsValid()
 }
 
 
-func (v *stringValue) IsNil() bool {
+func (v *StringValue) IsNil() bool {
 	if v == nil {
 		return true
 	}
 	return false
 }
-func (v *stringValue) IsNotNil() bool {
+func (v *StringValue) IsNotNil() bool {
 	return !v.IsNil()
 }
 
 
-func (v *stringValue) IsEmpty() bool {
+func (v *StringValue) IsEmpty() bool {
 	if v == nil {
 		return true
 	}
 	return false
 }
-func (v *stringValue) IsNotEmpty() bool {
+func (v *StringValue) IsNotEmpty() bool {
 	return !v.IsEmpty()
 }

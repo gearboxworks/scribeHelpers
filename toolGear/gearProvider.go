@@ -36,7 +36,7 @@ func NewProvider(runtime *toolRuntime.TypeRuntime) *Provider {
 		State:   ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	p.State.SetPackage("")
-	p.State.SetFunction("")
+	p.State.SetFunction()
 	return p
 }
 

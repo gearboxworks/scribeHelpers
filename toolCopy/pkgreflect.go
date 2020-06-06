@@ -34,7 +34,6 @@ var Consts = map[string]reflect.Value{
 	"ConstMethodRsync": reflect.ValueOf(ConstMethodRsync),
 	"ConstMethodSftp": reflect.ValueOf(ConstMethodSftp),
 	"ConstMethodTar": reflect.ValueOf(ConstMethodTar),
-	"onlyOnce": reflect.ValueOf(onlyOnce),
 	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

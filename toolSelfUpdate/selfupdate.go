@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
+	"strings"
 )
 
 func (su *TypeSelfUpdate) Update() *ux.State {
@@ -36,7 +37,7 @@ func (su *TypeSelfUpdate) Update() *ux.State {
 }
 
 
-func (su *TypeSelfUpdate) GetVersion(version *versionValue) *selfupdate.Release {
+func (su *TypeSelfUpdate) GetVersion(version *VersionValue) *selfupdate.Release {
 	var release *selfupdate.Release
 
 	for range onlyOnce {
@@ -55,7 +56,11 @@ func (su *TypeSelfUpdate) GetVersion(version *versionValue) *selfupdate.Release 
 				release, ok, err = selfupdate.DetectLatest(su.useRepo)
 
 			default:
-				release, ok, err = selfupdate.DetectVersion(su.useRepo, version.ToString())
+				v := version.ToString()
+				if !strings.HasPrefix(v, "v") {
+					v = "v" + v
+				}
+				release, ok, err = selfupdate.DetectVersion(su.useRepo, v)
 		}
 
 		if !ok {
@@ -74,7 +79,7 @@ func (su *TypeSelfUpdate) GetVersion(version *versionValue) *selfupdate.Release 
 }
 
 
-func (su *TypeSelfUpdate) PrintVersion(version *versionValue) *ux.State {
+func (su *TypeSelfUpdate) PrintVersion(version *VersionValue) *ux.State {
 	for range onlyOnce {
 		su.State = su.IsValid()
 		if su.State.IsNotOk() {
@@ -100,14 +105,24 @@ func (su *TypeSelfUpdate) IsUpdated(print bool) *ux.State {
 			break
 		}
 
-
-		current := su.GetVersion(su.version)
+		latest := su.GetVersion(nil)
 		if su.State.IsNotOk() {
 			break
 		}
 
-		latest := su.GetVersion(nil)
-		if su.State.IsNotOk() {
+		current := su.GetVersion(su.version)
+
+		if current == nil {
+			su.State.SetWarning("%s can be updated to v%s.",
+				su.name.ToString(),
+				su.version.ToString())
+			if print {
+				ux.PrintflnWarning("Current version info unknown.")
+				ux.PrintflnBlue("Current version (v%s)\n", su.version.ToString())
+				ux.PrintflnBlue("Updated version (v%s)", latest.Version.String())
+				fmt.Printf(printVersion(latest))
+			}
+			su.State.Clear()
 			break
 		}
 
@@ -118,7 +133,6 @@ func (su *TypeSelfUpdate) IsUpdated(print bool) *ux.State {
 			if print {
 				ux.PrintflnOk("%s", su.State.GetOk())
 				fmt.Printf(printVersion(current))
-				break
 			}
 			break
 		}
@@ -129,11 +143,10 @@ func (su *TypeSelfUpdate) IsUpdated(print bool) *ux.State {
 				su.version.ToString())
 			if print {
 				ux.PrintflnWarning("%s", su.State.GetOk())
-				ux.PrintflnBlue("Current version (v)", current.Version.String())
+				ux.PrintflnBlue("Current version (v%s)", current.Version.String())
 				fmt.Printf(printVersion(current))
-				ux.PrintflnBlue("Updated version (v)", latest.Version.String())
+				ux.PrintflnBlue("Updated version (v%s)", latest.Version.String())
 				fmt.Printf(printVersion(latest))
-				break
 			}
 			break
 		}
@@ -145,11 +158,10 @@ func (su *TypeSelfUpdate) IsUpdated(print bool) *ux.State {
 				latest.Version.String())
 			if print {
 				ux.PrintflnWarning("%s", su.State.GetOk())
-				ux.PrintflnBlue("Current version (v)", current.Version.String())
+				ux.PrintflnBlue("Current version (v%s)", current.Version.String())
 				fmt.Printf(printVersion(current))
-				ux.PrintflnBlue("Updated version (v)", latest.Version.String())
+				ux.PrintflnBlue("Updated version (v%s)", latest.Version.String())
 				fmt.Printf(printVersion(latest))
-				break
 			}
 			break
 		}
@@ -161,7 +173,7 @@ func (su *TypeSelfUpdate) IsUpdated(print bool) *ux.State {
 
 func (su *TypeSelfUpdate) Set(s SelfUpdateArgs) *ux.State {
 	if s.name != nil {
-		su.name = (*stringValue)(s.name)
+		su.name = (*StringValue)(s.name)
 	}
 
 	if s.version != nil {
@@ -169,15 +181,15 @@ func (su *TypeSelfUpdate) Set(s SelfUpdateArgs) *ux.State {
 	}
 
 	if s.binaryRepo != nil {
-		su.binaryRepo = (*stringValue)(s.binaryRepo)
+		su.binaryRepo = (*StringValue)(s.binaryRepo)
 	}
 
 	if s.sourceRepo != nil {
-		su.sourceRepo = (*stringValue)(s.sourceRepo)
+		su.sourceRepo = (*StringValue)(s.sourceRepo)
 	}
 
 	if s.logging != nil {
-		su.logging = (*flagValue)(s.logging)
+		su.logging = (*FlagValue)(s.logging)
 	} else {
 		su.logging = &defaultFalse
 	}
@@ -189,14 +201,14 @@ func (su *TypeSelfUpdate) Set(s SelfUpdateArgs) *ux.State {
 
 
 func (su *TypeSelfUpdate) SetDebug(value bool) *ux.State {
-	su.logging = (*flagValue)(&value)
+	su.logging = (*FlagValue)(&value)
 	su.State = su.IsValid()
 	return su.State
 }
 
 
 func (su *TypeSelfUpdate) SetName(value string) *ux.State {
-	su.name = (*stringValue)(&value)
+	su.name = (*StringValue)(&value)
 	su.State = su.IsValid()
 	return su.State
 }
@@ -210,14 +222,14 @@ func (su *TypeSelfUpdate) SetVersion(value string) *ux.State {
 
 
 func (su *TypeSelfUpdate) SetSourceRepo(value string) *ux.State {
-	su.sourceRepo = (*stringValue)(&value)
+	su.sourceRepo = (*StringValue)(&value)
 	su.State = su.IsValid()
 	return su.State
 }
 
 
 func (su *TypeSelfUpdate) SetBinaryRepo(value string) *ux.State {
-	su.binaryRepo = (*stringValue)(&value)
+	su.binaryRepo = (*StringValue)(&value)
 	su.State = su.IsValid()
 	return su.State
 }

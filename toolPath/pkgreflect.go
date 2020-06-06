@@ -9,10 +9,12 @@ var Types = map[string]reflect.Type{
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
 	"ToolOsPath": reflect.TypeOf((*ToolOsPath)(nil)).Elem(),
 	"TypeOsPath": reflect.TypeOf((*TypeOsPath)(nil)).Elem(),
+	"TypeOsPaths": reflect.TypeOf((*TypeOsPaths)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
 	"New": reflect.ValueOf(New),
+	"NewPaths": reflect.ValueOf(NewPaths),
 	"ReflectAbsPath": reflect.ValueOf(ReflectAbsPath),
 	"ReflectFileMode": reflect.ValueOf(ReflectFileMode),
 	"ReflectPath": reflect.ValueOf(ReflectPath),
@@ -35,7 +37,6 @@ var Variables = map[string]reflect.Value{
 
 var Consts = map[string]reflect.Value{
 	"DefaultSeparator": reflect.ValueOf(DefaultSeparator),
-	"onlyOnce": reflect.ValueOf(onlyOnce),
 	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

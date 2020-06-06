@@ -147,7 +147,7 @@ func (g *TypeGit) SetConfig(config gitcmd.Config) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
-	g.State.SetFunction("")
+	g.State.SetFunction()
 
 	for range onlyOnce {
 		g.GitConfig = &config
@@ -155,6 +155,20 @@ func (g *TypeGit) SetConfig(config gitcmd.Config) *ux.State {
 	}
 
 	return g.State
+}
+
+
+func responseToObjectTag(r *ux.TypeResponse) *object.Tag {
+	var o *object.Tag
+
+	for range onlyOnce {
+		if !r.IsOfType("object.Tag") {
+			break
+		}
+		o = r.GetData().(*object.Tag)
+	}
+
+	return o
 }
 
 

@@ -113,7 +113,7 @@ func (p *TypeOsPath) GetSeparator() string {
 
 func (p *TypeOsPath) ReadFile() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {
@@ -152,7 +152,7 @@ func (p *TypeOsPath) ReadFile() *ux.State {
 
 func (p *TypeOsPath) WriteFile() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {
@@ -209,7 +209,7 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 
 func (p *TypeOsPath) OpenFile() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {
@@ -276,7 +276,7 @@ func (p *TypeOsPath) SetFileHandle(fh *os.File) *ux.State {
 
 func (p *TypeOsPath) GetFileHandle() (*os.File, *ux.State) {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		if !p.IsValid() {
@@ -293,7 +293,7 @@ func (p *TypeOsPath) GetFileHandle() (*os.File, *ux.State) {
 
 func (p *TypeOsPath) CloseFile() *ux.State {
 	for range onlyOnce {
-		p.State.SetFunction("")
+		p.State.SetFunction()
 		p.State.Clear()
 
 		var err error
