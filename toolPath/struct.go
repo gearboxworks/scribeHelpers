@@ -27,7 +27,7 @@ type TypeOsPath struct {
 	_String       string
 	_Array        []string
 	_Separator    string
-	fileHandle    *os.File
+	FileHandle    *os.File
 
 	_Valid        bool
 	_CanOverwrite bool

@@ -78,7 +78,7 @@ func (vers *GearVersions) GetLatest() string {
 func (vers *GearVersions) HasVersion(gearVersion string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		//if gearVersion == "latest" {
 		//	gl := vers.GetLatest()
 		//	if gl == "" {

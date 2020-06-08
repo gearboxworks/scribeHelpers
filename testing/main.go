@@ -1,3 +1,9 @@
+/*
+The sole purpose of this file's existence is for unit testing all the package modules.
+Additionally, it helps within the GoLand IDE for entity mapping and checking.
+
+This file is not to be used for any production related code.
+*/
 package main
 
 import (
@@ -7,6 +13,7 @@ import (
 	"github.com/newclarity/scribeHelpers/toolDocker"
 	"github.com/newclarity/scribeHelpers/toolExec"
 	"github.com/newclarity/scribeHelpers/toolGear"
+	"github.com/newclarity/scribeHelpers/toolGhr"
 	"github.com/newclarity/scribeHelpers/toolGit"
 	"github.com/newclarity/scribeHelpers/toolGitHub"
 	"github.com/newclarity/scribeHelpers/toolPath"
@@ -15,44 +22,14 @@ import (
 	"github.com/newclarity/scribeHelpers/toolService"
 	"github.com/newclarity/scribeHelpers/toolSystem"
 	"github.com/newclarity/scribeHelpers/ux"
+	"os"
 	"strings"
 )
 
-/*
-The sole purpose of this file's existence is for unit testing all the package modules.
-Additionally, it helps within the GoLand IDE for entity mapping and checking.
-
-This file is not to be used for any production related code.
-*/
-
 const onlyOnce = "1"
 
+
 var globalDebug bool
-
-func main() {
-	Test_NewState()
-	Test_toolRuntime()
-
-	Test_loadTools()
-
-	Test_toolDocker()
-	Test_toolGear()
-
-	Test_toolGit()
-	Test_toolGitHub()
-
-	Test_toolPath()
-	Test_toolPaths()
-	Test_toolCopy()
-
-	Test_toolExec()
-	Test_NewMultiExec()
-
-	Test_toolPrompt()
-	Test_toolService()
-	Test_toolSystem()
-}
-
 
 func PrintTestStart(test string) {
 	ux.PrintflnWhite("################################################################################")
@@ -88,6 +65,77 @@ func PrintTestResult(state *ux.State, test string, sub string, args ...interface
 func PrintTestStop(test string) {
 	ux.PrintflnBlue("# %s - STOPPED", test)
 	ux.PrintflnWhite("################################################################################")
+}
+
+
+func main() {
+	Test_Ghr()
+
+	os.Exit(1)
+
+	Test_NewState()
+	Test_toolRuntime()
+
+	Test_loadTools()
+
+	Test_toolDocker()
+	Test_toolGear()
+
+	Test_toolGit()
+	Test_toolGitHub()
+
+	Test_toolPath()
+	Test_toolPaths()
+	Test_toolCopy()
+
+	Test_toolExec()
+	Test_NewMultiExec()
+
+	Test_toolPrompt()
+	Test_toolService()
+	Test_toolSystem()
+}
+
+
+func Test_Ghr() {
+	test := "toolGhr"
+	state := ux.NewState(test, globalDebug)
+	PrintTestStart(test)
+
+	Test := toolGhr.New(nil)
+	PrintTestResult(Test.State, test, "New")
+
+	state = Test.IsNil()
+	PrintTestResult(state, test, "IsNil()")
+
+	//state = Test.SetAuth(toolGhr.TypeAuth{ Token: "", User: "", AuthUser: "" })
+	//PrintTestResult(state, test, "IsNil()")
+
+	//state = Test.SetRepo(toolGhr.TypeRepo{ Name: "gearboxworks", Tag: "buildtool" })
+	//PrintTestResult(state, test, "SetRepo(toolGhr.TypeRepo{ Name: \"gearboxworks\", Tag: \"buildtool\" })")
+
+	state = Test.Open("gearboxworks", "buildtool")
+	PrintTestResult(state, test, "Open()")
+
+	state = Test.Info()
+	PrintTestResult(state, test, "Info()")
+
+	state = Test.GetReleases()
+	PrintTestResult(state, test, "Info()")
+
+	//state = Test.ShowProgress()
+	//PrintTestResult(state, test, "ShowProgress()")
+	//
+	//state = Test.Set("ls", "-l", "-T")
+	//PrintTestResult(state, test, "Set(\"ls\", \"-l\", \"-T\")")
+	//
+	//state = Test.FindRegex(`go.mod`, "..")
+	//PrintTestResult(state, test, "FindRegex(`go.mod`, \"..\")")
+	//
+	//state = Test.Run()
+	//PrintTestResult(state, test, "Run")
+
+	PrintTestStop(test)
 }
 
 

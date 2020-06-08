@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const OnlyOnce = "1"
+const onlyOnce = "1"
 
 
 type Ssh struct {
@@ -87,7 +87,7 @@ func (s *Ssh) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		s.State = s.State.EnsureNotNil()
 
 		if s.GearName == "" {
@@ -111,7 +111,7 @@ func (s *Ssh) Connect() error {
 		return state.GetError()
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		sshConfig := &ssh.ClientConfig{}
 
 		var auth []ssh.AuthMethod
@@ -241,7 +241,7 @@ func (s *Ssh) GetEnv() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		s.Env = make(Environment)
 		for _, item := range os.Environ() {
 			if strings.HasPrefix(item, "TMPDIR=") {

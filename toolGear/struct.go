@@ -35,10 +35,10 @@ func New(runtime *toolRuntime.TypeRuntime) *DockerGear {
 
 	for range onlyOnce {
 		gear.State = ux.NewState(runtime.CmdName, runtime.Debug)
+		gear.Runtime = runtime
 
 		gear.Image = NewImage(runtime)
 		gear.Container = NewContainer(runtime)
-		gear.Runtime = runtime
 
 		var err error
 		gear.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

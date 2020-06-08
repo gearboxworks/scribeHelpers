@@ -7,7 +7,7 @@ import (
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
-const OnlyOnce = "1"
+const onlyOnce = "1"
 
 const DefaultCommandName = "default"
 
@@ -70,7 +70,7 @@ func (gc *GearConfig) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		gc.State = gc.State.EnsureNotNil()
 
 		//if gc == nil {
@@ -90,7 +90,7 @@ func (gc *GearConfig) ParseJson(cs string) *ux.State {
 		fmt.Printf("HEY")
 		return gc.State
 	}
-	for range OnlyOnce {
+	for range onlyOnce {
 		gc.State = gc.State.EnsureNotNil()
 
 		if cs == "" {
@@ -118,7 +118,7 @@ func (gc *GearConfig) ParseJson(cs string) *ux.State {
 func (gc *GearConfig) IsMatchedGear(gearName string, gearVersion string, tagVersions []string) bool {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if gc.Meta.Organization != defaultOrganization {
 			break
 		}

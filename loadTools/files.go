@@ -380,7 +380,7 @@ func (at *TypeArgFile) SetOutputFile(file string, overwrite bool) *ux.State {
 
 		if at.File == nil {
 			at.File = toolPath.ToolNewPath(file)
-			//at.File.State.Clear()	// Special case.
+			//at.TypeFile.State.Clear()	// Special case.
 		}
 		at.isFile = true
 

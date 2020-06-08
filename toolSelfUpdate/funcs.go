@@ -20,8 +20,8 @@ func printVersion(release *selfupdate.Release) string {
 
 		ret += fmt.Sprintf("Url: %s\n", ux.SprintfBlue(release.URL))
 
-		//ret += fmt.Sprintf("Repo Owner: %s\n", ux.SprintfBlue(release.RepoOwner))
-		//ret += fmt.Sprintf("Repo Name: %s\n", ux.SprintfBlue(release.RepoName))
+		//ret += fmt.Sprintf("TypeRepo Owner: %s\n", ux.SprintfBlue(release.RepoOwner))
+		//ret += fmt.Sprintf("TypeRepo Name: %s\n", ux.SprintfBlue(release.RepoName))
 
 		ret += fmt.Sprintf("Size: %s\n", ux.SprintfBlue("%d", release.AssetByteSize))
 

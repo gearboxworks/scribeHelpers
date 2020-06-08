@@ -21,7 +21,7 @@ import (
 //	Connection  net.Conn
 //
 //	// SSH related.
-//	Auth        *SshAuth
+//	TypeAuth        *SshAuth
 //	//Username    string
 //	//Password    string
 //	//Host        string
@@ -44,7 +44,7 @@ import (
 //			_args = args[0]
 //		}
 //
-//		_args.Auth = NewSshAuth(*_args.Auth)
+//		_args.TypeAuth = NewSshAuth(*_args.TypeAuth)
 //
 //		// An SSH server is represented by a ServerConfig, which holds
 //		// certificate details and handles authentication of ServerConns.
@@ -105,7 +105,7 @@ func SshAuthenticate(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) 
 func (s *Ssh) InitServer() error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		// An SSH server is represented by a ServerConfig, which holds
 		// certificate details and handles authentication of ServerConns.
 		s.ServerConfig = &ssh.ServerConfig{
@@ -164,7 +164,7 @@ func (s *Ssh) InitServer() error {
 func (s *Ssh) StartServer() error {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		debugStream := ioutil.Discard
 		if s.Debug {
 			debugStream = os.Stderr

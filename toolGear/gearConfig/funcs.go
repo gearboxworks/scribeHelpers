@@ -16,7 +16,7 @@ func (gc *GearConfig) GetName() string {
 func (gc *GearConfig) GetCommand(cmd []string) []string {
 	var retCmd []string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var cmdExec string
 		switch {
 		case len(cmd) == 0:
@@ -52,7 +52,7 @@ func (gc *GearConfig) GetCommand(cmd []string) []string {
 func (gc *GearConfig) MatchCommand(cmd string) *string {
 	var c *string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if c2, ok := gc.Run.Commands[cmd]; ok {
 			c = &c2
 			break
@@ -68,7 +68,7 @@ func (gc *GearConfig) CreateLinks(version string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		links := make(map[string]string)
 		var failed bool
 
@@ -153,7 +153,7 @@ func (gc *GearConfig) RemoveLinks(version string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		links := make(map[string]string)
 		var failed bool
 

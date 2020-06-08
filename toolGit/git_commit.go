@@ -4,17 +4,6 @@ import (
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
-type Commit struct {
-	Hash string
-}
-
-
-//func _NewCommit(hash string) *Commit {
-//	return &Commit{
-//		Hash: hash,
-//	}
-//}
-
 
 // Usage:
 //		{{- $cmd := $git.Commit }}

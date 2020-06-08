@@ -2,9 +2,7 @@ package ux
 
 import (
 	"fmt"
-	"os"
 	"reflect"
-	"runtime"
 	"strings"
 )
 
@@ -37,12 +35,18 @@ type TypeResponse struct {
 	ofType reflect.Type
 	data   interface{}
 }
+
+
 func newResponse() TypeResponse {
 	return TypeResponse{ ofType: nil, data: nil }
 }
+
+
 func (state *State) GetResponse() *TypeResponse {
 	return &state.response
 }
+
+
 func (state *State) SetResponse(r interface{}) bool {
 	var ok bool
 
@@ -73,10 +77,12 @@ func (state *State) SetResponse(r interface{}) bool {
 
 	return ok
 }
+
+
 func (r *TypeResponse) IsOfType(t string) bool {
 	var ok bool
 
-	//fmt.Printf("%s - %s\n", r.ofType.String(), r.ofType.Name())
+	fmt.Printf("%s - %s\n", r.ofType.String(), r.ofType.Name())
 	for range onlyOnce {
 		if r.ofType.String() == t {
 			ok = true
@@ -93,18 +99,33 @@ func (r *TypeResponse) IsOfType(t string) bool {
 
 	return ok
 }
+
+
+func (r *TypeResponse) IsNotOfType(t string) bool {
+	return !r.IsOfType(t)
+}
+
+
 func (state *State) GetResponseData() interface{} {
 	return state.response.data
 }
+
+
 func (r *TypeResponse) GetData() interface{} {
 	return r.data
 }
+
+
 func (state *State) GetResponseType() reflect.Type {
 	return state.response.ofType
 }
+
+
 func (r *TypeResponse) GetType() reflect.Type {
 	return r.ofType
 }
+
+
 func (r *TypeResponse) GetStringArray() *[]string {
 	if r.IsOfType("[]string") {
 		return (r.data).(*[]string)
@@ -125,6 +146,8 @@ func (r *TypeResponse) ResponseToString() *string {
 	//}
 	return s
 }
+
+
 func (r *TypeResponse) ResponseToArray() *[]string {
 	var s *[]string
 	if IsReflectArray(r.data) {
@@ -135,6 +158,8 @@ func (r *TypeResponse) ResponseToArray() *[]string {
 	//}
 	return s
 }
+
+
 func (r *TypeResponse) ResponseToByteArray() *[]byte {
 	var s *[]byte
 	if IsReflectArray(r.data) {
@@ -145,6 +170,8 @@ func (r *TypeResponse) ResponseToByteArray() *[]byte {
 	//}
 	return s
 }
+
+
 func (r *TypeResponse) ResponseToInt() *int64 {
 	var s *int64
 	if IsReflectArray(r.data) {
@@ -156,6 +183,8 @@ func (r *TypeResponse) ResponseToInt() *int64 {
 	//}
 	return s
 }
+
+
 func (r *TypeResponse) ResponseToUint() *uint64 {
 	var s *uint64
 	if IsReflectArray(r.data) {
@@ -167,6 +196,8 @@ func (r *TypeResponse) ResponseToUint() *uint64 {
 	//}
 	return s
 }
+
+
 func (r *TypeResponse) ResponseToFloat() *float64 {
 	var s *float64
 	if IsReflectArray(r.data) {
@@ -338,6 +369,8 @@ func ReflectString(ref interface{}) *string {
 
 	return &s
 }
+
+
 func IsReflectString(i interface{}) bool {
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -390,6 +423,8 @@ func ReflectByteArray(ref interface{}) *[]byte {
 
 	return &s
 }
+
+
 func IsReflectByteArray(i interface{}) bool {
 	var ok bool
 	switch i.(type) {
@@ -415,6 +450,8 @@ func ReflectBool(ref interface{}) *bool {
 
 	return b
 }
+
+
 func IsReflectBool(i interface{}) bool {
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -430,6 +467,7 @@ func IsReflectBool(i interface{}) bool {
 	}
 	return ok
 }
+
 
 func ReflectBoolArg(ref interface{}) bool {
 	var s bool
@@ -475,6 +513,8 @@ func ReflectInt(ref interface{}) *int64 {
 
 	return &s
 }
+
+
 func IsReflectInt(i interface{}) bool {
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -505,6 +545,8 @@ func ReflectUint(ref interface{}) *uint64 {
 
 	return &s
 }
+
+
 func IsReflectUint(i interface{}) bool {
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -537,6 +579,8 @@ func ReflectFloat(ref interface{}) *float64 {
 
 	return &s
 }
+
+
 func IsReflectFloat(i interface{}) bool {
 	//v := reflect.ValueOf(i)
 	//switch v.Kind() {
@@ -551,15 +595,6 @@ func IsReflectFloat(i interface{}) bool {
 			ok = true
 	}
 	return ok
-}
-
-
-func foo() {
-	fmt.Printf("Go runs OK!\n")
-	fmt.Printf("PPID: %d -> PID:%d\n", os.Getppid(), os.Getpid())
-	fmt.Printf("Compiler: %s v%s\n", runtime.Compiler, runtime.Version())
-	fmt.Printf("Architecture: %s v%s\n", runtime.GOARCH, runtime.GOOS)
-	fmt.Printf("GOROOT: %s\n", runtime.GOROOT())
 }
 
 

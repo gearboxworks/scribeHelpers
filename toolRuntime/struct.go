@@ -38,7 +38,7 @@ type Environment map[string]string
 
 //type ExecCommand struct {
 //	Dir string
-//	File string
+//	TypeFile string
 //	FullPath string
 //	AsLink bool
 //}

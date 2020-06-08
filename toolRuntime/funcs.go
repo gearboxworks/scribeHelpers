@@ -1,10 +1,13 @@
 package toolRuntime
 
 import (
+	"fmt"
 	"github.com/blang/semver"
 	"github.com/newclarity/scribeHelpers/ux"
+	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -137,4 +140,13 @@ func (r *TypeRuntime) IsRunningAsFile() bool {
 }
 func (r *TypeRuntime) IsRunningAsLink() bool {
 	return !r.IsRunningAsFile()
+}
+
+
+func foo() {
+	fmt.Printf("Go runs OK!\n")
+	fmt.Printf("PPID: %d -> PID:%d\n", os.Getppid(), os.Getpid())
+	fmt.Printf("Compiler: %s v%s\n", runtime.Compiler, runtime.Version())
+	fmt.Printf("Architecture: %s v%s\n", runtime.GOARCH, runtime.GOOS)
+	fmt.Printf("GOROOT: %s\n", runtime.GOROOT())
 }

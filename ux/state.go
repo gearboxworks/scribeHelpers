@@ -657,13 +657,13 @@ func (p *RuntimeDebug) fetchRuntimeDebug(level int) {
 			p.Function = details.Name()
 			//f, l := details.FileLine(pc)
 			//fmt.Printf("%s:%d - %s:%d\n",
-			//	p.File,
+			//	p.TypeFile,
 			//	p.Line,
 			//	f,
 			//	l,
 			//	)
 		}
-		//fmt.Printf("DEBUG => %s:%d [%s]\n", p.File, p.Line, p.Function)
+		//fmt.Printf("DEBUG => %s:%d [%s]\n", p.TypeFile, p.Line, p.Function)
 	}
 }
 
@@ -721,4 +721,14 @@ func (state *State) SetDebug(msg ...interface{}) {
 }
 func (state *State) GetDebug() error {
 	return state._Debug
+}
+
+
+func (state *State) IsResponseOfType(t string) bool {
+	return state.response.IsOfType(t)
+}
+
+
+func (state *State) IsResponseNotOfType(t string) bool {
+	return state.response.IsNotOfType(t)
 }

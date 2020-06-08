@@ -186,12 +186,12 @@ func (ghr *GitHubRepo) UpdateReleases() *ux.State {
 				Instance: rel,
 			}
 
-			// rm[name].Url/File - Find the first ISO asset.
+			// rm[name].Url/TypeFile - Find the first ISO asset.
 			for _, asset := range rel.Assets {
 				if strings.HasSuffix(asset.GetBrowserDownloadURL(), ".iso") {
 					// Return the first ISO found.
 					release.Url = asset.GetBrowserDownloadURL()
-					//release.File = ghr.BaseDir.AddFileToPath(asset.GetName())
+					//release.TypeFile = ghr.BaseDir.AddFileToPath(asset.GetName())
 					_ = release.File.SetPath(ghr.BaseDir.GetPath(), asset.GetName())
 					release.Size = int64(asset.GetSize())
 					break
@@ -301,7 +301,7 @@ func (r *Release) GetIso() *ux.State {
 					case <-t.C:
 						r.DlIndex = int(100*resp.Progress())
 						//r.publishDownloadState()
-						//fmt.Printf("Downloading '%s' transferred %v / %v bytes (%d%%)\n", r.File.GetPath(), resp.BytesComplete(), resp.Size, r.DlIndex)
+						//fmt.Printf("Downloading '%s' transferred %v / %v bytes (%d%%)\n", r.TypeFile.GetPath(), resp.BytesComplete(), resp.Size, r.DlIndex)
 						fmt.Printf("%s VM: Downloading ISO - %d%% complete.\r",
 							Brandname,
 							r.DlIndex)
@@ -323,7 +323,7 @@ func (r *Release) GetIso() *ux.State {
 		)
 
 
-		//eblog.Debug(entity.VmBoxEntityName, "ISO fetched from '%s' and saved to '%s'. Size:%d", r.Url, r.File.GetPath(), resp.Size)
+		//eblog.Debug(entity.VmBoxEntityName, "ISO fetched from '%s' and saved to '%s'. Size:%d", r.Url, r.TypeFile.GetPath(), resp.Size)
 		r.DlIndex = 100
 		//r.publishDownloadState()
 		r.IsDownloading = false
@@ -381,14 +381,14 @@ func (r *Release) IsIsoFilePresent() (int, *ux.State) {
 		}
 
 		//if r.DlIndex < 100 {
-		//	err = errors.New("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath())
+		//	err = errors.New("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.TypeFile.GetPath())
 		//	ret = IsoFileNeedsToDownload
 		//	break
 		//}
 
 		ret = IsoFileDownloaded
 		r.DlIndex = 100
-		//eblog.Debug(entity.VmBoxEntityName, "ISO already fetched from '%s' and saved to '%s'", r.Url, r.File.GetPath())
+		//eblog.Debug(entity.VmBoxEntityName, "ISO already fetched from '%s' and saved to '%s'", r.Url, r.TypeFile.GetPath())
 	}
 
 	return ret, r.State
@@ -542,7 +542,7 @@ func (r *Release) IsValid() *ux.State {
 //	Name string
 //    Assets
 //}
-//type Releases []Release
+//type GetReleases []Release
 //
 //type Asset struct {
 //      Name

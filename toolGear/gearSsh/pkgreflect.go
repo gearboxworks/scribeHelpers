@@ -29,7 +29,7 @@ var Consts = map[string]reflect.Value{
 	"DefaultSshPort": reflect.ValueOf(DefaultSshPort),
 	"DefaultStatusLineUpdateDelay": reflect.ValueOf(DefaultStatusLineUpdateDelay),
 	"DefaultUsername": reflect.ValueOf(DefaultUsername),
-	"OnlyOnce": reflect.ValueOf(OnlyOnce),
+	"onlyOnce": reflect.ValueOf(onlyOnce),
 	"SshHostPrivateKey": reflect.ValueOf(SshHostPrivateKey),
 	"SshHostPublicKey": reflect.ValueOf(SshHostPublicKey),
 }

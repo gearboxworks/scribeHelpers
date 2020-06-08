@@ -248,15 +248,51 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 
 
 		var err error
-		p.fileHandle, err = os.Create(p._Path)
+		p.FileHandle, err = os.Create(p._Path)
 		if err != nil {
 			p.State.SetError("Cannot open file '%s' for writing - %s", p._Path, err)
 			break
 		}
 
-		p.State.SetResponse(p.fileHandle)
+		p.State.SetResponse(p.FileHandle)
 
-		p.State.SetOk("File '%s' opened OK", p._Path)
+		p.State.SetOk("TypeFile '%s' opened OK", p._Path)
+	}
+
+	return p.State
+}
+
+
+func (p *TypeOsPath) OpenFileHandle() *ux.State {
+	for range onlyOnce {
+		p.State.SetFunction()
+		p.State.Clear()
+
+		if !p.IsValid() {
+			p.State.SetWarning("path is invalid")
+			break
+		}
+
+		p.StatPath()
+		if p._IsDir {
+			p.State.SetError("path '%s' is a directory", p._Path)
+			break
+		}
+		if p.NotExists() {
+			p.State.Clear()
+			break
+		}
+
+
+		var err error
+		p.FileHandle, err = os.Open(p._Path)
+		if err != nil {
+			p.State.SetError("Cannot open file '%s' for writing - %s", p._Path, err)
+			break
+		}
+
+		p.State.SetResponse(p.FileHandle)
+		p.State.SetOk("TypeFile '%s' opened OK", p._Path)
 	}
 
 	return p.State
@@ -265,8 +301,8 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 
 func (p *TypeOsPath) SetFileHandle(fh *os.File) *ux.State {
 	for range onlyOnce {
-		p.fileHandle = fh
-		p.SetPath(p.fileHandle.Name())
+		p.FileHandle = fh
+		p.SetPath(p.FileHandle.Name())
 		p.State.Clear()
 	}
 
@@ -284,10 +320,10 @@ func (p *TypeOsPath) GetFileHandle() (*os.File, *ux.State) {
 			break
 		}
 
-		p.State.SetResponse(p.fileHandle)
+		p.State.SetResponse(p.FileHandle)
 	}
 
-	return p.fileHandle, p.State
+	return p.FileHandle, p.State
 }
 
 
@@ -297,17 +333,17 @@ func (p *TypeOsPath) CloseFile() *ux.State {
 		p.State.Clear()
 
 		var err error
-		err = p.fileHandle.Sync()
+		err = p.FileHandle.Sync()
 		if err != nil {
 			p.State.SetWarning("Error when syncing file '%s' - ", p._Path, err)
 		}
 
-		err = p.fileHandle.Close()
+		err = p.FileHandle.Close()
 		if err != nil {
 			p.State.SetWarning("Error when closing file '%s' - ", p._Path, err)
 		}
 
-		p.State.SetOk("File '%s' closed OK", p._Path)
+		p.State.SetOk("TypeFile '%s' closed OK", p._Path)
 	}
 
 	return p.State

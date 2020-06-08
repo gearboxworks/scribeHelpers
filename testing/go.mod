@@ -32,10 +32,14 @@ replace github.com/newclarity/scribeHelpers/toolSystem => ../toolSystem
 
 replace github.com/newclarity/scribeHelpers/toolTypes => ../toolTypes
 
+replace github.com/newclarity/scribeHelpers/toolGhr => ../toolGhr
+
 replace github.com/newclarity/scribeHelpers/toolUx => ../toolUx
 
 require (
+	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/newclarity/scribeHelpers/loadTools v0.0.0-00010101000000-000000000000 // indirect
 	github.com/newclarity/scribeHelpers/toolDocker v0.0.0-00010101000000-000000000000 // indirect
 	github.com/newclarity/scribeHelpers/toolGear v0.0.0-00010101000000-000000000000 // indirect
+	github.com/newclarity/scribeHelpers/toolGhr v0.0.0-00010101000000-000000000000 // indirect
 )
