@@ -206,8 +206,12 @@ func (ghr *TypeGhr) mustCopyN(w io.Writer, r io.Reader, n int64) *ux.State {
 			ghr.State.SetError("data did not match content length %d != %d", an, n)
 			break
 		}
-		ghr.State.SetError(err)
-		break
+		if err != nil {
+			ghr.State.SetError(err)
+			break
+		}
+
+		ghr.State.SetOk()
 	}
 
 	return ghr.State

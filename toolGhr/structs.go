@@ -264,14 +264,14 @@ func (ghr *TypeGhr) setRepo(r TypeRepo) *ux.State {
 }
 
 
-func (ghr *TypeGhr) setFile(f TypeFile) *ux.State {
-	if State := ghr.IsNil(); State.IsError() {
-		return State
-	}
-	ghr.State.SetFunction()
-	ghr.State = ghr.File.Set(f)
-	return ghr.State
-}
+//func (ghr *TypeGhr) setFile(f TypeFile) *ux.State {
+//	if State := ghr.IsNil(); State.IsError() {
+//		return State
+//	}
+//	ghr.State.SetFunction()
+//	ghr.State = ghr.File.Set(f)
+//	return ghr.State
+//}
 
 
 func (ghr *TypeGhr) GetReleases() *ux.State {

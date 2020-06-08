@@ -291,10 +291,8 @@ func (ghr *TypeGhr) Download(file string) *ux.State {
 			resp, err = http.Get(DefaultGitHubUrl + fmt.Sprintf("/%s/%s/releases/download/%s/%s", ghr.Repo.Organization, ghr.Repo.Name, ghr.Repo.Tag, ghr.File.Name))
 		} else {
 			//u := nvls(ghr.urlPrefix, github.DefaultBaseURL) + fmt.Sprintf(AssetUri, ghr.Repo.Organization, ghr.Repo.Name, asset.Id)
-			u := fmt.Sprintf(AssetUri, ghr.Repo.Organization, ghr.Repo.Name, asset.Id)
-			resp, err = github.DoAuthRequest("GET", u, "", ghr.Auth.Token, map[string]string{
-				"Accept": "application/octet-stream",
-			}, nil)
+			u := fmt.Sprintf(DefaultGitHubApiUrl + AssetUri, ghr.Repo.Organization, ghr.Repo.Name, asset.Id)
+			resp, err = github.DoAuthRequest("GET", u, "", ghr.Auth.Token, map[string]string{"Accept": "application/octet-stream",}, nil)
 		}
 		//noinspection ALL
 		defer resp.Body.Close()
@@ -304,8 +302,8 @@ func (ghr *TypeGhr) Download(file string) *ux.State {
 			break
 		}
 
-		ghr.message("GET", resp.Request.URL, "->", resp)
-
+		//ghr.message("GET %s -> %v", resp.Request.URL, resp.Status)
+		ghr.message("Fetching file '%s' -> %v", ghr.File.Name, resp.Status)
 		contentLength, err := strconv.ParseInt(resp.Header.Get("Content-Length"), 10, 64)
 		if err != nil {
 			ghr.State.SetError(err)
@@ -330,8 +328,17 @@ func (ghr *TypeGhr) Download(file string) *ux.State {
 			defer out.Close()
 		}
 
+		ghr.State = ghr.File.StatPath()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		ghr.State = ghr.mustCopyN(out, resp.Body, contentLength)
+		if ghr.State.IsNotOk() {
+			break
+		}
+
 		ghr.State.SetOk()
-		ghr.State.SetResponse(ghr.mustCopyN(out, resp.Body, contentLength))
 	}
 
 	//return mustCopyN(out, resp.Body, contentLength)

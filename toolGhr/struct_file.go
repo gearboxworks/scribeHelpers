@@ -70,19 +70,42 @@ func (file *TypeFile) isValid() *ux.State {
 }
 
 
-func (file *TypeFile) Set(f TypeFile) *ux.State {
+func (file *TypeFile) SetPath(f string) *ux.State {
 	if state := file.IsNil(); state.IsError() {
 		return state
 	}
 	file.state.SetFunction()
 
 	for range onlyOnce {
-		file.state = f.isValid()
+		file.state = file.isValid()
 		if file.state.IsNotOk() {
 			break
 		}
 
-		//
+		file.Name = f
+	}
+
+	return file.state
+}
+
+
+func (file *TypeFile) StatPath() *ux.State {
+	if state := file.IsNil(); state.IsError() {
+		return state
+	}
+	file.state.SetFunction()
+
+	for range onlyOnce {
+		file.state = file.isValid()
+		if file.state.IsNotOk() {
+			break
+		}
+
+		file.Path.SetPath(file.Name)
+		file.state = file.Path.StatPath()
+		if file.state.IsNotOk() {
+			break
+		}
 	}
 
 	return file.state
