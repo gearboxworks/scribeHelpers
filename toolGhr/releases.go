@@ -42,7 +42,30 @@ func (r *Release) CleanUploadUrl() string {
 	return r.UploadUrl[0:bracket]
 }
 
+
 func (r *Release) String() string {
+	var ret string
+
+	ret = ux.SprintfWhite("Name: %s\n", r.Name)
+	ret += ux.SprintfWhite("Published: %s\n", r.Published.Format("2006-01-02T15:04:05-0700"))
+	ret += ux.SprintfWhite("Tag: %s\n", r.TagName)
+	ret += ux.SprintfWhite("Url: %s\n", r.PageUrl)
+	ret += ux.SprintfWhite("Draft: %s\tPre-release: %s\n", Mark(r.Draft), Mark(r.Prerelease))
+	ret += ux.SprintfWhite("Assets: (%d)\n", len(r.Assets))
+
+	str := make([]string, len(r.Assets)+1)
+	for idx, asset := range r.Assets {
+		//str[idx] = ux.SprintfWhite("\t- artifact: %s, downloads: %d, state: %s, type: %s, size: %s, id: %d",
+		str[idx] = ux.SprintfWhite("\t- artifact: %s, downloads: %d, state: %s, size: %s",
+			asset.Name, asset.Downloads, asset.State, humanize.Bytes(asset.Size))
+	}
+	ret += strings.Join(str, "\n")
+
+	return ret
+}
+
+
+func (r *Release) Print() string {
 	str := make([]string, len(r.Assets)+1)
 	str[0] = fmt.Sprintf(
 		"%s, name: '%s', description: '%s', id: %d, tagged: %s, published: %s, draft: %v, prerelease: %v",
@@ -81,7 +104,7 @@ type ReleaseCreate struct {
 //	for range onlyOnce {
 //		//c := github.NewClient(ghr.Auth.AuthUser, ghr.Auth.Token, nil)
 //		//c.SetBaseURL(ghr.urlPrefix)
-//		ghr.State = ghr.Repo.ApiGet(ReleaseListUri, ghr.Repo.Organization, ghr.Repo.Name)
+//		ghr.State = ghr.Repo.apiGet(ReleaseListUri, ghr.Repo.Organization, ghr.Repo.Name)
 //		if ghr.State.IsNotOk() {
 //			break
 //		}
@@ -108,7 +131,7 @@ func (ghr *TypeGhr) latestReleaseApi() (*Release, *ux.State) {
 	for range onlyOnce {
 		//c := github.NewClient(ghr.Auth.AuthUser, ghr.Auth.Token, nil)
 		//c.SetBaseURL(ghr.urlPrefix)
-		err := ghr.Repo.ApiGet(ReleaseLatestUri, ghr.Repo.Organization, ghr.Repo.Name)
+		err := ghr.Repo.apiGet(ReleaseLatestUri, ghr.Repo.Organization, ghr.Repo.Name)
 		if err != nil {
 			ghr.State.SetError(err)
 			break
@@ -169,7 +192,7 @@ func (ghr *TypeGhr) LatestRelease() (*Release, *ux.State) {
 }
 
 
-func (ghr *TypeGhr) ReleaseOfTag() (*Release, *ux.State) {
+func (ghr *TypeGhr) releaseOfTag() (*Release, *ux.State) {
 	var ret *Release
 	if state := ux.IfNilReturnError(ghr); state.IsError() {
 		return &Release{}, state
@@ -182,6 +205,14 @@ func (ghr *TypeGhr) ReleaseOfTag() (*Release, *ux.State) {
 		if ghr.State.IsNotOk() {
 			ghr.State.SetError("could not find the rel corresponding to tag %s", ghr.Repo.Tag)
 			break
+		}
+
+		if len(*rels) == 0 {
+			ghr.State.SetError("could not find any releases")
+		}
+
+		if ghr.Repo.Tag == "latest" {
+			ghr.Repo.Tag = (*rels)[0].Name
 		}
 
 		for _, rel := range *rels {
@@ -197,7 +228,7 @@ func (ghr *TypeGhr) ReleaseOfTag() (*Release, *ux.State) {
 
 
 /* find the release-id of the specified tag */
-func (ghr *TypeGhr) IdOfTag() (int, *ux.State) {
+func (ghr *TypeGhr) idOfTag() (int, *ux.State) {
 	var ret int
 	if state := ux.IfNilReturnError(ghr); state.IsError() {
 		return ret, state
@@ -207,7 +238,7 @@ func (ghr *TypeGhr) IdOfTag() (int, *ux.State) {
 	for range onlyOnce {
 		var rel *Release
 
-		rel, ghr.State = ghr.ReleaseOfTag()
+		rel, ghr.State = ghr.releaseOfTag()
 		if ghr.State.IsNotOk() {
 			break
 		}

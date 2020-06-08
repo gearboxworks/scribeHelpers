@@ -185,21 +185,27 @@ func Printf(format string, args ...interface{}) {
 }
 
 
-//func SprintfNormal(format string, args ...interface{}) string {
-//	return fmt.Sprintf(format, args...)
-//}
 func SprintfNormal(format string, args ...interface{}) string {
 	inline := fmt.Sprintf(format, args...)
 	return Sprintf("%s", aurora.BrightBlue(inline))
 }
-//func PrintfNormal(format string, args ...interface{}) {
-//	_, _ = fmt.Fprintf(os.Stdout, fmt.Sprintf(format, args...))
-//}
 func PrintfNormal(format string, args ...interface{}) {
 	_, _ = fmt.Fprintf(os.Stdout, SprintfNormal(format, args...))
 }
 func PrintflnNormal(format string, args ...interface{}) {
 	_, _ = fmt.Fprintf(os.Stdout, SprintfNormal(format + "\n", args...))
+}
+
+
+func SprintfInfo(format string, args ...interface{}) string {
+	inline := fmt.Sprintf(format, args...)
+	return Sprintf("%s", aurora.BrightBlue(inline))
+}
+func PrintfInfo(format string, args ...interface{}) {
+	_, _ = fmt.Fprintf(os.Stdout, SprintfInfo(format, args...))
+}
+func PrintflnInfo(format string, args ...interface{}) {
+	_, _ = fmt.Fprintf(os.Stdout, SprintfInfo(format + "\n", args...))
 }
 
 

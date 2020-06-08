@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 )
 
 
@@ -22,65 +23,75 @@ func (ghr *TypeGhr) Info() *ux.State {
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		//user := ghr.Auth.User         // nvls(opt.Info.User, EnvUser)
-		//authUser := ghr.Auth.AuthUser // nvls(opt.Info.AuthUser, ghr.Auth.AuthUser)
-		//repo := ghr.Repo.Name         // nvls(opt.Info.Repo, EnvRepo)
-		//token := ghr.Auth.Token       // nvls(opt.Info.Token, ghr.Auth.Token)
-		//tag := ghr.Repo.Tag           // opt.Info.Tag
-
-		if ghr.Repo.Organization == "" || ghr.Repo.Name == "" {
-			ghr.State.SetError("user and repo need to be passed as arguments")
+		ghr.State = ghr.isValid()
+		if ghr.State.IsNotOk() {
 			break
 		}
 
+
+		ghr.message("Getting release tag info ...")
 		// Find regular git tags.
-		var foundTags []Tag
-		foundTags, ghr.State = ghr.Tags()
+		var tags *Tags
+		tags, ghr.State = ghr.Repo.GetTags()
 		if ghr.State.IsNotOk() {
 			ghr.State.SetError("could not fetch tags, %v", ghr.State.GetError())
 			break
 		}
-		if len(foundTags) == 0 {
+		if len(*tags) == 0 {
 			ghr.State.SetError("no tags available for %s", ghr.Repo.GetUrl())
 			break
 		}
 
-		tags := foundTags[:0]
-		for _, t := range foundTags {
+		if ghr.Repo.Tag == "latest" {
+			ghr.Repo.Tag = (*tags)[0].Name
+		}
+
+		if ghr.Repo.Tag == "" {
+			// Return all tags.
+			var t []string
+			for _, tag := range *tags {
+				t = append(t, tag.Name)
+			}
+			ghr.message("Tags: %s", strings.Join(t, ", "))
+
+		} else {
 			// If the user only requested one tag, filter out the rest.
-			if ghr.Repo.Tag == "" || t.Name == ghr.Repo.Tag {
-				tags = append(tags, t)
+			for _, t := range *tags {
+				if t.Name == ghr.Repo.Tag {
+					ghr.message("Tag: %s", ghr.Repo.Tag)
+					break
+				}
 			}
 		}
 
-		renderer := ghr.renderInfoText
 
-		if ghr.File.JSON {
-			renderer = ghr.renderInfoJSON
-		}
-
+		ghr.message("Getting release info ...")
 		// List releases + assets.
-		var releases *Releases
 		if ghr.Repo.Tag == "" {
+			var releases *Releases
 			// Get all releases.
-			ux.PrintflnBlue("%s: getting information for all releases", ghr.Repo.GetUrl())
 			releases, ghr.State = ghr.Repo.GetReleases()
 			if ghr.State.IsNotOk() {
 				break
 			}
+			ghr.message("Found %d releases.", len(*releases))
+			for _, release := range *releases {
+				fmt.Printf("\n####\n%v", release)
+			}
+
 		} else {
 			var rel *Release
 			// Get only one release.
-			ux.PrintflnBlue("%s/%s: getting information for the release", ghr.Repo.Tag)
-			rel, ghr.State = ghr.ReleaseOfTag()
+			rel, ghr.State = ghr.releaseOfTag()
 			if ghr.State.IsNotOk() {
 				break
 			}
-			releases = &Releases{rel}
+			ghr.message("Found 1 release.")
+			ghr.message("- %v", rel)
 		}
 
+
 		ghr.State.SetOk()
-		ghr.State.SetResponse(renderer(tags, releases))
 	}
 
 	//return renderer(tags, releases)
@@ -95,16 +106,17 @@ func (ghr *TypeGhr) Upload() *ux.State {
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		//user := ghr.Auth.User         // nvls(opt.Upload.User, EnvUser)
-		//authUser := ghr.Auth.AuthUser // nvls(opt.Upload.AuthUser, ghr.Auth.AuthUser)
-		//repo := ghr.Repo.Name         // nvls(opt.Upload.Repo, EnvRepo)
-		//token := ghr.Auth.Token       // nvls(opt.Upload.Token, ghr.Auth.Token)
-		//tag := ghr.Repo.Tag           // ghr.Upload.Tag
-		//name := ghr.File.Name
-		//label := ghr.File.Label
-		//file := ghr.File.Path
+		ghr.State = ghr.isValid()
+		if ghr.State.IsNotOk() {
+			break
+		}
 
-		ux.PrintflnBlue("uploading...")
+		ghr.State = ghr.Repo.isValidTag()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		ghr.message("Uploading release asset ...")
 
 		if ghr.File.Path == nil {
 			ghr.State.SetError("provided file was not valid")
@@ -113,14 +125,14 @@ func (ghr *TypeGhr) Upload() *ux.State {
 		//noinspection ALL
 		defer ghr.File.Path.CloseFile()
 
-		ghr.State = ghr.ValidateCredentials()
-		if ghr.State.IsNotOk() {
-			break
-		}
+		//ghr.State = ghr.validateCredentials()
+		//if ghr.State.IsNotOk() {
+		//	break
+		//}
 
 		// Find the release corresponding to the entered tag, if any.
 		var rel *Release
-		rel, ghr.State = ghr.ReleaseOfTag()
+		rel, ghr.State = ghr.releaseOfTag()
 		if ghr.State.IsNotOk() {
 			break
 		}
@@ -152,7 +164,7 @@ func (ghr *TypeGhr) Upload() *ux.State {
 		// 1. Their state is new.
 		// 2. The user explicitly asked to delete/replace the asset with -R.
 		if asset := findAsset(assets, ghr.File.Name); asset != nil && (asset.State == "new" || ghr.File.Replace) {
-			ux.PrintflnBlue("asset (id: %d) already existed in state %s: removing...", asset.Id, asset.Name)
+			ghr.message("Asset (id: %d) exists in state %s: Removing ...", asset.Id, asset.Name)
 			ghr.State = ghr.DeleteAsset(asset)
 			if ghr.State.IsNotOk() {
 				ghr.State.SetError("could not replace asset: %v", ghr.State.GetError())
@@ -182,7 +194,7 @@ func (ghr *TypeGhr) Upload() *ux.State {
 		}
 		//noinspection ALL
 		defer resp.Body.Close()
-		ux.PrintflnBlue("RESPONSE:", resp)
+		ghr.message("RESPONSE:", resp)
 
 		var r io.Reader = resp.Body
 		if ghr.runtime.Debug {
@@ -192,15 +204,15 @@ func (ghr *TypeGhr) Upload() *ux.State {
 		// For HTTP status 201 and 502, Github will return a JSON encoding of
 		// the (partially) created asset.
 		if resp.StatusCode == http.StatusBadGateway || resp.StatusCode == http.StatusCreated {
-			ux.PrintfBlue("ASSET: ")
+			ghr.message("ASSET: ")
 			asset = new(Asset)
 			if err := json.NewDecoder(r).Decode(&asset); err != nil {
 				ghr.State.SetError("upload failed (%s), could not unmarshal asset (err: %v)", resp.Status, err)
 				break
 			}
 		} else {
-			ux.PrintfBlue("BODY: ")
-			if msg, err := ToMessage(r); err == nil {
+			ghr.message("BODY: ")
+			if msg, err := Tomessage(r); err == nil {
 				ghr.State.SetError("could not upload, status code (%s), %v", resp.Status, msg)
 				break
 			}
@@ -212,10 +224,10 @@ func (ghr *TypeGhr) Upload() *ux.State {
 			// 502 means the upload failed, but GitHub still retains metadata
 			// (an asset in state "new"). Attempt to delete that now since it
 			// would clutter the list of release assets.
-			ux.PrintflnBlue("asset (id: %d) failed to upload, it's now in state %s: removing...", asset.Id, asset.Name)
+			ghr.message("Asset (id: %d) failed to upload and is now in state %s: Removing...", asset.Id, asset.Name)
 			ghr.State = ghr.DeleteAsset(asset)
 			if ghr.State.IsNotOk() {
-				ghr.State.SetError("upload failed (%s), could not delete partially uploaded asset (ID: %d, err: %v) in order to cleanly reset GH API state, please try again", resp.Status, asset.Id, err)
+				ghr.State.SetError("Upload failed (%s), could not delete partially uploaded asset (ID: %d, err: %v) in order to cleanly reset GH API state, please try again", resp.Status, asset.Id, err)
 				break
 			}
 			ghr.State.SetError("could not upload, status code (%s)", resp.Status)
@@ -230,42 +242,45 @@ func (ghr *TypeGhr) Upload() *ux.State {
 }
 
 
-func (ghr *TypeGhr) Download() *ux.State {
+func (ghr *TypeGhr) Download(file string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		//user := ghr.Auth.User			// nvls(opt.Download.User, EnvUser)
-		//authUser := ghr.Auth.AuthUser	// nvls(opt.Download.AuthUser, ghr.Auth.AuthUser)
-		//repo := ghr.Repo.Name			// nvls(opt.Download.Repo, EnvRepo)
-		//token := ghr.Auth.Token			// nvls(opt.Download.Token, ghr.Auth.Token)
-		//tag := ghr.Repo.Tag				// opt.Download.Tag
-		//name := ghr.Repo.Name			// opt.Download.Name
-		//latest := ghr.File.Latest		// opt.Download.Latest
-
-		ux.PrintflnBlue("downloading...")
-
-		ghr.State = ghr.ValidateTarget(ghr.File.Latest)
+		ghr.State = ghr.isValid()
 		if ghr.State.IsNotOk() {
 			break
 		}
 
+		ghr.State = ghr.Repo.isValidTag()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		if file == "" {
+			ghr.State.SetError("no asset to download")
+			break
+		}
+		ghr.File.Name = file
+
+		ghr.message("Downloading release asset ...")
+
 		// Find the release corresponding to the entered tag, if any.
 		var rel *Release
-		if ghr.File.Latest {
-			rel, ghr.State = ghr.LatestRelease()
-		} else {
-			rel, ghr.State = ghr.ReleaseOfTag()
-		}
+		//if ghr.Repo.Tag == "latest" {
+		//	rel, ghr.State = ghr.LatestRelease()
+		//} else {
+			rel, ghr.State = ghr.releaseOfTag()
+		//}
 		if ghr.State.IsNotOk() {
 			break
 		}
 
 		asset := findAsset(rel.Assets, ghr.File.Name)
 		if asset == nil {
-			ghr.State.SetError("coud not find asset named %s", ghr.File.Name)
+			ghr.State.SetError("could not find asset named %s", ghr.File.Name)
 			break
 		}
 
@@ -289,7 +304,7 @@ func (ghr *TypeGhr) Download() *ux.State {
 			break
 		}
 
-		ux.PrintflnBlue("GET", resp.Request.URL, "->", resp)
+		ghr.message("GET", resp.Request.URL, "->", resp)
 
 		contentLength, err := strconv.ParseInt(resp.Header.Get("Content-Length"), 10, 64)
 		if err != nil {
@@ -331,24 +346,22 @@ func (ghr *TypeGhr) Release() *ux.State {
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		//user := ghr.Auth.User         // nvls(opt.Release.User, EnvUser)
-		//authUser := ghr.Auth.AuthUser // nvls(opt.Release.AuthUser, ghr.Auth.AuthUser)
-		//repo := ghr.Repo.Name         // nvls(opt.Release.Repo, EnvRepo)
-		//token := ghr.Auth.Token       // nvls(opt.Release.Token, ghr.Auth.Token)
-		//tag := ghr.Repo.Tag           // opt.Release.Tag
-
-		//name := ghr.File.Name				// nvls(cmdopt.Name, tag)
-		//desc := ghr.Repo.Description		// nvls(cmdopt.Desc, tag)
-		//target := ghr.Repo.Target			// nvls(cmdopt.Target)
-		//draft := ghr.Repo.Draft				// cmdopt.Draft
-		//prerelease := ghr.Repo.Prerelease	// cmdopt.Prerelease
-
-		ux.PrintflnBlue("releasing...")
-
-		ghr.State = ghr.ValidateCredentials()
+		ghr.State = ghr.isValid()
 		if ghr.State.IsNotOk() {
 			break
 		}
+
+		ghr.State = ghr.Repo.isValidTag()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		ghr.message("Releasing '%s' ...", ghr.Repo.Tag)
+
+		//ghr.State = ghr.validateCredentials()
+		//if ghr.State.IsNotOk() {
+		//	break
+		//}
 
 		// Check if we need to read the description from stdin.
 		if ghr.Repo.Description == "-" {
@@ -387,7 +400,7 @@ func (ghr *TypeGhr) Release() *ux.State {
 		//noinspection ALL
 		defer resp.Body.Close()
 
-		ux.PrintflnBlue("RESPONSE:", resp)
+		ghr.message("RESPONSE:", resp)
 		if resp.StatusCode != http.StatusCreated {
 			if resp.StatusCode == 422 {
 				ghr.State.SetError("github returned %v (this is probably because the release already exists)", resp.Status)
@@ -403,7 +416,7 @@ func (ghr *TypeGhr) Release() *ux.State {
 				ghr.State.SetError("error while reading response, %v", err)
 				break
 			}
-			ux.PrintflnBlue("BODY:", string(body))
+			ghr.message("BODY:", string(body))
 		}
 
 		ghr.State.SetOk()
@@ -414,39 +427,37 @@ func (ghr *TypeGhr) Release() *ux.State {
 }
 
 
-func (ghr *TypeGhr) Edit() *ux.State {
+func (ghr *TypeGhr) Update() *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		//user := ghr.Auth.User         // nvls(opt.Edit.User, EnvUser)
-		//authUser := ghr.Auth.AuthUser // nvls(opt.Edit.AuthUser, ghr.Auth.AuthUser)
-		//repo := ghr.Repo.Name         // nvls(opt.Edit.Repo, EnvRepo)
-		//token := ghr.Auth.Token       // nvls(opt.Edit.Token, ghr.Auth.Token)
-		//tag := ghr.Repo.Tag           // opt.Edit.Tag
-
-		//name := ghr.File.Name				// nvls(cmdopt.Name, tag)
-		//desc := ghr.Repo.Description		// nvls(cmdopt.Desc, tag)
-		//target := ghr.Repo.Target			// nvls(cmdopt.Target)
-		//draft := ghr.Repo.Draft				// cmdopt.Draft
-		//prerelease := ghr.Repo.Prerelease	// cmdopt.Prerelease
-
-		ux.PrintflnBlue("editing...")
-
-		ghr.State = ghr.ValidateCredentials()
+		ghr.State = ghr.isValid()
 		if ghr.State.IsNotOk() {
 			break
 		}
+
+		ghr.State = ghr.Repo.isValidTag()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		ghr.message("Updating release '%s' ...", ghr.Repo.Tag)
+
+		//ghr.State = ghr.validateCredentials()
+		//if ghr.State.IsNotOk() {
+		//	break
+		//}
 
 		var id int
-		id, ghr.State = ghr.IdOfTag()
+		id, ghr.State = ghr.idOfTag()
 		if ghr.State.IsNotOk() {
 			break
 		}
 
-		ux.PrintflnBlue("release %v has id %v", ghr.Repo.Tag, id)
+		ghr.message("Release %s has id %d", ghr.Repo.Tag, id)
 		// Check if we need to read the description from stdin.
 		if ghr.Repo.Description == "-" {
 			b, err := ioutil.ReadAll(os.Stdin)
@@ -483,7 +494,7 @@ func (ghr *TypeGhr) Edit() *ux.State {
 		//noinspection ALL
 		defer resp.Body.Close()
 
-		ux.PrintflnBlue("RESPONSE:", resp)
+		ghr.message("RESPONSE:", resp)
 		if resp.StatusCode != http.StatusOK {
 			if resp.StatusCode == 422 {
 				ghr.State.SetError("github returned %v (this is probably because the release already exists)", resp.Status)
@@ -499,7 +510,7 @@ func (ghr *TypeGhr) Edit() *ux.State {
 				ghr.State.SetError("error while reading response, %v", err)
 				break
 			}
-			ux.PrintflnBlue("BODY:", string(body))
+			ghr.message("BODY:", string(body))
 		}
 
 		ghr.State.SetOk()
@@ -517,27 +528,19 @@ func (ghr *TypeGhr) Delete() *ux.State {
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		//user := ghr.Auth.User			// nvls(opt.Delete.User, EnvUser)
-		//authUser := ghr.Auth.AuthUser	// nvls(opt.Delete.AuthUser, ghr.Auth.AuthUser)
-		//repo := ghr.Repo.Name			// nvls(opt.Delete.Repo, EnvRepo)
-		//token := ghr.Auth.Token			// nvls(opt.Delete.Token, ghr.Auth.Token)
-		//tag := ghr.Repo.Tag				// opt.Delete.Tag
-
-		//user, repo, token, tag := nvls(opt.Delete.User, EnvUser),
-		//	nvls(opt.Delete.Repo, EnvRepo),
-		//	nvls(opt.Delete.Token, ghr.Auth.Token),
-		//	opt.Delete.Tag
-		//authUser := nvls(opt.Delete.AuthUser, ghr.AuthUser)
-
-		ux.PrintflnBlue("deleting...")
+		ghr.State = ghr.isValid()
+		if ghr.State.IsNotOk() {
+			break
+		}
+		ghr.message("Deleting release '%s' ...", ghr.Repo.Tag)
 
 		var id int
-		id, ghr.State = ghr.IdOfTag()
+		id, ghr.State = ghr.idOfTag()
 		if ghr.State.IsNotOk() {
 			break
 		}
 
-		ux.PrintflnBlue("release %v has id %v", ghr.Repo.Tag, id)
+		ghr.message("Release %v has id %v", ghr.Repo.Tag, id)
 
 		baseURL := nvls(ghr.urlPrefix, github.DefaultBaseURL)
 		resp, err := github.DoAuthRequest("DELETE", baseURL+fmt.Sprintf("/repos/%s/%s/releases/%d",

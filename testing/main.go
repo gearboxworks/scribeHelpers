@@ -121,19 +121,10 @@ func Test_Ghr() {
 	PrintTestResult(state, test, "Info()")
 
 	state = Test.GetReleases()
-	PrintTestResult(state, test, "Info()")
+	PrintTestResult(state, test, "GetReleases()")
 
-	//state = Test.ShowProgress()
-	//PrintTestResult(state, test, "ShowProgress()")
-	//
-	//state = Test.Set("ls", "-l", "-T")
-	//PrintTestResult(state, test, "Set(\"ls\", \"-l\", \"-T\")")
-	//
-	//state = Test.FindRegex(`go.mod`, "..")
-	//PrintTestResult(state, test, "FindRegex(`go.mod`, \"..\")")
-	//
-	//state = Test.Run()
-	//PrintTestResult(state, test, "Run")
+	state = Test.Download("buildtool-darwin_amd64.tar.gz")
+	PrintTestResult(state, test, "Download()")
 
 	PrintTestStop(test)
 }

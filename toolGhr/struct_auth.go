@@ -8,9 +8,9 @@ import (
 
 
 type TypeAuth struct {
-	Token    string `goptions:"-s, --security-token, description='Github token ($GITHUB_TOKEN if set). required if repo is private.'"`
+	Token    string		// `goptions:"-s, --security-token, description='Github token ($GITHUB_TOKEN if set). required if repo is private.'"`
 	//User     string `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
-	AuthUser string `goptions:"-a, --auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
+	AuthUser string		// `goptions:"-a, --auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
 
 	runtime  *toolRuntime.TypeRuntime
 	state    *ux.State
@@ -30,9 +30,9 @@ func NewAuth(runtime *toolRuntime.TypeRuntime) *TypeAuth {
 			runtime: runtime,
 			state:   ux.NewState(runtime.CmdName, runtime.Debug),
 		}
-		//if auth.AuthUser == "" {
-		//	auth.AuthUser = auth.User
-		//}
+		if auth.AuthUser == "" {
+			auth.AuthUser = os.Getenv("GITHUB_USER")
+		}
 	}
 	auth.state.SetPackage("")
 	auth.state.SetFunctionCaller()
@@ -49,7 +49,7 @@ func (auth *TypeAuth) IsNil() *ux.State {
 }
 
 
-func (auth *TypeAuth) IsValid() *ux.State {
+func (auth *TypeAuth) isValid() *ux.State {
 	if state := ux.IfNilReturnError(auth); state.IsError() {
 		return state
 	}
@@ -84,7 +84,7 @@ func (auth *TypeAuth) Set(a TypeAuth) *ux.State {
 	auth.state.SetFunction()
 
 	for range onlyOnce {
-		auth.state = a.IsValid()
+		auth.state = a.isValid()
 		if auth.state.IsNotOk() {
 			break
 		}

@@ -8,12 +8,12 @@ import (
 
 
 type TypeFile struct {
-	Name     string `goptions:"-n, --name, description='Name of the file', obligatory"`
-	Latest   bool   `goptions:"-l, --latest, description='Download latest release (required if tag is not specified)',mutexgroup='input'"`
-	Label    string   `goptions:"-l, --label, description='Label (description) of the file'"`
+	Name     string					// `goptions:"-n, --name, description='Name of the file', obligatory"`
+	//Latest   bool					// `goptions:"-l, --latest, description='Download latest release (required if tag is not specified)',mutexgroup='input'"`
+	Label    string					// `goptions:"-l, --label, description='Label (description) of the file'"`
 	Path     *toolPath.TypeOsPath	// WAS Name - *os.TypeFile `goptions:"-f, --file, description='TypeFile to upload (use - for stdin)', rdonly, obligatory"`
-	Replace  bool     `goptions:"-R, --replace, description='Replace asset with same name if it already exists (WARNING: not atomic, failure to upload will remove the original asset too)'"`
-	JSON     bool   `goptions:"-j, --json, description='Emit info as JSON instead of text'"`
+	Replace  bool					// `goptions:"-R, --replace, description='Replace asset with same name if it already exists (WARNING: not atomic, failure to upload will remove the original asset too)'"`
+	JSON     bool					// `goptions:"-j, --json, description='Emit info as JSON instead of text'"`
 
 	runtime  *toolRuntime.TypeRuntime
 	state    *ux.State
@@ -27,7 +27,7 @@ func NewFile(runtime *toolRuntime.TypeRuntime) *TypeFile {
 	for range onlyOnce {
 		f = TypeFile{
 			Name:    "",
-			Latest:  false,
+			//Latest:  false,
 			Label:   "",
 			Path:    toolPath.New(runtime),
 			Replace: false,
@@ -52,7 +52,7 @@ func (file *TypeFile) IsNil() *ux.State {
 }
 
 
-func (file *TypeFile) IsValid() *ux.State {
+func (file *TypeFile) isValid() *ux.State {
 	if state := ux.IfNilReturnError(file); state.IsError() {
 		return state
 	}
@@ -77,7 +77,7 @@ func (file *TypeFile) Set(f TypeFile) *ux.State {
 	file.state.SetFunction()
 
 	for range onlyOnce {
-		file.state = f.IsValid()
+		file.state = f.isValid()
 		if file.state.IsNotOk() {
 			break
 		}

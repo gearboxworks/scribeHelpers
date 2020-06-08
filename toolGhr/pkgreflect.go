@@ -9,7 +9,7 @@ var Types = map[string]reflect.Type{
 	"Commit": reflect.TypeOf((*Commit)(nil)).Elem(),
 	"GhrGetter": reflect.TypeOf((*GhrGetter)(nil)).Elem(),
 	"GithubError": reflect.TypeOf((*GithubError)(nil)).Elem(),
-	"Message": reflect.TypeOf((*Message)(nil)).Elem(),
+	"message": reflect.TypeOf((*message)(nil)).Elem(),
 	"Release": reflect.TypeOf((*Release)(nil)).Elem(),
 	"ReleaseCreate": reflect.TypeOf((*ReleaseCreate)(nil)).Elem(),
 	"Releases": reflect.TypeOf((*Releases)(nil)).Elem(),
@@ -29,7 +29,7 @@ var Functions = map[string]reflect.Value{
 	"NewFile": reflect.ValueOf(NewFile),
 	"NewRepo": reflect.ValueOf(NewRepo),
 	"ReflectToolGhr": reflect.ValueOf(ReflectToolGhr),
-	"ToMessage": reflect.ValueOf(ToMessage),
+	"Tomessage": reflect.ValueOf(Tomessage),
 }
 
 var Variables = map[string]reflect.Value{

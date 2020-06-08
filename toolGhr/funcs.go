@@ -14,8 +14,8 @@ import (
 
 
 /* usually when something goes wrong, github sends something like this back */
-type Message struct {
-	Message string        `json:"message"`
+type message struct {
+	message string        `json:"message"`
 	Errors  []GithubError `json:"errors"`
 }
 
@@ -26,9 +26,9 @@ type GithubError struct {
 }
 
 
-/* transforms a stream into a Message, if it's valid json */
-func ToMessage(r io.Reader) (*Message, error) {
-	var msg Message
+/* transforms a stream into a message, if it's valid json */
+func Tomessage(r io.Reader) (*message, error) {
+	var msg message
 	if err := json.NewDecoder(r).Decode(&msg); err != nil {
 		return nil, err
 	}
@@ -37,8 +37,8 @@ func ToMessage(r io.Reader) (*Message, error) {
 }
 
 
-func (m *Message) String() string {
-	str := fmt.Sprintf("msg: %v, errors: ", m.Message)
+func (m *message) String() string {
+	str := fmt.Sprintf("msg: %v, errors: ", m.message)
 
 	errstr := make([]string, len(m.Errors))
 	for idx, err := range m.Errors {
@@ -110,6 +110,7 @@ type Tag struct {
 	ZipBallUrl string `json:"zipball_url"`
 	TarBallUrl string `json:"tarball_url"`
 }
+type Tags []Tag
 
 type Commit struct {
 	Sha string `json:"sha"`
@@ -119,35 +120,6 @@ type Commit struct {
 
 func (t *Tag) String() string {
 	return t.Name + " (commit: " + t.Commit.Url + ")"
-}
-
-
-// Get the tags associated with a repo.
-func (ghr *TypeGhr) Tags() ([]Tag, *ux.State) {
-	var tags []Tag
-	if state := ghr.IsNil(); state.IsError() {
-		return tags, state
-	}
-	ghr.State.SetFunction()
-
-	for range onlyOnce {
-		//client := github.NewClient(ghr.Auth.AuthUser, ghr.Auth.Token, nil)
-		//client.SetBaseURL(ghr.urlPrefix)
-		err := ghr.Repo.ApiGet(TagsUri, ghr.Repo.Organization, ghr.Repo.Name)
-		if err != nil {
-			ghr.State.SetError(err)
-			break
-		}
-
-		if ghr.State.IsResponseNotOfType("[]Tag") {
-			ghr.State.SetError("could not get tags")
-			break
-		}
-
-		tags = ghr.State.GetResponseData().([]Tag)
-	}
-
-	return tags, ghr.State
 }
 
 
@@ -242,52 +214,59 @@ func (ghr *TypeGhr) mustCopyN(w io.Writer, r io.Reader, n int64) *ux.State {
 }
 
 
-func (ghr *TypeGhr) renderInfoText(tags []Tag, releases *Releases) *ux.State {
-	if state := ghr.IsNil(); state.IsError() {
-		return state
-	}
-	ghr.State.SetFunction()
-
-	for range onlyOnce {
-		fmt.Println("tags:")
-		for _, tag := range tags {
-			fmt.Println("-", &tag)
-		}
-
-		fmt.Println("releases:")
-		for _, release := range *releases {
-			fmt.Println("-", &release)
-		}
-
-		ghr.State.SetOk()
-	}
-
-	//return nil
-	return ghr.State
+func (ghr *TypeGhr) message(format string, args ...interface{}) {
+	ux.PrintfCyan("%s: ", ghr.Repo.GetUrl())
+	ux.PrintflnBlue(format, args...)
 }
 
 
-func (ghr *TypeGhr) renderInfoJSON(tags []Tag, releases *Releases) *ux.State {
-	if state := ghr.IsNil(); state.IsError() {
-		return state
-	}
-	ghr.State.SetFunction()
+//func (ghr *TypeGhr) renderInfoText(tags Tags, releases *Releases) *ux.State {
+//	if state := ghr.IsNil(); state.IsError() {
+//		return state
+//	}
+//	ghr.State.SetFunction()
+//
+//	for range onlyOnce {
+//		var t []string
+//		for _, tag := range tags {
+//			t = append(t, tag.Name)
+//		}
+//		ghr.message("Tags: %s", strings.Join(t, ", "))
+//
+//		ghr.message("Releases")
+//		for _, release := range *releases {
+//			ghr.message("- %v", release)
+//		}
+//
+//		ghr.State.SetOk()
+//	}
+//
+//	//return nil
+//	return ghr.State
+//}
 
-	for range onlyOnce {
-		out := struct {
-			Tags     []Tag
-			Releases *Releases
-		}{
-			Tags:     tags,
-			Releases: releases,
-		}
 
-		enc := json.NewEncoder(os.Stdout)
-		enc.SetIndent("", "    ")
-
-		ghr.State.SetOk()
-		ghr.State.SetResponse(enc.Encode(&out))
-	}
-
-	return ghr.State
-}
+//func (ghr *TypeGhr) renderInfoJSON(tags Tags, releases *Releases) *ux.State {
+//	if state := ghr.IsNil(); state.IsError() {
+//		return state
+//	}
+//	ghr.State.SetFunction()
+//
+//	for range onlyOnce {
+//		out := struct {
+//			Tags     Tags
+//			Releases *Releases
+//		}{
+//			Tags:     tags,
+//			Releases: releases,
+//		}
+//
+//		enc := json.NewEncoder(os.Stdout)
+//		enc.SetIndent("", "    ")
+//
+//		ghr.State.SetOk()
+//		ghr.State.SetResponse(enc.Encode(&out))
+//	}
+//
+//	return ghr.State
+//}

@@ -10,13 +10,14 @@ import (
 
 
 type TypeRepo struct {
-	Organization string `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
-	Name         string `goptions:"-r, --repo"` // WAS TypeRepo
-	Tag          string `goptions:"-t, --tag"`
-	Description  string `goptions:"-d, --description, description='Release description, use - for reading a description from stdin (defaults to tag)'"`
-	Draft        bool   `goptions:"--draft, description='The release is a draft'"`
-	Prerelease   bool   `goptions:"-p, --pre-release, description='The release is a pre-release'"`
-	Target       string `goptions:"-c, --target, description='Commit SHA or branch to create release of (defaults to the repository default branch)'"`
+	Organization string		// `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
+	Name         string		// `goptions:"-r, --repo"` // WAS TypeRepo
+	Tag          string		// `goptions:"-t, --tag"`
+	//Latest       bool		// `goptions:"-l, --latest, description='Download latest release (required if tag is not specified)',mutexgroup='input'"`
+	Description  string		// `goptions:"-d, --description, description='Release description, use - for reading a description from stdin (defaults to tag)'"`
+	Draft        bool		// `goptions:"--draft, description='The release is a draft'"`
+	Prerelease   bool		// `goptions:"-p, --pre-release, description='The release is a pre-release'"`
+	Target       string		// `goptions:"-c, --target, description='Commit SHA or branch to create release of (defaults to the repository default branch)'"`
 
 	client       github.Client
 	url          string
@@ -35,7 +36,7 @@ func NewRepo(runtime *toolRuntime.TypeRuntime) *TypeRepo {
 		repo = TypeRepo{
 			Organization: os.Getenv("GITHUB_USER"),
 			Name:         os.Getenv("GITHUB_REPO"),
-			Tag:          "",
+			Tag:          "latest",
 			Description:  "",
 			Draft:        false,
 			Prerelease:   false,
@@ -64,7 +65,7 @@ func (repo *TypeRepo) IsNil() *ux.State {
 }
 
 
-func (repo *TypeRepo) IsValid() *ux.State {
+func (repo *TypeRepo) isValid() *ux.State {
 	if state := ux.IfNilReturnError(repo); state.IsError() {
 		return state
 	}
@@ -81,11 +82,25 @@ func (repo *TypeRepo) IsValid() *ux.State {
 			repo.state.SetError("repo org is empty")
 			break
 		}
+	}
 
+	return repo.state
+}
+
+
+func (repo *TypeRepo) isValidTag() *ux.State {
+	if State := repo.IsNil(); State.IsError() {
+		return State
+	}
+	repo.state.SetFunction()
+
+	for range onlyOnce {
 		if repo.Tag == "" {
-			repo.state.SetError("repo tag is empty")
+			repo.state.SetError("empty tag")
 			break
 		}
+
+		repo.state.SetOk()
 	}
 
 	return repo.state
@@ -116,7 +131,7 @@ func (repo *TypeRepo) Set(ur TypeRepo) *ux.State {
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.state = ur.IsValid()
+		repo.state = ur.isValid()
 		if repo.state.IsNotOk() {
 			break
 		}
@@ -289,19 +304,22 @@ func (repo *TypeRepo) GetUrl() string {
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.state = repo.IsValid()
+		repo.state = repo.isValid()
 		if repo.state.IsNotOk() {
 			break
 		}
 
 		ret = fmt.Sprintf("%s/%s/%s", repo.urlPrefix, repo.Organization, repo.Name)
+		if repo.Tag != "" {
+			ret += "/" + repo.Tag
+		}
 	}
 
 	return ret
 }
 
 
-func (repo *TypeRepo) ApiGet(url string, args ...interface{}) *ux.State {
+func (repo *TypeRepo) apiGet(url string, args ...interface{}) *ux.State {
 	if state := ux.IfNilReturnError(repo); state.IsError() {
 		return state
 	}
@@ -356,10 +374,10 @@ func (repo *TypeRepo) GetReleases() (*Releases, *ux.State) {
 
 
 // Get the tags associated with a repo.
-func (repo *TypeRepo) GetTags() ([]Tag, *ux.State) {
-	var tags []Tag
+func (repo *TypeRepo) GetTags() (*Tags, *ux.State) {
+	var tags Tags
 	if state := repo.IsNil(); state.IsError() {
-		return tags, state
+		return &Tags{}, state
 	}
 	repo.state.SetFunction()
 
@@ -381,7 +399,7 @@ func (repo *TypeRepo) GetTags() ([]Tag, *ux.State) {
 		repo.state.SetResponse(&tags)
 	}
 
-	return tags, repo.state
+	return &tags, repo.state
 }
 
 

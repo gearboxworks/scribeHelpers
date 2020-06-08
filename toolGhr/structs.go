@@ -130,7 +130,7 @@ func (ghr *TypeGhr) IsNil() *ux.State {
 }
 
 
-func (ghr *TypeGhr) IsValid() *ux.State {
+func (ghr *TypeGhr) isValid() *ux.State {
 	if State := ux.IfNilReturnError(ghr); State.IsError() {
 		return State
 	}
@@ -138,83 +138,73 @@ func (ghr *TypeGhr) IsValid() *ux.State {
 	for range onlyOnce {
 		ghr.State = ghr.State.EnsureNotNil()
 
-		//if ghr.urlPrefix == "" {
-		//	ghr.State.SetError("API is empty")
+		ghr.State = ghr.Auth.isValid()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		ghr.State = ghr.Repo.isValid()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		//ghr.State = ghr.File.isValid()
+		//if ghr.State.IsNotOk() {
 		//	break
 		//}
-
-		ghr.State = ghr.Auth.IsValid()
-		if ghr.State.IsNotOk() {
-			break
-		}
-
-		ghr.State = ghr.Repo.IsValid()
-		if ghr.State.IsNotOk() {
-			break
-		}
-
-		ghr.State = ghr.File.IsValid()
-		if ghr.State.IsNotOk() {
-			break
-		}
 	}
 
 	return ghr.State
 }
 
 
-func (ghr *TypeGhr) ValidateTarget(latest bool) *ux.State {
-	if State := ghr.IsNil(); State.IsError() {
-		return State
-	}
-	ghr.State.SetFunction()
-
-	for range onlyOnce {
-		if ghr.Repo.Organization == "" {
-			ghr.State.SetError("empty user")
-			break
-		}
-
-		if ghr.Repo.Name == "" {
-			ghr.State.SetError("empty repo")
-			break
-		}
-
-		if ghr.Repo.Tag == "" && !latest {
-			ghr.State.SetError("empty tag")
-			break
-		}
-
-		ghr.State.SetOk()
-	}
-
-	return ghr.State
-}
+//func (ghr *TypeGhr) isValidTag(latest bool) *ux.State {
+//	if State := ghr.IsNil(); State.IsError() {
+//		return State
+//	}
+//	ghr.State.SetFunction()
+//
+//	for range onlyOnce {
+//		ghr.State = ghr.Repo.isValid()
+//		if ghr.State.IsNotOk() {
+//			break
+//		}
+//
+//		if ghr.Repo.Tag == "" && !latest {
+//			ghr.State.SetError("empty tag")
+//			break
+//		}
+//
+//		ghr.State.SetOk()
+//	}
+//
+//	return ghr.State
+//}
 
 
-func (ghr *TypeGhr) ValidateCredentials() *ux.State {
-	if State := ghr.IsNil(); State.IsError() {
-		return State
-	}
-	ghr.State.SetFunction()
-
-	for range onlyOnce {
-		ghr.State = ghr.ValidateTarget(false)
-		if ghr.State.IsNotOk() {
-			break
-		}
-
-		if ghr.Auth.Token == "" {
-			ghr.State.SetError("empty token")
-			break
-		}
-
-		ghr.State.SetOk()
-	}
-
-	// return nil
-	return ghr.State
-}
+//func (ghr *TypeGhr) validateCredentials() *ux.State {
+//	if State := ghr.IsNil(); State.IsError() {
+//		return State
+//	}
+//	ghr.State.SetFunction()
+//
+//	for range onlyOnce {
+//		ghr.State = ghr.Repo.isValidTag(false)
+//		if ghr.State.IsNotOk() {
+//			break
+//		}
+//
+//		if ghr.Auth.Token == "" {
+//			ghr.State.SetError("empty token")
+//			break
+//		}
+//
+//		ghr.State.SetOk()
+//	}
+//
+//	// return nil
+//	return ghr.State
+//}
 
 
 func (ghr *TypeGhr) Open(org string, repo string) *ux.State {
@@ -254,7 +244,7 @@ func (ghr *TypeGhr) Open(org string, repo string) *ux.State {
 }
 
 
-func (ghr *TypeGhr) SetAuth(a TypeAuth) *ux.State {
+func (ghr *TypeGhr) setAuth(a TypeAuth) *ux.State {
 	if State := ghr.IsNil(); State.IsError() {
 		return State
 	}
@@ -264,7 +254,7 @@ func (ghr *TypeGhr) SetAuth(a TypeAuth) *ux.State {
 }
 
 
-func (ghr *TypeGhr) SetRepo(r TypeRepo) *ux.State {
+func (ghr *TypeGhr) setRepo(r TypeRepo) *ux.State {
 	if State := ghr.IsNil(); State.IsError() {
 		return State
 	}
@@ -274,7 +264,7 @@ func (ghr *TypeGhr) SetRepo(r TypeRepo) *ux.State {
 }
 
 
-func (ghr *TypeGhr) SetFile(f TypeFile) *ux.State {
+func (ghr *TypeGhr) setFile(f TypeFile) *ux.State {
 	if State := ghr.IsNil(); State.IsError() {
 		return State
 	}
@@ -301,5 +291,76 @@ func (ghr *TypeGhr) GetReleases() *ux.State {
 		ghr.State.SetResponse(&rels)
 	}
 
+	return ghr.State
+}
+
+
+func (ghr *TypeGhr) GetTags() *ux.State {
+	if State := ghr.IsNil(); State.IsError() {
+		return State
+	}
+	ghr.State.SetFunction()
+
+	for range onlyOnce {
+		var tags *Tags
+		tags, ghr.State = ghr.Repo.GetTags()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		ghr.State.SetOk("Found %d releases at repo '%s'", len(*tags), ghr.Repo.GetUrl())
+		ghr.State.SetResponse(&tags)
+	}
+
+	return ghr.State
+}
+
+
+func (ghr *TypeGhr) SetTag(n string) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+	ghr.State = ghr.Repo.SetName(n)
+	return ghr.State
+}
+
+
+func (ghr *TypeGhr) SetDescription(n string) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+	ghr.State = ghr.Repo.SetDescription(n)
+	return ghr.State
+}
+
+
+func (ghr *TypeGhr) SetDraft(n bool) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+	ghr.State = ghr.Repo.SetDraft(n)
+	return ghr.State
+}
+
+
+func (ghr *TypeGhr) SetPreRelease(n bool) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+	ghr.State = ghr.Repo.SetPreRelease(n)
+	return ghr.State
+}
+
+
+func (ghr *TypeGhr) SetTarget(n string) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+	ghr.State = ghr.Repo.SetTarget(n)
 	return ghr.State
 }
