@@ -30,7 +30,34 @@ type Release struct {
 	Published   *time.Time `json:"published_at"`
 	Assets      []Asset    `json:"assets"`
 }
-type Releases []*Release
+type Releases struct {
+	All []*Release
+	Selected *Release
+}
+
+
+// findRelease returns the release if a release with name can be found in releases,
+// otherwise returns nil.
+func (r *Releases) findRelease(name string) *Release {
+	for range onlyOnce {
+		r.Selected = nil
+
+		if name == "latest" {
+			// Latest will always be first... Maybe... @TODO - TO BE CHECKED
+			r.Selected = r.All[0]
+			break
+		}
+
+		for _, release := range r.All {
+			if release.Name == name {
+				r.Selected = release
+			}
+		}
+	}
+
+	return r.Selected
+}
+
 
 func (r *Release) CleanUploadUrl() string {
 	bracket := strings.Index(r.UploadUrl, "{")
@@ -165,15 +192,14 @@ func (ghr *TypeGhr) LatestRelease() (*Release, *ux.State) {
 
 		// The enterprise urlPrefix doesnt support the latest release endpoint. Get
 		// all releases and compare the published date to get the latest.
-		var rels *Releases
-		rels, ghr.State = ghr.Repo.GetReleases()
+		ghr.State = ghr.Repo.GetReleases()
 		if ghr.State.IsNotOk() {
 			break
 		}
 
 		var latestRelIndex = -1
 		maxDate := time.Time{}
-		for i, release := range *rels {
+		for i, release := range *ghr.Repo.releases {
 			if relDate := *release.Published; relDate.After(maxDate) {
 				maxDate = relDate
 				latestRelIndex = i
@@ -184,46 +210,44 @@ func (ghr *TypeGhr) LatestRelease() (*Release, *ux.State) {
 			break
 		}
 
-		ret = (*rels)[latestRelIndex]
-		ux.PrintflnBlue("Found %d releases, latest release is %v", len(*rels), (*rels)[latestRelIndex])
+		ret = (*ghr.Repo.releases)[latestRelIndex]
+		ux.PrintflnBlue("Found %d releases, latest release is %s", len(*ghr.Repo.releases), ret.Name)
 	}
 
 	return ret, ghr.State
 }
 
 
-func (ghr *TypeGhr) releaseOfTag() (*Release, *ux.State) {
-	var ret *Release
+func (ghr *TypeGhr) GetRelease() *ux.State {
 	if state := ux.IfNilReturnError(ghr); state.IsError() {
-		return &Release{}, state
+		return state
 	}
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		var rels *Releases
-		rels, ghr.State = ghr.Repo.GetReleases()
+		ghr.State = ghr.Repo.GetReleases()
 		if ghr.State.IsNotOk() {
 			ghr.State.SetError("could not find the rel corresponding to tag %s", ghr.Repo.Tag)
 			break
 		}
 
-		if len(*rels) == 0 {
+		if len(*ghr.Repo.releases) == 0 {
 			ghr.State.SetError("could not find any releases")
 		}
 
 		if ghr.Repo.Tag == "latest" {
-			ghr.Repo.Tag = (*rels)[0].Name
+			ghr.Repo.Tag = (*ghr.Repo.releases)[0].Name
 		}
 
-		for _, rel := range *rels {
+		for _, rel := range *ghr.Repo.releases {
 			if rel.TagName == ghr.Repo.Tag {
-				ret = rel
+				ghr.Repo.release = rel
 				break
 			}
 		}
 	}
 
-	return ret, ghr.State
+	return ghr.State
 }
 
 

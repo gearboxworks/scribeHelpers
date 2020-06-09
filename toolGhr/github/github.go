@@ -46,14 +46,14 @@ type Client struct {
 }
 
 // NewClient creates a new Client for use with the Github API.
-func NewClient(username, token string, client *rest.Client) Client {
+func NewClient(username, token string, client *rest.Client) *Client {
 	c := Client{}
 	if client == nil {
 		c.client = rest.NewClient(username, token, DefaultBaseURL)
 	} else {
 		c.client = client
 	}
-	return c
+	return &c
 }
 
 // SetBaseURL updates the client's base URL, if baseurl is a non-empty value.

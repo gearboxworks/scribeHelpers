@@ -37,6 +37,11 @@ type TypeResponse struct {
 }
 
 
+type ResponseGetter interface {
+	GetResponse() interface{}
+}
+
+
 func newResponse() TypeResponse {
 	return TypeResponse{ ofType: nil, data: nil }
 }

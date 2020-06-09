@@ -12,6 +12,12 @@ import (
 type GhrGetter interface {
 }
 
+//var _ ux.ResponseGetter = (*TypeResponse)(nil)
+//type TypeResponse ux.TypeResponse
+//func (t TypeResponse) GetResponse() interface{} {
+//	panic("implement me")
+//}
+
 
 type State ux.State
 func (s *State) Reflect() *ux.State {
@@ -29,10 +35,7 @@ type TypeGhr struct {
 	Repo     *TypeRepo
 	File     *TypeFile
 
-	urlPrefix string
-	//gh    github.Client
-	release   Release
-	releases  []Release
+	//urlPrefix string
 
 	runtime  *toolRuntime.TypeRuntime
 	State    *ux.State
@@ -108,7 +111,7 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGhr {
 			Repo: NewRepo(runtime),
 			File: NewFile(runtime),
 
-			urlPrefix: DefaultGitHubUrl,
+			//urlPrefix: DefaultGitHubUrl,
 			//gh:    github.Client{},
 
 			runtime:  runtime,
@@ -219,25 +222,17 @@ func (ghr *TypeGhr) Open(org string, repo string) *ux.State {
 			break
 		}
 
-		ghr.State = ghr.Repo.SetOrganization(org)
+		ghr.State = ghr.Repo.SetRepo(org, repo)
 		if ghr.State.IsNotOk() {
-			ghr.State.SetError("Cannot set organization to '%s'", org)
 			break
 		}
 
-		ghr.State = ghr.Repo.SetName(repo)
-		if ghr.State.IsNotOk() {
-			ghr.State.SetError("Cannot set repo to '%s'", repo)
-			break
-		}
-
-		var rels *Releases
-		rels, ghr.State = ghr.Repo.GetReleases()
-		if ghr.State.IsNotOk() {
-			ghr.State.SetError("Cannot connect to repo '%s'", ghr.Repo.GetUrl())
-			break
-		}
-		ghr.State.SetOk("Found %d releases at repo '%s'", len(*rels), ghr.Repo.GetUrl())
+		//ghr.State = ghr.Repo.GetReleases()
+		//if ghr.State.IsNotOk() {
+		//	ghr.State.SetError("Cannot connect to repo '%s'", ghr.Repo.GetUrl())
+		//	break
+		//}
+		ghr.State.SetOk("Found %d releases at repo '%s'", len(*ghr.Repo.Releases), ghr.Repo.GetUrl())
 	}
 
 	return ghr.State
@@ -264,16 +259,6 @@ func (ghr *TypeGhr) setRepo(r TypeRepo) *ux.State {
 }
 
 
-//func (ghr *TypeGhr) setFile(f TypeFile) *ux.State {
-//	if State := ghr.IsNil(); State.IsError() {
-//		return State
-//	}
-//	ghr.State.SetFunction()
-//	ghr.State = ghr.File.Set(f)
-//	return ghr.State
-//}
-
-
 func (ghr *TypeGhr) GetReleases() *ux.State {
 	if State := ghr.IsNil(); State.IsError() {
 		return State
@@ -281,14 +266,13 @@ func (ghr *TypeGhr) GetReleases() *ux.State {
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		var rels *Releases
-		rels, ghr.State = ghr.Repo.GetReleases()
+		ghr.State = ghr.Repo.GetReleases()
 		if ghr.State.IsNotOk() {
 			break
 		}
 
-		ghr.State.SetOk("Found %d releases at repo '%s'", len(*rels), ghr.Repo.GetUrl())
-		ghr.State.SetResponse(&rels)
+		ghr.State.SetOk("Found %d releases at repo '%s'", len(*ghr.Repo.releases), ghr.Repo.GetUrl())
+		ghr.State.SetResponse(&ghr.Repo.releases)
 	}
 
 	return ghr.State

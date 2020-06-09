@@ -114,7 +114,10 @@ func Test_Ghr() {
 	//state = Test.SetRepo(toolGhr.TypeRepo{ Name: "gearboxworks", Tag: "buildtool" })
 	//PrintTestResult(state, test, "SetRepo(toolGhr.TypeRepo{ Name: \"gearboxworks\", Tag: \"buildtool\" })")
 
-	state = Test.Open("gearboxworks", "buildtool")
+	state = Test.Open("mickmake", "test")
+	PrintTestResult(state, test, "Open()")
+
+	state = Test.OpenUrl("mickmake", "test")
 	PrintTestResult(state, test, "Open()")
 
 	state = Test.Info()
@@ -123,8 +126,20 @@ func Test_Ghr() {
 	state = Test.GetReleases()
 	PrintTestResult(state, test, "GetReleases()")
 
+	state = Test.Upload("testing")
+	PrintTestResult(state, test, "Download()")
+
 	state = Test.Download("buildtool-darwin_amd64.tar.gz")
 	PrintTestResult(state, test, "Download()")
+
+
+	//func (r *TypeResponse) GetStringArray() *[]string {
+	//	if r.IsOfType("[]string") {
+	//	return (r.data).(*[]string)
+	//}
+	//
+	//	return &[]string{}
+	//}
 
 	PrintTestStop(test)
 }

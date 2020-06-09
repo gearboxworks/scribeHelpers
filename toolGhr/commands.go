@@ -16,6 +16,7 @@ import (
 )
 
 
+// Show repo information
 func (ghr *TypeGhr) Info() *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
@@ -28,67 +29,91 @@ func (ghr *TypeGhr) Info() *ux.State {
 			break
 		}
 
-
-		ghr.message("Getting release tag info ...")
-		// Find regular git tags.
-		var tags *Tags
-		tags, ghr.State = ghr.Repo.GetTags()
+		ghr.State = ghr.Repo.isValidTag()
 		if ghr.State.IsNotOk() {
-			ghr.State.SetError("could not fetch tags, %v", ghr.State.GetError())
-			break
-		}
-		if len(*tags) == 0 {
-			ghr.State.SetError("no tags available for %s", ghr.Repo.GetUrl())
 			break
 		}
 
-		if ghr.Repo.Tag == "latest" {
-			ghr.Repo.Tag = (*tags)[0].Name
+
+		ghr.message("Getting repo tag info ...")
+		ghr.State = ghr.Repo.GetTags()
+		if ghr.State.IsNotOk() {
+			break
 		}
-
-		if ghr.Repo.Tag == "" {
-			// Return all tags.
-			var t []string
-			for _, tag := range *tags {
-				t = append(t, tag.Name)
-			}
-			ghr.message("Tags: %s", strings.Join(t, ", "))
-
-		} else {
-			// If the user only requested one tag, filter out the rest.
-			for _, t := range *tags {
-				if t.Name == ghr.Repo.Tag {
-					ghr.message("Tag: %s", ghr.Repo.Tag)
-					break
-				}
-			}
+		ghr.State = ghr.Repo.PrintTags()
+		if ghr.State.IsNotOk() {
+			break
 		}
 
 
-		ghr.message("Getting release info ...")
-		// List releases + assets.
-		if ghr.Repo.Tag == "" {
-			var releases *Releases
-			// Get all releases.
-			releases, ghr.State = ghr.Repo.GetReleases()
-			if ghr.State.IsNotOk() {
-				break
-			}
-			ghr.message("Found %d releases.", len(*releases))
-			for _, release := range *releases {
-				fmt.Printf("\n####\n%v", release)
-			}
-
-		} else {
-			var rel *Release
-			// Get only one release.
-			rel, ghr.State = ghr.releaseOfTag()
-			if ghr.State.IsNotOk() {
-				break
-			}
-			ghr.message("Found 1 release.")
-			ghr.message("- %v", rel)
+		ghr.message("Getting repo release info ...")
+		ghr.State = ghr.Repo.GetReleases()
+		if ghr.State.IsNotOk() {
+			break
 		}
+		ghr.State = ghr.Repo.PrintReleases()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+
+		//ghr.message("Getting release tag info ...")
+		// Find regular git tags.
+		//var tags *Tags
+		//ghr.State = ghr.Repo.GetTags()
+		//if ghr.State.IsNotOk() {
+		//	ghr.State.SetError("could not fetch tags, %v", ghr.State.GetError())
+		//	break
+		//}
+		//if len(*tags) == 0 {
+		//	ghr.State.SetError("no tags available for %s", ghr.Repo.GetUrl())
+		//	break
+		//}
+		//
+		//if ghr.Repo.Tag == "latest" {
+		//	ghr.Repo.Tag = (*tags)[0].Name
+		//}
+		//
+		//if ghr.Repo.Tag == "" {
+		//	// Return all tags.
+		//	var t []string
+		//	for _, tag := range ghr.Repo.Tags.All {
+		//		t = append(t, tag.Name)
+		//	}
+		//	ghr.message("Tags: %s", strings.Join(t, ", "))
+		//
+		//} else {
+		//	// If the user only requested one tag, filter out the rest.
+		//	for _, t := range *tags {
+		//		if t.Name == ghr.Repo.Tag {
+		//			ghr.message("Tag: %s", ghr.Repo.Tag)
+		//			break
+		//		}
+		//	}
+		//}
+		//
+		//
+		//// List releases + assets.
+		//if ghr.Repo.Tag == "" {
+		//	// Get all releases.
+		//	ghr.State = ghr.Repo.GetReleases()
+		//	if ghr.State.IsNotOk() {
+		//		break
+		//	}
+		//	ghr.message("Found %d releases.", len(*ghr.Repo.Releases))
+		//	for _, release := range *ghr.Repo.Releases {
+		//		fmt.Printf("\n####\n%v", release)
+		//	}
+		//
+		//} else {
+		//	// Get only one release.
+		//	ghr.State = ghr.releaseOfTag()
+		//	if ghr.State.IsNotOk() {
+		//		break
+		//	}
+		//	ghr.message("Found 1 release.")
+		//	ghr.message("- %v", ghr.Repo.Release)
+		//}
 
 
 		ghr.State.SetOk()
@@ -99,7 +124,8 @@ func (ghr *TypeGhr) Info() *ux.State {
 }
 
 
-func (ghr *TypeGhr) Upload() *ux.State {
+// Upload a file to a repo release.
+func (ghr *TypeGhr) Upload(file string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
@@ -124,11 +150,6 @@ func (ghr *TypeGhr) Upload() *ux.State {
 		}
 		//noinspection ALL
 		defer ghr.File.Path.CloseFile()
-
-		//ghr.State = ghr.validateCredentials()
-		//if ghr.State.IsNotOk() {
-		//	break
-		//}
 
 		// Find the release corresponding to the entered tag, if any.
 		var rel *Release
@@ -242,6 +263,7 @@ func (ghr *TypeGhr) Upload() *ux.State {
 }
 
 
+// Download a file from a repo release.
 func (ghr *TypeGhr) Download(file string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
@@ -318,7 +340,7 @@ func (ghr *TypeGhr) Download(file string) *ux.State {
 		out := os.Stdout // Pipe the asset to stdout by default.
 		if isCharDevice(out) {
 			// If stdout is a char device, assume it's a TTY (terminal). In this
-			// case, don't pipe th easset to stdout, but create it as a file in
+			// case, don't pipe the asset to stdout, but create it as a file in
 			// the current working folder.
 			if out, err = os.Create(ghr.File.Name); err != nil {
 				ghr.State.SetError("could not create file %s", ghr.File.Name)
@@ -328,16 +350,17 @@ func (ghr *TypeGhr) Download(file string) *ux.State {
 			defer out.Close()
 		}
 
-		ghr.State = ghr.File.StatPath()
-		if ghr.State.IsNotOk() {
-			break
-		}
-
 		ghr.State = ghr.mustCopyN(out, resp.Body, contentLength)
 		if ghr.State.IsNotOk() {
 			break
 		}
 
+		ghr.State = ghr.File.StatPath()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		ghr.State.SetResponse(ghr.File)
 		ghr.State.SetOk()
 	}
 
@@ -346,7 +369,8 @@ func (ghr *TypeGhr) Download(file string) *ux.State {
 }
 
 
-func (ghr *TypeGhr) Release() *ux.State {
+// Create a repo release.
+func (ghr *TypeGhr) Create() *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
@@ -364,11 +388,6 @@ func (ghr *TypeGhr) Release() *ux.State {
 		}
 
 		ghr.message("Releasing '%s' ...", ghr.Repo.Tag)
-
-		//ghr.State = ghr.validateCredentials()
-		//if ghr.State.IsNotOk() {
-		//	break
-		//}
 
 		// Check if we need to read the description from stdin.
 		if ghr.Repo.Description == "-" {
@@ -434,6 +453,7 @@ func (ghr *TypeGhr) Release() *ux.State {
 }
 
 
+// Update a repo release.
 func (ghr *TypeGhr) Update() *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
@@ -452,11 +472,6 @@ func (ghr *TypeGhr) Update() *ux.State {
 		}
 
 		ghr.message("Updating release '%s' ...", ghr.Repo.Tag)
-
-		//ghr.State = ghr.validateCredentials()
-		//if ghr.State.IsNotOk() {
-		//	break
-		//}
 
 		var id int
 		id, ghr.State = ghr.idOfTag()
@@ -528,6 +543,7 @@ func (ghr *TypeGhr) Update() *ux.State {
 }
 
 
+// Delete a repo release.
 func (ghr *TypeGhr) Delete() *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
