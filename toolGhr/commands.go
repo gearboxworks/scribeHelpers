@@ -48,6 +48,39 @@ func (ghr *TypeGhr) Info() *ux.State {
 }
 
 
+// Show repo information
+func (ghr *TypeGhr) Copy(dstRepo *TypeRepo) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+
+	for range onlyOnce {
+		ghr.State = ghr.isValid()
+		if ghr.State.IsNotOk() {
+			break
+		}
+		ghr.State = ghr.Repo.Fetch(true)
+		if ghr.State.IsError() {
+			break
+		}
+
+		ghr.State = dstRepo.Fetch(true)
+		if ghr.State.IsError() {
+			break
+		}
+
+
+		// Copy src to dst...
+
+
+		ghr.State.SetOk()
+	}
+
+	return ghr.State
+}
+
+
 // Upload multiple files to a repo Release.
 func (ghr *TypeGhr) UploadMultiple(replace bool, files ...string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {

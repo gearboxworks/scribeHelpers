@@ -152,7 +152,15 @@ func (repo *TypeRepo) Open(user string, token string) *ux.State {
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.client = github.NewClient(user, token, nil)
+		if user != "" {
+			repo.Auth.AuthUser = user
+		}
+
+		if token != "" {
+			repo.Auth.Token = token
+		}
+
+		repo.client = github.NewClient(repo.Auth.AuthUser, repo.Auth.Token, nil)
 		if repo.client == nil {
 			break
 		}
@@ -180,6 +188,11 @@ func (repo *TypeRepo) Set(ur TypeRepo) *ux.State {
 	repo.state.SetFunction()
 
 	for range onlyOnce {
+		repo.state = repo.Open(ur.Auth.AuthUser, ur.Auth.Token)
+		if repo.state.IsNotOk() {
+			break
+		}
+
 		repo.state = repo.SetDescription(ur.Description)
 		if repo.state.IsNotOk() {
 			break
