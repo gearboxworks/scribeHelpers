@@ -10,12 +10,11 @@ import (
 type TypeAuth struct {
 	Token    string		// `goptions:"-s, --security-token, description='Github token ($GITHUB_TOKEN if set). required if repo is private.'"`
 	//User     string `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
-	AuthUser string		// `goptions:"-a, --auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
+	AuthUser string		// `goptions:"-a, --Auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
 
 	runtime  *toolRuntime.TypeRuntime
 	state    *ux.State
 }
-
 
 func NewAuth(runtime *toolRuntime.TypeRuntime) *TypeAuth {
 	var auth TypeAuth
@@ -39,7 +38,6 @@ func NewAuth(runtime *toolRuntime.TypeRuntime) *TypeAuth {
 	return &auth
 }
 
-
 func (auth *TypeAuth) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(auth); state.IsError() {
 		return state
@@ -47,7 +45,6 @@ func (auth *TypeAuth) IsNil() *ux.State {
 	auth.state = auth.state.EnsureNotNil()
 	return auth.state
 }
-
 
 func (auth *TypeAuth) isValid() *ux.State {
 	if state := ux.IfNilReturnError(auth); state.IsError() {
@@ -62,8 +59,8 @@ func (auth *TypeAuth) isValid() *ux.State {
 			break
 		}
 
-		//if auth.User == "" {
-		//	auth.state.SetError("$GITHUB_USER is empty")
+		//if Auth.User == "" {
+		//	Auth.state.SetError("$GITHUB_USER is empty")
 		//	break
 		//}
 
@@ -75,7 +72,6 @@ func (auth *TypeAuth) isValid() *ux.State {
 
 	return auth.state
 }
-
 
 func (auth *TypeAuth) Set(a TypeAuth) *ux.State {
 	if state := auth.IsNil(); state.IsError() {
@@ -93,7 +89,7 @@ func (auth *TypeAuth) Set(a TypeAuth) *ux.State {
 		//goptions.ParseAndFail(&options)
 		//
 		//if options.Version {
-		//	fmt.Printf("github-release v%s\n", github.VERSION)
+		//	fmt.Printf("github-Release v%s\n", github.VERSION)
 		//	return nil
 		//}
 		//

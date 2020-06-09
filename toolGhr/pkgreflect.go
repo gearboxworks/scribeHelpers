@@ -11,8 +11,8 @@ var Types = map[string]reflect.Type{
 	"GithubError": reflect.TypeOf((*GithubError)(nil)).Elem(),
 	"message": reflect.TypeOf((*message)(nil)).Elem(),
 	"Release": reflect.TypeOf((*Release)(nil)).Elem(),
-	"ReleaseCreate": reflect.TypeOf((*ReleaseCreate)(nil)).Elem(),
-	"Releases": reflect.TypeOf((*Releases)(nil)).Elem(),
+	"releaseCreate": reflect.TypeOf((*releaseCreate)(nil)).Elem(),
+	"releases": reflect.TypeOf((*releases)(nil)).Elem(),
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
 	"Tag": reflect.TypeOf((*Tag)(nil)).Elem(),
 	"ToolGhr": reflect.TypeOf((*ToolGhr)(nil)).Elem(),
@@ -37,12 +37,11 @@ var Variables = map[string]reflect.Value{
 }
 
 var Consts = map[string]reflect.Value{
-	"AssetReleaseListUri": reflect.ValueOf(AssetReleaseListUri),
 	"AssetUri": reflect.ValueOf(AssetUri),
-	"ReleaseDateFormat": reflect.ValueOf(ReleaseDateFormat),
-	"ReleaseLatestUri": reflect.ValueOf(ReleaseLatestUri),
-	"ReleaseListUri": reflect.ValueOf(ReleaseListUri),
-	"TagsUri": reflect.ValueOf(TagsUri),
+	"releaseDateFormat": reflect.ValueOf(releaseDateFormat),
+	"releaseLatestUri": reflect.ValueOf(releaseLatestUri),
+	"releaseListUri": reflect.ValueOf(releaseListUri),
+	"tagsUri": reflect.ValueOf(tagsUri),
 	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

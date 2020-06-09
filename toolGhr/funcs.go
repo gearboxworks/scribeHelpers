@@ -91,7 +91,7 @@ func Mark(ok bool) string {
 
 // mustCopyN attempts to copy exactly N bytes, if this fails, an error is
 // returned.
-func (ghr *TypeGhr) mustCopyN(w io.Writer, r io.Reader, n int64) *ux.State {
+func (ghr *TypeGhr) mustCopyN(w *os.File, r io.Reader, n int64) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
@@ -121,7 +121,7 @@ func (ghr *TypeGhr) message(format string, args ...interface{}) {
 }
 
 
-//func (ghr *TypeGhr) renderInfoText(tags Tags, releases *Releases) *ux.State {
+//func (ghr *TypeGhr) renderInfoText(tags tags, releases *releases) *ux.State {
 //	if state := ghr.IsNil(); state.IsError() {
 //		return state
 //	}
@@ -132,11 +132,11 @@ func (ghr *TypeGhr) message(format string, args ...interface{}) {
 //		for _, tag := range tags {
 //			t = append(t, tag.Name)
 //		}
-//		ghr.message("Tags: %s", strings.Join(t, ", "))
+//		ghr.message("tags: %s", strings.Join(t, ", "))
 //
-//		ghr.message("Releases")
-//		for _, release := range *releases {
-//			ghr.message("- %v", release)
+//		ghr.message("releases")
+//		for _, Release := range *releases {
+//			ghr.message("- %v", Release)
 //		}
 //
 //		ghr.State.SetOk()
@@ -147,7 +147,7 @@ func (ghr *TypeGhr) message(format string, args ...interface{}) {
 //}
 
 
-//func (ghr *TypeGhr) renderInfoJSON(tags Tags, releases *Releases) *ux.State {
+//func (ghr *TypeGhr) renderInfoJSON(tags tags, releases *releases) *ux.State {
 //	if state := ghr.IsNil(); state.IsError() {
 //		return state
 //	}
@@ -155,11 +155,11 @@ func (ghr *TypeGhr) message(format string, args ...interface{}) {
 //
 //	for range onlyOnce {
 //		out := struct {
-//			Tags     Tags
-//			Releases *Releases
+//			tags     tags
+//			releases *releases
 //		}{
-//			Tags:     tags,
-//			Releases: releases,
+//			tags:     tags,
+//			releases: releases,
 //		}
 //
 //		enc := json.NewEncoder(os.Stdout)

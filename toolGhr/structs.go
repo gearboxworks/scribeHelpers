@@ -1,9 +1,8 @@
 // This is a "fork and modify" of the codebase from https://github.com/github-release/github-release
-// "github-release" is a stale repo - so the need to fork.
+// "github-Release" is a stale repo - so the need to fork.
 package toolGhr
 
 import (
-	"github.com/newclarity/scribeHelpers/toolPath"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 )
@@ -29,13 +28,7 @@ func ReflectToolGhr(e *TypeGhr) *ToolGhr {
 
 
 type TypeGhr struct {
-	Path      *toolPath.TypeOsPath
-
-	Auth     *TypeAuth
 	Repo     *TypeRepo
-	File     *TypeFile
-
-	//urlPrefix string
 
 	runtime  *toolRuntime.TypeRuntime
 	State    *ux.State
@@ -43,16 +36,16 @@ type TypeGhr struct {
 	// Download
 	//Token    string `goptions:"-s, --security-token, description='Github token ($GITHUB_TOKEN if set). required if repo is private.'"`
 	//User     string `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
-	//AuthUser string `goptions:"-a, --auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
+	//AuthUser string `goptions:"-a, --Auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
 	//TypeRepo     string `goptions:"-r, --repo, description='Github repo (required if $GITHUB_REPO not set)'"`
 	//Tag      string `goptions:"-t, --tag, description='Git tag to download from (required if latest is not specified)', mutexgroup='input',obligatory"`
 	//Name     string `goptions:"-n, --name, description='Name of the file', obligatory"`
-	//Latest   bool   `goptions:"-l, --latest, description='Download latest release (required if tag is not specified)',mutexgroup='input'"`
+	//Latest   bool   `goptions:"-l, --latest, description='Download latest Release (required if tag is not specified)',mutexgroup='input'"`
 	//
 	// Upload
 	//Token    string   `goptions:"-s, --security-token, description='Github token (required if $GITHUB_TOKEN not set)'"`
 	//User     string   `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
-	//AuthUser string   `goptions:"-a, --auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
+	//AuthUser string   `goptions:"-a, --Auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
 	//TypeRepo     string   `goptions:"-r, --repo, description='Github repo (required if $GITHUB_REPO not set)'"`
 	//Tag      string   `goptions:"-t, --tag, description='Git tag to upload to', obligatory"`
 	//Name     string   `goptions:"-n, --name, description='Name of the file', obligatory"`
@@ -64,40 +57,39 @@ type TypeGhr struct {
 	//Token      string `goptions:"-s, --security-token, description='Github token (required if $GITHUB_TOKEN not set)'"`
 	//User       string `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
 	//TypeRepo       string `goptions:"-r, --repo, description='Github repo (required if $GITHUB_REPO not set)'"`
-	//Tag        string `goptions:"-t, --tag, obligatory, description='Git tag to create a release from'"`
-	//Name       string `goptions:"-n, --name, description='Name of the release (defaults to tag)'"`
+	//Tag        string `goptions:"-t, --tag, obligatory, description='Git tag to create a Release from'"`
+	//Name       string `goptions:"-n, --name, description='Name of the Release (defaults to tag)'"`
 	//Desc       string `goptions:"-d, --description, description='Release description, use - for reading a description from stdin (defaults to tag)'"`
-	//Draft      bool   `goptions:"--draft, description='The release is a draft'"`
-	//Prerelease bool   `goptions:"-p, --pre-release, description='The release is a pre-release'"`
-	//Target     string `goptions:"-c, --target, description='Commit SHA or branch to create release of (defaults to the repository default branch)'"`
+	//Draft      bool   `goptions:"--draft, description='The Release is a draft'"`
+	//Prerelease bool   `goptions:"-p, --pre-Release, description='The Release is a pre-Release'"`
+	//Target     string `goptions:"-c, --target, description='Commit SHA or branch to create Release of (defaults to the repository default branch)'"`
 	//
 	// Edit
 	//Token      string `goptions:"-s, --security-token, description='Github token (required if $GITHUB_TOKEN not set)'"`
 	//User       string `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
-	//AuthUser   string `goptions:"-a, --auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
+	//AuthUser   string `goptions:"-a, --Auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
 	//TypeRepo       string `goptions:"-r, --repo, description='Github repo (required if $GITHUB_REPO not set)'"`
-	//Tag        string `goptions:"-t, --tag, obligatory, description='Git tag to edit the release of'"`
-	//Name       string `goptions:"-n, --name, description='New name of the release (defaults to tag)'"`
-	//Desc       string `goptions:"-d, --description, description='New release description, use - for reading a description from stdin (defaults to tag)'"`
-	//Draft      bool   `goptions:"--draft, description='The release is a draft'"`
-	//Prerelease bool   `goptions:"-p, --pre-release, description='The release is a pre-release'"`
+	//Tag        string `goptions:"-t, --tag, obligatory, description='Git tag to edit the Release of'"`
+	//Name       string `goptions:"-n, --name, description='New name of the Release (defaults to tag)'"`
+	//Desc       string `goptions:"-d, --description, description='New Release description, use - for reading a description from stdin (defaults to tag)'"`
+	//Draft      bool   `goptions:"--draft, description='The Release is a draft'"`
+	//Prerelease bool   `goptions:"-p, --pre-Release, description='The Release is a pre-Release'"`
 	//
 	// Delete
 	//Token    string `goptions:"-s, --security-token, description='Github token (required if $GITHUB_TOKEN not set)'"`
 	//User     string `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
-	//AuthUser string `goptions:"-a, --auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
+	//AuthUser string `goptions:"-a, --Auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
 	//TypeRepo     string `goptions:"-r, --repo, description='Github repo (required if $GITHUB_REPO not set)'"`
-	//Tag      string `goptions:"-t, --tag, obligatory, description='Git tag of release to delete'"`
+	//Tag      string `goptions:"-t, --tag, obligatory, description='Git tag of Release to delete'"`
 	//
 	// Info
 	//Token    string `goptions:"-s, --security-token, description='Github token ($GITHUB_TOKEN if set). required if repo is private.'"`
 	//User     string `goptions:"-u, --user, description='Github repo user or organisation (required if $GITHUB_USER not set)'"`
-	//AuthUser string `goptions:"-a, --auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
+	//AuthUser string `goptions:"-a, --Auth-user, description='Username for authenticating to the API (falls back to $GITHUB_AUTH_USER or $GITHUB_USER)'"`
 	//TypeRepo     string `goptions:"-r, --repo, description='Github repo (required if $GITHUB_REPO not set)'"`
 	//Tag      string `goptions:"-t, --tag, description='Git tag to query (optional)'"`
 	//JSON     bool   `goptions:"-j, --json, description='Emit info as JSON instead of text'"`
 }
-
 
 func New(runtime *toolRuntime.TypeRuntime) *TypeGhr {
 	var ghr TypeGhr
@@ -105,14 +97,10 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGhr {
 
 	for range onlyOnce {
 		ghr = TypeGhr{
-			Path:     toolPath.New(runtime),
+			//Path:     toolPath.New(runtime),
 
-			Auth: NewAuth(runtime),
 			Repo: NewRepo(runtime),
-			File: NewFile(runtime),
-
-			//urlPrefix: DefaultGitHubUrl,
-			//gh:    github.Client{},
+			//File: NewFile(runtime),
 
 			runtime:  runtime,
 			State:    ux.NewState(runtime.CmdName, runtime.Debug),
@@ -123,7 +111,6 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGhr {
 	return &ghr
 }
 
-
 func (ghr *TypeGhr) IsNil() *ux.State {
 	if State := ux.IfNilReturnError(ghr); State.IsError() {
 		return State
@@ -131,7 +118,6 @@ func (ghr *TypeGhr) IsNil() *ux.State {
 	ghr.State = ghr.State.EnsureNotNil()
 	return ghr.State
 }
-
 
 func (ghr *TypeGhr) isValid() *ux.State {
 	if State := ux.IfNilReturnError(ghr); State.IsError() {
@@ -141,7 +127,7 @@ func (ghr *TypeGhr) isValid() *ux.State {
 	for range onlyOnce {
 		ghr.State = ghr.State.EnsureNotNil()
 
-		ghr.State = ghr.Auth.isValid()
+		ghr.State = ghr.Repo.Auth.isValid()
 		if ghr.State.IsNotOk() {
 			break
 		}
@@ -160,56 +146,6 @@ func (ghr *TypeGhr) isValid() *ux.State {
 	return ghr.State
 }
 
-
-//func (ghr *TypeGhr) isValidTag(latest bool) *ux.State {
-//	if State := ghr.IsNil(); State.IsError() {
-//		return State
-//	}
-//	ghr.State.SetFunction()
-//
-//	for range onlyOnce {
-//		ghr.State = ghr.Repo.isValid()
-//		if ghr.State.IsNotOk() {
-//			break
-//		}
-//
-//		if ghr.Repo.Tag == "" && !latest {
-//			ghr.State.SetError("empty tag")
-//			break
-//		}
-//
-//		ghr.State.SetOk()
-//	}
-//
-//	return ghr.State
-//}
-
-
-//func (ghr *TypeGhr) validateCredentials() *ux.State {
-//	if State := ghr.IsNil(); State.IsError() {
-//		return State
-//	}
-//	ghr.State.SetFunction()
-//
-//	for range onlyOnce {
-//		ghr.State = ghr.Repo.isValidTag(false)
-//		if ghr.State.IsNotOk() {
-//			break
-//		}
-//
-//		if ghr.Auth.Token == "" {
-//			ghr.State.SetError("empty token")
-//			break
-//		}
-//
-//		ghr.State.SetOk()
-//	}
-//
-//	// return nil
-//	return ghr.State
-//}
-
-
 func (ghr *TypeGhr) Open(org string, repo string) *ux.State {
 	if State := ghr.IsNil(); State.IsError() {
 		return State
@@ -217,7 +153,7 @@ func (ghr *TypeGhr) Open(org string, repo string) *ux.State {
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		ghr.State = ghr.Repo.Open(ghr.Auth.AuthUser, ghr.Auth.Token)
+		ghr.State = ghr.Repo.Open(ghr.Repo.Auth.AuthUser, ghr.Repo.Auth.Token)
 		if ghr.State.IsNotOk() {
 			break
 		}
@@ -227,88 +163,42 @@ func (ghr *TypeGhr) Open(org string, repo string) *ux.State {
 			break
 		}
 
-		//ghr.State = ghr.Repo.GetReleases()
+		//ghr.State = ghr.Repo.Releases()
 		//if ghr.State.IsNotOk() {
 		//	ghr.State.SetError("Cannot connect to repo '%s'", ghr.Repo.GetUrl())
 		//	break
 		//}
-		ghr.State.SetOk("Found %d releases at repo '%s'", len(*ghr.Repo.Releases), ghr.Repo.GetUrl())
+		ghr.State.SetOk("Found %d releases at repo '%s'", ghr.Repo.CountReleases(), ghr.Repo.GetUrl())
 	}
 
 	return ghr.State
 }
 
-
-func (ghr *TypeGhr) setAuth(a TypeAuth) *ux.State {
+func (ghr *TypeGhr) OpenUrl(repoUrl string) *ux.State {
 	if State := ghr.IsNil(); State.IsError() {
 		return State
 	}
 	ghr.State.SetFunction()
-	ghr.State = ghr.Auth.Set(a)
-	return ghr.State
+	return ghr.Repo.SetUrl(repoUrl)
 }
 
-
-func (ghr *TypeGhr) setRepo(r TypeRepo) *ux.State {
-	if State := ghr.IsNil(); State.IsError() {
-		return State
+func (ghr *TypeGhr) Set(n TypeRepo) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
 	}
 	ghr.State.SetFunction()
-	ghr.State = ghr.Repo.Set(r)
+	ghr.State = ghr.Repo.Set(n)
 	return ghr.State
 }
-
-
-func (ghr *TypeGhr) GetReleases() *ux.State {
-	if State := ghr.IsNil(); State.IsError() {
-		return State
-	}
-	ghr.State.SetFunction()
-
-	for range onlyOnce {
-		ghr.State = ghr.Repo.GetReleases()
-		if ghr.State.IsNotOk() {
-			break
-		}
-
-		ghr.State.SetOk("Found %d releases at repo '%s'", len(*ghr.Repo.releases), ghr.Repo.GetUrl())
-		ghr.State.SetResponse(&ghr.Repo.releases)
-	}
-
-	return ghr.State
-}
-
-
-func (ghr *TypeGhr) GetTags() *ux.State {
-	if State := ghr.IsNil(); State.IsError() {
-		return State
-	}
-	ghr.State.SetFunction()
-
-	for range onlyOnce {
-		var tags *Tags
-		tags, ghr.State = ghr.Repo.GetTags()
-		if ghr.State.IsNotOk() {
-			break
-		}
-
-		ghr.State.SetOk("Found %d releases at repo '%s'", len(*tags), ghr.Repo.GetUrl())
-		ghr.State.SetResponse(&tags)
-	}
-
-	return ghr.State
-}
-
 
 func (ghr *TypeGhr) SetTag(n string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
 	ghr.State.SetFunction()
-	ghr.State = ghr.Repo.SetName(n)
+	ghr.State = ghr.Repo.SetTag(n)
 	return ghr.State
 }
-
 
 func (ghr *TypeGhr) SetDescription(n string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
@@ -319,7 +209,6 @@ func (ghr *TypeGhr) SetDescription(n string) *ux.State {
 	return ghr.State
 }
 
-
 func (ghr *TypeGhr) SetDraft(n bool) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
@@ -329,16 +218,14 @@ func (ghr *TypeGhr) SetDraft(n bool) *ux.State {
 	return ghr.State
 }
 
-
-func (ghr *TypeGhr) SetPreRelease(n bool) *ux.State {
+func (ghr *TypeGhr) SetPrerelease(n bool) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
 	ghr.State.SetFunction()
-	ghr.State = ghr.Repo.SetPreRelease(n)
+	ghr.State = ghr.Repo.SetPrerelease(n)
 	return ghr.State
 }
-
 
 func (ghr *TypeGhr) SetTarget(n string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {

@@ -110,6 +110,7 @@ func IfNilReturnError(ref interface{}) *State {
 	if state == nil {
 		state = NewState("", false)
 	}
+	state.SetOk()
 	return state
 	//return ref.(*State)
 }

@@ -117,20 +117,63 @@ func Test_Ghr() {
 	state = Test.Open("mickmake", "test")
 	PrintTestResult(state, test, "Open()")
 
-	state = Test.OpenUrl("mickmake", "test")
-	PrintTestResult(state, test, "Open()")
+	state = Test.OpenUrl("mickmake/test")
+	PrintTestResult(state, test, "OpenUrl(\"mickmake/test\")")
 
+	state = Test.OpenUrl("https://github.com/mickmake/test")
+	PrintTestResult(state, test, "OpenUrl(\"https://github.com/mickmake/test\")")
+
+	state = Test.SetTag("latest")
+	PrintTestResult(state, test, "SetTag(\"latest\")")
 	state = Test.Info()
 	PrintTestResult(state, test, "Info()")
 
-	state = Test.GetReleases()
-	PrintTestResult(state, test, "GetReleases()")
+	state = Test.SetTag("1.0")
+	PrintTestResult(state, test, "SetTag(\"1.0\")")
+	state = Test.Info()
+	PrintTestResult(state, test, "Info()")
 
-	state = Test.Upload("testing")
-	PrintTestResult(state, test, "Download()")
+	count := Test.Repo.CountReleases()
+	PrintTestResult(state, test, "Repo.CountReleases() == %d", count)
+	rels := Test.Repo.Releases()
+	PrintTestResult(state, test, "rels.CountAll: %d", rels.CountAll())
+	PrintTestResult(state, test, "len(rels.GetAll()): %d", len(rels.GetAll()))
+	PrintTestResult(state, test, "rels.GetLatest: %v", rels.GetLatest())
+	PrintTestResult(state, test, "rels.GetSelected: %v", rels.GetSelected())
+	PrintTestResult(state, test, "rels.Sprint: %s", rels.Sprint())
 
-	state = Test.Download("buildtool-darwin_amd64.tar.gz")
-	PrintTestResult(state, test, "Download()")
+	rel := Test.Repo.Release()
+	PrintTestResult(state, test, "rels.Sprint: %v", rel)
+
+	//state = Test.Delete("1.0.1")
+	//PrintTestResult(state, test, "Create(\"1.0.1\", true)")
+	//
+	//state = Test.Create("1.0.1", true)
+	//PrintTestResult(state, test, "Create(\"1.0.1\", true)")
+	//
+	////state = Test.Upload(true, "testing", "")
+	////PrintTestResult(state, test, "Upload(\"testing\", \"\", true)")
+	//
+	//state = Test.UploadMultiple(true, "../testing/testing", "pkgreflect.go", "init.go")
+	//PrintTestResult(state, test, "Upload(\"testing\", \"\", true)")
+	//
+	//state = Test.Download("testing", true)
+	//PrintTestResult(state, test, "Download(\"testing\")")
+
+	relData := toolGhr.TypeRepo{
+		Organization: "mickmake",
+		Name:         "test",
+		TagName:      "2.0.0",
+		Description:  "This is a description",
+		Draft:        false,
+		Prerelease:   false,
+		Target:       "",
+		Replace:      true,
+		Files:        []string{"../testing/testing", "pkgreflect.go", "init.go"},
+		Auth:         &toolGhr.TypeAuth{ Token: "", AuthUser: "" },
+	}
+	state = Test.CreateRelease(relData)
+	PrintTestResult(state, test, "CreateRelease(relData)")
 
 
 	//func (r *TypeResponse) GetStringArray() *[]string {
