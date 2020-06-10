@@ -29,7 +29,7 @@ func (s *Ssh) StatusLineUpdate() {
 	// signal.Notify(c, syscall.SIGWINCH)
 
 	for s.StatusLine.TerminateFlag == false {
-		// Handle terminal windows size changes properly.
+		// fh terminal windows size changes properly.
 		fileDescriptor := int(os.Stdin.Fd())
 		width, height, _ := terminal.GetSize(fileDescriptor)
 		if (s.StatusLine.TermWidth != width) || (s.StatusLine.TermHeight != height) {

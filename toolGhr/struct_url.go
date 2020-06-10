@@ -1,6 +1,9 @@
 package toolGhr
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/newclarity/scribeHelpers/ux"
+)
 
 const (
 	repoBaseUrl         = "%s/repos/%s/%s"
@@ -30,6 +33,26 @@ const (
 	assetsUri			= "/releases/%d/assets"
 )
 
+func (repo *TypeRepo) ClientGet(ref interface{}, uri string, args ...interface{}) *ux.State {
+	if State := ux.IfNilReturnError(repo); State.IsError() {
+		return State
+	}
+
+	for range onlyOnce {
+		URL := repo.generateApiUrl(uri, args...)
+		err := repo.client.Get(URL, ref)
+		if err != nil {
+			repo.state.SetError(err)
+			break
+		}
+		if ref == nil {
+			repo.state.SetWarning("no results found")
+			break
+		}
+	}
+
+	return repo.state
+}
 
 func (repo *TypeRepo) generateApiUrl(format string, args ...interface{}) string {
 	if state := repo.IsNil(); state.IsError() {

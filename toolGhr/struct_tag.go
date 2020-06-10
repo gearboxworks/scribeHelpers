@@ -24,17 +24,21 @@ func (repo *TypeRepo) FetchTags(force bool) *ux.State {
 			break
 		}
 
-		URL := repo.generateApiUrl(tagsUri)
-		err := repo.client.Get(URL, &repo.tags.all)
-		if err != nil {
-			repo.state.SetError(err)
-			break
-		}
-
-		if repo.tags.all == nil {
+		repo.state = repo.ClientGet(&repo.tags.all, tagsUri)
+		if repo.state.IsNotOk() {
 			repo.state.SetError("no tags found")
 			break
 		}
+		//URL := repo.generateApiUrl(tagsUri)
+		//err := repo.client.Get(URL, &repo.tags.all)
+		//if err != nil {
+		//	repo.state.SetError(err)
+		//	break
+		//}
+		//if repo.tags.all == nil {
+		//	repo.state.SetError("no tags found")
+		//	break
+		//}
 
 		// @TODO - figure out how to do this.
 		//// Sometimes we can't second guess what the "latest" is based on date alone.
@@ -97,6 +101,25 @@ func (repo *TypeRepo) PrintTags() *ux.State {
 	return repo.state
 }
 
+func (repo *TypeRepo) PrintTag() *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+	if repo.tags.selected != nil {
+		repo.tags.selected.Print()
+	}
+	return repo.state
+}
+
+func (repo *TypeRepo) SelectTag(tag string) *Tag {
+	if state := ux.IfNilReturnError(repo); state.IsError() {
+		return nil
+	}
+	repo.state.SetFunction()
+	return repo.tags.findTag(tag)
+}
+
 // Delete sends a HTTP DELETE request for the given asset to Github. Returns
 // nil if the asset was deleted OR there was nothing to delete.
 func (repo *TypeRepo) DeleteTag(tag string) *ux.State {
@@ -106,10 +129,41 @@ func (repo *TypeRepo) DeleteTag(tag string) *ux.State {
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.message("Deleting Release Tag '%s' ...", tag)
-		URL := repo.generateApiUrl(tagRef, tag)
+		if repo.tags.all == nil {
+			repo.state.SetError("No tags available")
+			break
+		}
+
+		ref := repo.SelectTag(tag)
+		if ref == nil {
+			repo.state.SetError("Release tag '%s' not available", tag)
+			break
+		}
+
+		repo.state = repo.DeleteTagRef(ref)
+	}
+
+	return repo.state
+}
+
+func (repo *TypeRepo) DeleteTagRef(ref *Tag) *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+
+	for range onlyOnce {
+		if ref == nil {
+			repo.messageError("Deleting Release tag FAILED - empty")
+			repo.state.SetError("Deleting Release tag FAILED - empty")
+			break
+		}
+
+		repo.message("Deleting Release tag '%s' ...", ref.Name)
+		URL := repo.generateApiUrl(tagRef, ref.Name)
 		resp, err := github.DoAuthRequest("DELETE", URL, "application/json", repo.Auth.Token, nil, nil)
 		if err != nil {
+			repo.messageError("Deleting Release tag '%s' FAILED", ref.Name)
 			repo.state.SetError("Release deletion failed: %v", err)
 			break
 		}
@@ -117,10 +171,12 @@ func (repo *TypeRepo) DeleteTag(tag string) *ux.State {
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusNoContent {
-			repo.state.SetError("failed to delete tag %s - status: %s", tag, resp.Status)
+			repo.messageError("Deleting Release tag '%s' FAILED", ref.Name)
+			repo.state.SetError("failed to delete tag %s - status: %s", ref.Name, resp.Status)
 			break
 		}
 
+		repo.messageOk("Deleted Release tag '%s' OK", ref.Name)
 		repo.state.SetOk()
 	}
 

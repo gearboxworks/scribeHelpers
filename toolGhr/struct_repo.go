@@ -3,6 +3,7 @@ package toolGhr
 import (
 	"fmt"
 	"github.com/newclarity/scribeHelpers/toolGhr/github"
+	"github.com/newclarity/scribeHelpers/toolPath"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"net/url"
@@ -20,17 +21,18 @@ type TypeRepo struct {
 	Prerelease   bool
 	Target       string
 	Files        []string
-	Replace      bool
+	Overwrite    bool
 
 	Auth         *TypeAuth
 	client       *github.Client
+	clientValid  bool
 	urlPrefix    string
 	apiUrlPrefix string
 
 	tags         *tags
 	releases     *releases
 	assets       *assets
-	file         *TypeFile
+	//files        *TypeFiles
 
 	runtime      *toolRuntime.TypeRuntime
 	state        *ux.State
@@ -63,9 +65,7 @@ func NewRepo(runtime *toolRuntime.TypeRuntime) *TypeRepo {
 			Prerelease:   false,
 			Target:       "",
 			Files:        []string{},
-			Replace:      false,
-
-			file:         NewFile(runtime),
+			Overwrite:      false,
 
 			Auth:         NewAuth(runtime),
 			client:       &github.Client{},
@@ -143,6 +143,26 @@ func (repo *TypeRepo) isValidTag() *ux.State {
 	return repo.state
 }
 
+func (repo *TypeRepo) isAuthChanged(user string, token string) bool {
+	var ok bool
+	for range onlyOnce {
+		if !repo.clientValid {
+			ok = true
+			break
+		}
+		if repo.Auth.AuthUser != user {
+			ok = true
+			break
+		}
+		if repo.Auth.Token != token {
+			ok = true
+			break
+		}
+		ok = false
+	}
+	return ok
+}
+
 
 // Create/open/set methods
 func (repo *TypeRepo) Open(user string, token string) *ux.State {
@@ -152,6 +172,10 @@ func (repo *TypeRepo) Open(user string, token string) *ux.State {
 	repo.state.SetFunction()
 
 	for range onlyOnce {
+		if !repo.isAuthChanged(user, token) {
+			break
+		}
+
 		if user != "" {
 			repo.Auth.AuthUser = user
 		}
@@ -167,6 +191,8 @@ func (repo *TypeRepo) Open(user string, token string) *ux.State {
 
 		repo.client.SetBaseURL(repo.apiUrlPrefix)
 
+		repo.clientValid = true
+
 		//repo.state = repo.FetchReleases()
 		//if repo.state.IsNotOk() {
 		//	break
@@ -181,16 +207,18 @@ func (repo *TypeRepo) Open(user string, token string) *ux.State {
 	return repo.state
 }
 
-func (repo *TypeRepo) Set(ur TypeRepo) *ux.State {
+func (repo *TypeRepo) Set(ur *TypeRepo) *ux.State {
 	if state := repo.IsNil(); state.IsError() {
 		return state
 	}
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.state = repo.Open(ur.Auth.AuthUser, ur.Auth.Token)
-		if repo.state.IsNotOk() {
-			break
+		if ur.Auth != nil {
+			repo.state = repo.Open(ur.Auth.AuthUser, ur.Auth.Token)
+			if repo.state.IsNotOk() {
+				break
+			}
 		}
 
 		repo.state = repo.SetDescription(ur.Description)
@@ -223,17 +251,37 @@ func (repo *TypeRepo) Set(ur TypeRepo) *ux.State {
 			break
 		}
 
-		repo.state = repo.SetReplace(ur.Replace)
+		repo.state = repo.SetOverwrite(ur.Overwrite)
 		if repo.state.IsNotOk() {
 			break
 		}
 
-		repo.state = repo.SetFiles(ur.Files)
+		repo.state = repo.SetFiles(ur.Files...)
 		if repo.state.IsNotOk() {
 			break
 		}
 
 		repo.state = repo.isValid()
+		if repo.state.IsNotOk() {
+			break
+		}
+	}
+
+	return repo.state
+}
+
+func (repo *TypeRepo) SetAuth(ur *TypeAuth) *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+
+	for range onlyOnce {
+		if ur == nil {
+			break
+		}
+
+		repo.state = repo.Open(ur.AuthUser, ur.Token)
 		if repo.state.IsNotOk() {
 			break
 		}
@@ -249,17 +297,17 @@ func (repo *TypeRepo) SetRepo(org string, name string) *ux.State {
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		if org == "" {
-			repo.state.SetError("invalid repo org")
+		repo.state = repo.Open(repo.Auth.AuthUser, repo.Auth.Token)
+		if repo.state.IsNotOk() {
 			break
 		}
-		repo.Organization = org
 
-		if name == "" {
-			repo.state.SetError("invalid repo name")
-			break
+		if org != "" {
+			repo.Organization = org
 		}
-		repo.Name = name
+		if name != "" {
+			repo.Name = name
+		}
 
 		repo.state = repo.Fetch(true)
 		if repo.state.IsError() {
@@ -279,6 +327,11 @@ func (repo *TypeRepo) SetUrl(repoUrl string) *ux.State {
 	repo.state.SetFunction()
 
 	for range onlyOnce {
+		repo.state = repo.Open(repo.Auth.AuthUser, repo.Auth.Token)
+		if repo.state.IsNotOk() {
+			break
+		}
+
 		if repoUrl == "" {
 			repo.state.SetError("invalid repo url")
 			break
@@ -384,12 +437,8 @@ func (repo *TypeRepo) SetDraft(n bool) *ux.State {
 		return state
 	}
 	repo.state.SetFunction()
-
-	for range onlyOnce {
-		repo.Draft = n
-		repo.state.SetOk()
-	}
-
+	repo.Draft = n
+	repo.state.SetOk()
 	return repo.state
 }
 
@@ -398,12 +447,18 @@ func (repo *TypeRepo) SetPrerelease(n bool) *ux.State {
 		return state
 	}
 	repo.state.SetFunction()
+	repo.Prerelease = n
+	repo.state.SetOk()
+	return repo.state
+}
 
-	for range onlyOnce {
-		repo.Prerelease = n
-		repo.state.SetOk()
+func (repo *TypeRepo) SetOverwrite(n bool) *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
 	}
-
+	repo.state.SetFunction()
+	repo.Overwrite = n
+	repo.state.SetOk()
 	return repo.state
 }
 
@@ -425,28 +480,55 @@ func (repo *TypeRepo) SetTarget(n string) *ux.State {
 	return repo.state
 }
 
-func (repo *TypeRepo) SetReplace(n bool) *ux.State {
+func (repo *TypeRepo) SetFiles(f ...string) *ux.State {
 	if state := repo.IsNil(); state.IsError() {
 		return state
 	}
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.Replace = n
+		if len(f) == 0 {
+			break
+		}
+		repo.Files = f
 		repo.state.SetOk()
 	}
 
 	return repo.state
 }
 
-func (repo *TypeRepo) SetFiles(f []string) *ux.State {
+func (repo *TypeRepo) SetFilePath(glob string, f ...string) *ux.State {
 	if state := repo.IsNil(); state.IsError() {
 		return state
 	}
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.Files = f
+		if len(f) == 0 {
+			break
+		}
+
+		fp := toolPath.NewPaths(repo.runtime)
+		if fp.State.IsNotOk() {
+			repo.state = fp.State
+			break
+		}
+
+		repo.state = fp.FindRegex(glob, f...)
+		if repo.state.IsNotOk() {
+			break
+		}
+
+		if fp.GetLength() == 0 {
+			repo.state.SetError("No files with pattern '%s' found in path '%s'", glob, fp.Base.GetPath())
+			break
+		}
+
+		repo.Files = []string{}
+		for _, file := range fp.Paths {
+			repo.Files = append(repo.Files, file.GetPathAbs())
+		}
+
 		repo.state.SetOk()
 	}
 
@@ -490,4 +572,16 @@ func (repo *TypeRepo) Fetch(force bool) *ux.State {
 func (repo *TypeRepo) message(format string, args ...interface{}) {
 	ux.PrintfCyan("%s: ", repo.GetUrl())
 	ux.PrintflnBlue(format, args...)
+}
+
+
+func (repo *TypeRepo) messageOk(format string, args ...interface{}) {
+	ux.PrintfCyan("%s: ", repo.GetUrl())
+	ux.PrintflnGreen(format, args...)
+}
+
+
+func (repo *TypeRepo) messageError(format string, args ...interface{}) {
+	ux.PrintfCyan("%s: ", repo.GetUrl())
+	ux.PrintflnRed(format, args...)
 }

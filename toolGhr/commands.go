@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/newclarity/scribeHelpers/toolGhr/github"
+	"github.com/newclarity/scribeHelpers/toolPath"
 	"github.com/newclarity/scribeHelpers/ux"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 
@@ -49,7 +51,7 @@ func (ghr *TypeGhr) Info() *ux.State {
 
 
 // Show repo information
-func (ghr *TypeGhr) Copy(dstRepo *TypeRepo) *ux.State {
+func (ghr *TypeGhr) CopyFrom(srcRepo *TypeRepo, cacheDir string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
@@ -60,10 +62,87 @@ func (ghr *TypeGhr) Copy(dstRepo *TypeRepo) *ux.State {
 		if ghr.State.IsNotOk() {
 			break
 		}
-		ghr.State = ghr.Repo.Fetch(true)
+
+
+		// Setup cache dir.
+		ghr.message("Setting up cache directory...")
+		dir := toolPath.New(ghr.runtime)
+		if ghr.State.IsNotOk() {
+			break
+		}
+		dir.SetPath(cacheDir)
+		ghr.State = dir.StatPath()
 		if ghr.State.IsError() {
 			break
 		}
+
+
+		// Setup src repo.
+		ghr.message("Setting up source repo...")
+		ghr.State = srcRepo.Fetch(true)
+		if ghr.State.IsError() {
+			break
+		}
+		srcRef := srcRepo.Release()
+		if srcRef == nil {
+			ghr.State.SetError("No source release found")
+			break
+		}
+
+
+		// Copy src files to cache.
+		ghr.message("Download files from source repo to cache...")
+		ghr.State = srcRepo.DownloadAssets(false, cacheDir)
+		if ghr.State.IsError() {
+			break
+		}
+
+
+		// Setup destination repo.
+		dstRepo := ghr.Repo
+		ghr.message("Setup destination repo...")
+		ghr.State = dstRepo.Fetch(true)
+		if ghr.State.IsError() {
+			break
+		}
+
+		//dstRepo.Organization = "",
+		//dstRepo.Name =         "",
+		//dstRepo.Auth =         dstRepo.Auth,
+		dstRepo.TagName     = srcRef.TagName
+		dstRepo.Description = srcRef.Description
+		dstRepo.Draft       = srcRef.Draft
+		dstRepo.Prerelease  = srcRef.Prerelease
+		dstRepo.Target      = srcRepo.Target
+		//dstRepo.Files       = srcRepo.Files
+		//dstRepo.Overwrite     = srcRepo.Overwrite
+
+		dstRepo.Files = []string{}
+		for _, file := range srcRepo.Files {
+			dstRepo.Files = append(dstRepo.Files, filepath.Join(cacheDir, file))
+		}
+
+
+		// Create release on destination repo.
+		ghr.message("Creating release on destination repo...")
+		ghr.State = dstRepo.CreateRelease(nil)
+		if ghr.State.IsNotOk() {
+			ghr.State.SetError("could not create release '%s'", ghr.Repo.TagName)
+			break
+		}
+
+
+		// Upload files
+		ghr.message("Uploading assets to destination repo...")
+		for _, file := range dstRepo.Files {
+			ghr.State = ghr.Upload(dstRepo.Overwrite, file)
+			if ghr.State.IsNotOk() {
+				// Retry same file again if failed.
+				ghr.State = ghr.Upload(dstRepo.Overwrite, file)
+				break
+			}
+		}
+
 
 		ghr.State = dstRepo.Fetch(true)
 		if ghr.State.IsError() {
@@ -71,8 +150,9 @@ func (ghr *TypeGhr) Copy(dstRepo *TypeRepo) *ux.State {
 		}
 
 
-		// Copy src to dst...
-
+		ghr.message("Destination repo now in sync for Release '%s'.", dstRepo.TagName)
+		//srcRepo.PrintRelease()
+		dstRepo.PrintRelease()
 
 		ghr.State.SetOk()
 	}
@@ -82,7 +162,7 @@ func (ghr *TypeGhr) Copy(dstRepo *TypeRepo) *ux.State {
 
 
 // Upload multiple files to a repo Release.
-func (ghr *TypeGhr) UploadMultiple(replace bool, files ...string) *ux.State {
+func (ghr *TypeGhr) UploadMultiple(overwrite bool, files ...string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
@@ -95,8 +175,10 @@ func (ghr *TypeGhr) UploadMultiple(replace bool, files ...string) *ux.State {
 		}
 
 		for _, file := range files {
-			ghr.State = ghr.Upload(replace, file, "")
+			ghr.State = ghr.Upload(overwrite, file)
 			if ghr.State.IsNotOk() {
+				// Retry same file again if failed.
+				ghr.State = ghr.Upload(overwrite, file)
 				break
 			}
 		}
@@ -107,7 +189,7 @@ func (ghr *TypeGhr) UploadMultiple(replace bool, files ...string) *ux.State {
 
 
 // Upload a file to a repo Release.
-func (ghr *TypeGhr) Upload(replace bool, file string, label string) *ux.State {
+func (ghr *TypeGhr) Upload(overwrite bool, label string, path ...string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
@@ -119,44 +201,12 @@ func (ghr *TypeGhr) Upload(replace bool, file string, label string) *ux.State {
 			break
 		}
 
-		ghr.Repo.SetFile(file, label)
-
 		ghr.State = ghr.Repo.Fetch(true)
 		if ghr.State.IsError() {
 			break
 		}
 
-
-		//// Incomplete (failed) uploads will have their state set to new. These
-		//// assets are (AFAIK) useless in all cases. The only thing they will do
-		//// is prevent the upload of another asset of the same name. To work
-		//// around this GH API weirdness, let's just delete assets if:
-		////
-		//// 1. Their state is new.
-		//// 2. The user explicitly asked to delete/replace the asset with -R.
-		for range onlyOnce {
-			asset := ghr.Repo.SelectAsset(file)
-			if asset == nil {
-				break
-			}
-
-			//if asset.State != "new" {
-			//	break
-			//}
-
-			if replace == false {
-				break
-			}
-
-			ghr.message("Asset (id: %d) exists in state %s: Removing ...", asset.Id, asset.State)
-			ghr.State = ghr.Repo.DeleteAsset(asset)
-			if ghr.State.IsNotOk() {
-				ghr.State.SetError("could not replace asset: %v", ghr.State.GetError())
-				break
-			}
-		}
-
-		ghr.State = ghr.Repo.UploadAsset(file)
+		ghr.State = ghr.Repo.UploadAsset(overwrite, label, path...)
 		if ghr.State.IsNotOk() {
 			break
 		}
@@ -169,7 +219,7 @@ func (ghr *TypeGhr) Upload(replace bool, file string, label string) *ux.State {
 
 
 // Download a file from a repo Release.
-func (ghr *TypeGhr) Download(file string, overwrite bool) *ux.State {
+func (ghr *TypeGhr) Download(overwrite bool, name string, path ...string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
@@ -181,15 +231,13 @@ func (ghr *TypeGhr) Download(file string, overwrite bool) *ux.State {
 			break
 		}
 
-		ghr.Repo.SetFile(file, "")
-
 		ghr.State = ghr.Repo.Fetch(true)
 		if ghr.State.IsError() {
 			break
 		}
 
-		ghr.State = ghr.Repo.DownloadAsset(file, overwrite)
-		if ghr.State.IsNotOk() {
+		ghr.State = ghr.Repo.DownloadAsset(overwrite, name, path...)
+		if ghr.State.IsError() {
 			break
 		}
 
@@ -200,15 +248,50 @@ func (ghr *TypeGhr) Download(file string, overwrite bool) *ux.State {
 }
 
 
-// Create a repo Release.
-func (ghr *TypeGhr) CreateRelease(n TypeRepo) *ux.State {
+// Upload multiple files to a repo Release.
+func (ghr *TypeGhr) DeleteAssets(labels ...string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		ghr.State = ghr.Set(n)
+		ghr.State = ghr.isValid()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		ghr.State = ghr.Repo.Fetch(true)
+		if ghr.State.IsError() {
+			break
+		}
+
+		for _, file := range labels {
+			ghr.State = ghr.Repo.DeleteAsset(file)
+			if ghr.State.IsNotOk() {
+				break
+			}
+		}
+	}
+
+	return ghr.State
+}
+
+
+// Create a repo Release.
+func (ghr *TypeGhr) Create(rel TypeRepo) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+
+	for range onlyOnce {
+		ghr.State = ghr.Repo.Fetch(true)
+		if ghr.State.IsError() {
+			break
+		}
+
+		ghr.State = ghr.Set(rel)
 		if ghr.State.IsNotOk() {
 			break
 		}
@@ -220,35 +303,7 @@ func (ghr *TypeGhr) CreateRelease(n TypeRepo) *ux.State {
 
 
 		// Create release
-		ghr.State = ghr.Repo.Fetch(true)
-		if ghr.State.IsError() {
-			break
-		}
-
-		for range onlyOnce {
-			rel := ghr.Repo.SelectRelease(ghr.Repo.TagName)
-			if rel == nil {
-				break
-			}
-
-			if ghr.Repo.Replace == false {
-				break
-			}
-
-			ghr.message("Release (id: %d) exists in state %s: Removing ...", rel.Id, rel.Name)
-			ghr.State = ghr.Repo.DeleteRelease(rel)
-			if ghr.State.IsNotOk() {
-				ghr.State.SetError("could not replace release: %v", rel.Name)
-				break
-			}
-
-			ghr.State = ghr.Repo.Fetch(true)
-			if ghr.State.IsError() {
-				break
-			}
-		}
-
-		ghr.State = ghr.Repo.CreateRelease(ghr.Repo.TagName)
+		ghr.State = ghr.Repo.CreateRelease(&rel)
 		if ghr.State.IsNotOk() {
 			ghr.State.SetError("could not create release '%s'", ghr.Repo.TagName)
 			break
@@ -259,86 +314,11 @@ func (ghr *TypeGhr) CreateRelease(n TypeRepo) *ux.State {
 			break
 		}
 
-
 		// Upload files
-		for _, file := range ghr.Repo.Files {
-			for range onlyOnce {
-				asset := ghr.Repo.SelectAsset(file)
-				if asset == nil {
-					break
-				}
-
-				if ghr.Repo.Replace == false {
-					break
-				}
-
-				ghr.message("Asset (id: %d) exists in state %s: Removing ...", asset.Id, asset.State)
-				ghr.State = ghr.Repo.DeleteAsset(asset)
-				if ghr.State.IsNotOk() {
-					ghr.State.SetError("could not replace asset: %v", ghr.State.GetError())
-					break
-				}
-			}
-
-			ghr.State = ghr.Repo.UploadAsset(file)
-			if ghr.State.IsNotOk() {
-				break
-			}
-		}
-	}
-
-	return ghr.State
-}
-
-
-// Create a repo Release.
-func (ghr *TypeGhr) Create(tag string, replace bool) *ux.State {
-	if state := ghr.IsNil(); state.IsError() {
-		return state
-	}
-	ghr.State.SetFunction()
-
-	for range onlyOnce {
-		ghr.State = ghr.isValid()
-		if ghr.State.IsNotOk() {
-			break
-		}
-
-		ghr.State = ghr.SetTag(tag)
-		if ghr.State.IsNotOk() {
-			break
-		}
-
-		ghr.State = ghr.Repo.Fetch(true)
+		ghr.State = ghr.UploadMultiple(ghr.Repo.Overwrite, ghr.Repo.Files...)
 		if ghr.State.IsError() {
 			break
 		}
-
-		for range onlyOnce {
-			rel := ghr.Repo.SelectRelease(tag)
-			if rel == nil {
-				break
-			}
-
-			if replace == false {
-				break
-			}
-
-			ghr.message("Release (id: %d) exists. Removing ...", rel.Id)
-			ghr.State = ghr.Repo.DeleteRelease(rel)
-			if ghr.State.IsNotOk() {
-				ghr.State.SetError("could not replace release: %s", rel.Name)
-				break
-			}
-		}
-
-		ghr.State = ghr.Repo.CreateRelease(tag)
-		if ghr.State.IsNotOk() {
-			ghr.State.SetError("could not create release '%s'", tag)
-			break
-		}
-
-		ghr.State.SetOk()
 	}
 
 	return ghr.State
@@ -384,7 +364,7 @@ func (ghr *TypeGhr) Update(tag string) *ux.State {
 		/* the Release create struct works for editing releases as well */
 		params := releaseCreate{
 			TagName:    ghr.Repo.TagName,
-			Name:       ghr.Repo.file.Name,
+			Name:       ghr.Repo.TagName,
 			Body:       ghr.Repo.Description,
 			Draft:      ghr.Repo.Draft,
 			Prerelease: ghr.Repo.Prerelease,
@@ -464,38 +444,7 @@ func (ghr *TypeGhr) Delete(tag string) *ux.State {
 			break
 		}
 
-		ghr.State = ghr.Repo.DeleteRelease(rel)
-
-		//ghr.message("Deleting Release '%s' ...", ghr.Repo.Tag)
-		//URL := ghr.Repo.generateApiUrl(releaseIdUri, rel.Id)
-		//resp, err := github.DoAuthRequest("DELETE", URL, "application/json", ghr.Repo.Auth.Token, nil, nil)
-		//if err != nil {
-		//	ghr.State.SetError("Release deletion failed: %v", err)
-		//	break
-		//}
-		////noinspection ALL
-		//defer resp.Body.Close()
-		//
-		//if resp.StatusCode != http.StatusNoContent {
-		//	ghr.State.SetError("could not delete the Release corresponding to tag %s on repo %s/%s", ghr.Repo.Tag, ghr.Repo.Organization, ghr.Repo.Name)
-		//	break
-		//}
-		//
-		//
-		//ghr.message("Deleting Release Tag '%s' ...", ghr.Repo.Tag)
-		//URL = ghr.Repo.generateApiUrl(tagRef, ghr.Repo.Tag)
-		//resp, err = github.DoAuthRequest("DELETE", URL, "application/json", ghr.Repo.Auth.Token, nil, nil)
-		//if err != nil {
-		//	ghr.State.SetError("Release deletion failed: %v", err)
-		//	break
-		//}
-		////noinspection ALL
-		//defer resp.Body.Close()
-		//
-		//if resp.StatusCode != http.StatusNoContent {
-		//	ghr.State.SetError("could not delete the Release corresponding to tag %s on repo %s/%s", ghr.Repo.Tag, ghr.Repo.Organization, ghr.Repo.Name)
-		//	break
-		//}
+		ghr.State = ghr.Repo.DeleteRelease(tag)
 	}
 
 	return ghr.State

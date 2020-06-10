@@ -153,11 +153,6 @@ func (ghr *TypeGhr) Open(org string, repo string) *ux.State {
 	ghr.State.SetFunction()
 
 	for range onlyOnce {
-		ghr.State = ghr.Repo.Open(ghr.Repo.Auth.AuthUser, ghr.Repo.Auth.Token)
-		if ghr.State.IsNotOk() {
-			break
-		}
-
 		ghr.State = ghr.Repo.SetRepo(org, repo)
 		if ghr.State.IsNotOk() {
 			break
@@ -187,7 +182,16 @@ func (ghr *TypeGhr) Set(n TypeRepo) *ux.State {
 		return state
 	}
 	ghr.State.SetFunction()
-	ghr.State = ghr.Repo.Set(n)
+	ghr.State = ghr.Repo.Set(&n)
+	return ghr.State
+}
+
+func (ghr *TypeGhr) SetAuth(n TypeAuth) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+	ghr.State = ghr.Repo.SetAuth(&n)
 	return ghr.State
 }
 
@@ -233,5 +237,32 @@ func (ghr *TypeGhr) SetTarget(n string) *ux.State {
 	}
 	ghr.State.SetFunction()
 	ghr.State = ghr.Repo.SetTarget(n)
+	return ghr.State
+}
+
+func (ghr *TypeGhr) SetFiles(file ...string) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+	ghr.State = ghr.Repo.SetFiles(file...)
+	return ghr.State
+}
+
+func (ghr *TypeGhr) SetFilePath(glob string, path ...string) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+	ghr.State = ghr.Repo.SetFilePath(glob, path...)
+	return ghr.State
+}
+
+func (ghr *TypeGhr) SetOverwrite(n bool) *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
+	ghr.State.SetFunction()
+	ghr.Repo.SetOverwrite(n)
 	return ghr.State
 }

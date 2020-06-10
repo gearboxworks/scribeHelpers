@@ -69,7 +69,7 @@ func PrintTestStop(test string) {
 
 
 func main() {
-	Test_Ghr()
+	Test_GhrCopy()
 
 	os.Exit(1)
 
@@ -97,6 +97,38 @@ func main() {
 }
 
 
+func Test_GhrCopy() {
+	test := "toolGhrCopy"
+	state := ux.NewState(test, globalDebug)
+	PrintTestStart(test)
+
+	Src := toolGhr.New(nil)
+	PrintTestResult(Src.State, test, "New")
+	state = Src.IsNil()
+	PrintTestResult(state, test, "IsNil()")
+	state = Src.SetAuth(toolGhr.TypeAuth{ Token: "", AuthUser: "" })
+	PrintTestResult(state, test, "IsNil()")
+	//state = Src.Set(toolGhr.TypeRepo{ Organization: "gearboxworks", Name: "launch" })
+	state = Src.OpenUrl("https://github.com/newclarity/launch")
+	PrintTestResult(state, test, "OpenUrl(\"https://github.com/newclarity/launch\")")
+
+
+	Dest := toolGhr.New(nil)
+	PrintTestResult(Dest.State, test, "New")
+	state = Dest.IsNil()
+	PrintTestResult(state, test, "IsNil()")
+	state = Dest.OpenUrl("https://github.com/mickmake/test")
+	PrintTestResult(state, test, "OpenUrl(\"https://github.com/mickmake/test\")")
+	state = Dest.SetOverwrite(true)
+	PrintTestResult(state, test, "SetOverwrite(true)")
+
+	state = Dest.CopyFrom(Src.Repo, "dist")
+	PrintTestResult(state, test, "CopyFrom(Src.Repo, \"dist\")")
+
+	PrintTestStop(test)
+}
+
+
 func Test_Ghr() {
 	test := "toolGhr"
 	state := ux.NewState(test, globalDebug)
@@ -107,15 +139,6 @@ func Test_Ghr() {
 
 	state = Test.IsNil()
 	PrintTestResult(state, test, "IsNil()")
-
-	//state = Test.SetAuth(toolGhr.TypeAuth{ Token: "", User: "", AuthUser: "" })
-	//PrintTestResult(state, test, "IsNil()")
-
-	//state = Test.SetRepo(toolGhr.TypeRepo{ Name: "gearboxworks", Tag: "buildtool" })
-	//PrintTestResult(state, test, "SetRepo(toolGhr.TypeRepo{ Name: \"gearboxworks\", Tag: \"buildtool\" })")
-
-	state = Test.Open("mickmake", "test")
-	PrintTestResult(state, test, "Open()")
 
 	state = Test.OpenUrl("mickmake/test")
 	PrintTestResult(state, test, "OpenUrl(\"mickmake/test\")")
@@ -145,20 +168,20 @@ func Test_Ghr() {
 	rel := Test.Repo.Release()
 	PrintTestResult(state, test, "rels.Sprint: %v", rel)
 
-	//state = Test.Delete("1.0.1")
-	//PrintTestResult(state, test, "Create(\"1.0.1\", true)")
-	//
-	//state = Test.Create("1.0.1", true)
-	//PrintTestResult(state, test, "Create(\"1.0.1\", true)")
-	//
-	////state = Test.Upload(true, "testing", "")
-	////PrintTestResult(state, test, "Upload(\"testing\", \"\", true)")
-	//
-	//state = Test.UploadMultiple(true, "../testing/testing", "pkgreflect.go", "init.go")
+	state = Test.Delete("1.0.1")
+	PrintTestResult(state, test, "Create(\"1.0.1\", true)")
+
+	state = Test.Create( toolGhr.TypeRepo{TagName: "1.0.1", Overwrite: true })
+	PrintTestResult(state, test, "Create(\"1.0.1\", true)")
+
+	//state = Test.Upload(true, "testing", "")
 	//PrintTestResult(state, test, "Upload(\"testing\", \"\", true)")
-	//
-	//state = Test.Download("testing", true)
-	//PrintTestResult(state, test, "Download(\"testing\")")
+
+	state = Test.UploadMultiple(true, "../testing/testing", "pkgreflect.go", "init.go")
+	PrintTestResult(state, test, "Upload(\"testing\", \"\", true)")
+
+	state = Test.Download(true, "testing")
+	PrintTestResult(state, test, "Download(\"testing\")")
 
 	relData := toolGhr.TypeRepo{
 		Organization: "mickmake",
@@ -168,21 +191,18 @@ func Test_Ghr() {
 		Draft:        false,
 		Prerelease:   false,
 		Target:       "",
-		Replace:      true,
-		Files:        []string{"../testing/testing", "pkgreflect.go", "init.go"},
+		Overwrite:    true,
+		//Files:        []string{"../testing/testing", "pkgreflect.go", "init.go"},
 		Auth:         &toolGhr.TypeAuth{ Token: "", AuthUser: "" },
 	}
-	state = Test.CreateRelease(relData)
+	state = Test.SetFilePath(".*\\.go", "../testing")
+	PrintTestResult(state, test, "Download(\"testing\")")
+
+	state = Test.Create(relData)
 	PrintTestResult(state, test, "CreateRelease(relData)")
 
-
-	//func (r *TypeResponse) GetStringArray() *[]string {
-	//	if r.IsOfType("[]string") {
-	//	return (r.data).(*[]string)
-	//}
-	//
-	//	return &[]string{}
-	//}
+	state = Test.DeleteAssets("pkgreflect.go", "main.go")
+	PrintTestResult(state, test, "CreateRelease(relData)")
 
 	PrintTestStop(test)
 }

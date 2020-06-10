@@ -11,6 +11,83 @@ import (
 )
 
 
+
+func ReleaseSync(srcrepo string, binrepo string, version string, path string) *ux.State {
+	state := ux.NewState("ReleaseSync", false)
+
+	for range onlyOnce {
+		if srcrepo == "" {
+			state.SetError("source repo invalid")
+			break
+		}
+
+		if binrepo == "" {
+			state.SetError("binary repo invalid")
+			break
+		}
+
+		if version == "" {
+			state.SetError("version invalid")
+			break
+		}
+
+		if path == "" {
+			state.SetError("cache dir invalid")
+			break
+		}
+
+		if binrepo == srcrepo {
+			// No need to push to binary repo.
+			// GoReleaser will handle this.
+			break
+		}
+
+		// Setup source repo.
+		Src := New(nil)
+		if Src.State.IsNotOk() {
+			state = Src.State
+			break
+		}
+		state = Src.SetAuth(TypeAuth{ Token: "", AuthUser: "" })
+		if state.IsNotOk() {
+			break
+		}
+		state = Src.OpenUrl(srcrepo)
+		if state.IsNotOk() {
+			break
+		}
+		state = Src.SetTag(version)
+		if state.IsNotOk() {
+			break
+		}
+
+		// Setup destination repo.
+		Dest := New(nil)
+		if Src.State.IsNotOk() {
+			state = Src.State
+			break
+		}
+		state = Dest.IsNil()
+		if state.IsNotOk() {
+			break
+		}
+		state = Dest.OpenUrl(binrepo)
+		if state.IsNotOk() {
+			break
+		}
+		state = Dest.SetOverwrite(true)
+		if state.IsNotOk() {
+			break
+		}
+
+		// Now sync the release in the destination repo.
+		state = Dest.CopyFrom(Src.Repo, path)
+	}
+
+	return state
+}
+
+
 /* usually when something goes wrong, github sends something like this back */
 type message struct {
 	message string        `json:"message"`
@@ -119,55 +196,3 @@ func (ghr *TypeGhr) message(format string, args ...interface{}) {
 	ux.PrintfCyan("%s: ", ghr.Repo.GetUrl())
 	ux.PrintflnBlue(format, args...)
 }
-
-
-//func (ghr *TypeGhr) renderInfoText(tags tags, releases *releases) *ux.State {
-//	if state := ghr.IsNil(); state.IsError() {
-//		return state
-//	}
-//	ghr.State.SetFunction()
-//
-//	for range onlyOnce {
-//		var t []string
-//		for _, tag := range tags {
-//			t = append(t, tag.Name)
-//		}
-//		ghr.message("tags: %s", strings.Join(t, ", "))
-//
-//		ghr.message("releases")
-//		for _, Release := range *releases {
-//			ghr.message("- %v", Release)
-//		}
-//
-//		ghr.State.SetOk()
-//	}
-//
-//	//return nil
-//	return ghr.State
-//}
-
-
-//func (ghr *TypeGhr) renderInfoJSON(tags tags, releases *releases) *ux.State {
-//	if state := ghr.IsNil(); state.IsError() {
-//		return state
-//	}
-//	ghr.State.SetFunction()
-//
-//	for range onlyOnce {
-//		out := struct {
-//			tags     tags
-//			releases *releases
-//		}{
-//			tags:     tags,
-//			releases: releases,
-//		}
-//
-//		enc := json.NewEncoder(os.Stdout)
-//		enc.SetIndent("", "    ")
-//
-//		ghr.State.SetOk()
-//		ghr.State.SetResponse(enc.Encode(&out))
-//	}
-//
-//	return ghr.State
-//}

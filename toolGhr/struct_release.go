@@ -30,25 +30,35 @@ func (repo *TypeRepo) FetchReleases(force bool) *ux.State {
 			break
 		}
 
-		URL := repo.generateApiUrl(releaseListUri)
-		err := repo.client.Get(URL, &repo.releases.all)
-		if err != nil {
-			repo.state.SetError(err)
-			break
-		}
-
-		if repo.releases.all == nil {
+		repo.state = repo.ClientGet(&repo.releases.all, releaseListUri)
+		if repo.state.IsNotOk() {
 			repo.state.SetError("no releases found")
 			break
 		}
+		//URL := repo.generateApiUrl(releaseListUri)
+		//err := repo.client.Get(URL, &repo.releases.all)
+		//if err != nil {
+		//	repo.state.SetError(err)
+		//	break
+		//}
+		//if repo.releases.all == nil {
+		//	repo.state.SetError("no releases found")
+		//	break
+		//}
 
 		// Sometimes we can't second guess what the "latest" is based on date alone.
-		URL = repo.generateApiUrl(releaseTagUri, Latest)
-		err = repo.client.Get(URL, &repo.releases.latest)
-		if err != nil {
-			repo.state.SetError(err)
+		repo.state = repo.ClientGet(&repo.releases.latest, releaseTagUri, Latest)
+		if repo.state.IsNotOk() {
+			repo.state.SetError("no releases found")
 			break
 		}
+		//URL = repo.generateApiUrl(releaseTagUri, Latest)
+		//err = repo.client.Get(URL, &repo.releases.latest)
+		//if err != nil {
+		//	repo.state.SetError(err)
+		//	break
+		//}
+
 
 		if repo.releases.findRelease(repo.TagName) == nil {
 			repo.state.SetWarning("no Release '%s' found", repo.TagName)
@@ -109,6 +119,17 @@ func (repo *TypeRepo) PrintReleases() *ux.State {
 	return repo.state
 }
 
+func (repo *TypeRepo) PrintRelease() *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+	if repo.releases.selected != nil {
+		repo.releases.selected.Print()
+	}
+	return repo.state
+}
+
 func (repo *TypeRepo) SelectRelease(tag string) *Release {
 	if state := ux.IfNilReturnError(repo); state.IsError() {
 		return nil
@@ -118,34 +139,67 @@ func (repo *TypeRepo) SelectRelease(tag string) *Release {
 	if rel != nil {
 		repo.TagName = rel.Name
 	}
-
 	return rel
 }
 
 // Delete sends a HTTP DELETE request for the given asset to Github. Returns
 // nil if the asset was deleted OR there was nothing to delete.
-func (repo *TypeRepo) DeleteRelease(r *Release) *ux.State {
+func (repo *TypeRepo) DeleteRelease(tag string) *ux.State {
 	if state := repo.IsNil(); state.IsError() {
 		return state
 	}
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		URL := repo.generateApiUrl(releaseIdUri, r.Id)
+		if repo.releases.all == nil {
+			repo.state.SetError("No releases available")
+			break
+		}
+
+		ref := repo.SelectRelease(tag)
+		if ref == nil {
+			repo.state.SetError("Release '%s' not available", tag)
+			break
+		}
+
+		repo.state = repo.DeleteReleaseRef(ref)
+	}
+
+	return repo.state
+}
+
+func (repo *TypeRepo) DeleteReleaseRef(ref *Release) *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+
+	for range onlyOnce {
+		if ref == nil {
+			repo.messageError("Deleting Release FAILED - empty")
+			repo.state.SetError("Deleting Release FAILED - empty")
+			break
+		}
+
+		repo.message("Deleting Release '%s' ...", ref.TagName)
+		URL := repo.generateApiUrl(releaseIdUri, ref.Id)
 		resp, err := github.DoAuthRequest("DELETE", URL, "application/json", repo.Auth.Token, nil, nil)
 		if err != nil {
-			repo.state.SetError("failed to delete release %s (ID: %d), HTTP error: %b", r.Name, r.Id, err)
+			repo.messageError("Deleting Release '%s' FAILED", ref.TagName)
+			repo.state.SetError("failed to delete release %s (ID: %d), HTTP error: %b", ref.TagName, ref.Id, err)
 			break
 		}
 		//noinspection ALL
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusNoContent {
-			repo.state.SetError("failed to delete release %s (ID: %d) - status: %s", r.Name, r.Id, resp.Status)
+			repo.messageError("Deleting Release asset '%s' FAILED", ref.TagName)
+			repo.state.SetError("failed to delete release %s (ID: %d) - status: %s", ref.TagName, ref.Id, resp.Status)
 			break
 		}
+		repo.messageOk("Deleted Release '%s' OK", ref.TagName)
 
-		repo.state = repo.DeleteTag(r.TagName)
+		repo.state = repo.DeleteTag(ref.TagName)
 		if repo.state.IsNotOk() {
 			break
 		}
@@ -156,16 +210,29 @@ func (repo *TypeRepo) DeleteRelease(r *Release) *ux.State {
 	return repo.state
 }
 
-func (repo *TypeRepo) CreateRelease(tag string) *ux.State {
+func (repo *TypeRepo) CreateRelease(ref *TypeRepo) *ux.State {
 	if state := repo.IsNil(); state.IsError() {
 		return state
 	}
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.TagName = tag
-		repo.message("Creating release '%s' ...", repo.TagName)
+		if ref != nil {
+			repo.state = repo.Set(ref)
+			if repo.state.IsNotOk() {
+				break
+			}
+		}
 
+		if repo.Overwrite {
+			repo.state = repo.deleteIfReleaseExist(repo.TagName)
+			if repo.state.IsNotOk() {
+				break
+			}
+		}
+
+
+		repo.message("Creating release '%s' ...", repo.TagName)
 		// Check if we need to read the description from stdin.
 		if repo.Description == "-" {
 			b, err := ioutil.ReadAll(os.Stdin)
@@ -206,7 +273,7 @@ func (repo *TypeRepo) CreateRelease(tag string) *ux.State {
 		if resp.StatusCode != http.StatusCreated {
 			if resp.StatusCode == 422 {
 				//repo.state.SetError("github returned %v (this is probably because the Release already exists)", resp.Status)
-				repo.state.SetError("release '%s' already exists")
+				repo.state.SetError("Release '%s' already exists", repo.TagName)
 				break
 			}
 			repo.state.SetError("github returned %v", resp.Status)
@@ -220,6 +287,131 @@ func (repo *TypeRepo) CreateRelease(tag string) *ux.State {
 				break
 			}
 			repo.message("BODY:", string(body))
+		}
+
+		repo.messageOk("Created Release '%s' OK", repo.TagName)
+		repo.state.SetOk()
+	}
+
+	if repo.state.IsNotOk() {
+		repo.messageError("Creating Release FAILED - %s", repo.state.GetError())
+	}
+	return repo.state
+}
+
+func (repo *TypeRepo) UpdateRelease(rel *TypeRepo) *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+
+	for range onlyOnce {
+		r := repo.SelectRelease(rel.TagName)
+		if r == nil {
+			repo.state.SetError("Release '%s' does not exist.", rel.TagName)
+			break
+		}
+
+		repo.state = repo.Set(rel)
+		if repo.state.IsNotOk() {
+			break
+		}
+
+
+		// Check if we need to read the description from stdin.
+		if repo.Description == "-" {
+			b, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				repo.state.SetError("could not read description from stdin: %v", err)
+				break
+			}
+			repo.Description = string(b)
+		}
+
+		/* the Release create struct works for editing releases as well */
+		params := releaseCreate{
+			TagName:    repo.TagName,
+			Name:       repo.TagName,
+			Body:       repo.Description,
+			Draft:      repo.Draft,
+			Prerelease: repo.Prerelease,
+		}
+
+		/* encode the parameters as JSON, as required by the github API */
+		payload, err := json.Marshal(params)
+		if err != nil {
+			repo.state.SetError("can't encode Release creation params, %v", err)
+			break
+		}
+
+
+		repo.message("Updating Release '%s' ...", repo.TagName)
+		URL := repo.generateApiUrl(releaseIdUri, r.Id)
+		resp, err := github.DoAuthRequest("PATCH", URL, "application/json", repo.Auth.Token, nil, bytes.NewReader(payload))
+		if err != nil {
+			repo.state.SetError("while submitting %v, %v", string(payload), err)
+			break
+		}
+		//noinspection ALL
+		defer resp.Body.Close()
+
+		//repo.message("RESPONSE:", resp)
+		if resp.StatusCode != http.StatusOK {
+			if resp.StatusCode == 422 {
+				//repo.state.SetError("github returned %v (this is probably because the Release already exists)", resp.Status)
+				repo.state.SetError("Release '%s' already exists", repo.TagName)
+				break
+			}
+			repo.state.SetError("github returned unexpected status code %v", resp.Status)
+			break
+		}
+
+		if repo.runtime.Debug {
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				repo.state.SetError("error while reading response, %v", err)
+				break
+			}
+			repo.message("BODY:", string(body))
+		}
+
+		repo.messageOk("Updating release '%s' OK", repo.TagName)
+		repo.state.SetOk()
+	}
+
+	if repo.state.IsNotOk() {
+		repo.messageError("Updating Release FAILED - %s", repo.state.GetError())
+	}
+	return repo.state
+}
+
+func (repo *TypeRepo) deleteIfReleaseExist(tag string) *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+
+	for range onlyOnce {
+		rel := repo.SelectRelease(tag)
+		if rel == nil {
+			break
+		}
+
+		//if rel.Replace == false {
+		//	break
+		//}
+
+		repo.message("Release '%s' exists. Removing ...", rel.TagName)
+		repo.state = repo.DeleteRelease(rel.TagName)
+		if repo.state.IsNotOk() {
+			repo.state.SetError("Could not replace release '%s' prior to creating.", rel.TagName)
+			break
+		}
+		repo.message("Release '%s' removed OK ...", rel.TagName)
+
+		repo.state = repo.Fetch(true)
+		if repo.state.IsError() {
+			break
 		}
 
 		repo.state.SetOk()

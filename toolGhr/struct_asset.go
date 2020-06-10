@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/newclarity/scribeHelpers/toolGhr/github"
+	"github.com/newclarity/scribeHelpers/toolPath"
 	"github.com/newclarity/scribeHelpers/ux"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -35,34 +37,35 @@ func (repo *TypeRepo) FetchAssets(force bool) *ux.State {
 			break
 		}
 
-		URL := repo.generateApiUrl(releaseIdUri, repo.releases.selected.Id)
-		err := repo.client.Get(URL, &repo.assets.all)
-		if err != nil {
-			repo.state.SetError(err)
-			break
-		}
-
-		if repo.assets.all == nil {
+		repo.state = repo.ClientGet(&repo.assets.all, releaseIdUri, repo.releases.selected.Id)
+		if repo.state.IsNotOk() {
 			repo.state.SetWarning("no assets found")
 			break
 		}
-
-		// @TODO - figure out how to do this.
-		// Sometimes we can't second guess what the "latest" is based on date alone.
-		//u = fmt.Sprintf(assetsUri, repo.Organization, repo.Name, repo.releases.selected.Id)
-		//err = repo.client.Get(u, &repo.tags.latest)
+		//URL := repo.generateApiUrl(releaseIdUri, repo.releases.selected.Id)
+		//err := repo.client.Get(URL, &repo.assets.all)
 		//if err != nil {
 		//	repo.state.SetError(err)
 		//	break
 		//}
+		//if repo.assets.all == nil {
+		//	repo.state.SetWarning("no assets found")
+		//	break
+		//}
+
 		repo.assets.latest = repo.assets.GetLatest()
 
-		if repo.file.Name != "" {
-			if repo.assets.findAsset(repo.file.Name) == nil {
-				repo.state.SetWarning("asset '%s' not found", repo.file.Name)
-				break
-			}
+		repo.Files = []string{}
+		for _, file := range repo.assets.all {
+			repo.Files = append(repo.Files, file.Name)
 		}
+
+		//if repo.file.Name != "" {
+		//	if repo.assets.findAsset(repo.file.Name) == nil {
+		//		repo.state.SetWarning("asset '%s' not found", repo.file.Name)
+		//		break
+		//	}
+		//}
 
 		repo.state.SetOk()
 		repo.state.SetResponse(&repo.assets)
@@ -106,81 +109,154 @@ func (repo *TypeRepo) PrintAssets() *ux.State {
 		return state
 	}
 	repo.state.SetFunction()
-	repo.releases.Print()
+	repo.assets.Print()
 	return repo.state
 }
 
-func (repo *TypeRepo) SelectAsset(file string) *Asset {
+func (repo *TypeRepo) PrintAsset() *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+	if repo.assets.selected != nil {
+		repo.assets.selected.Print()
+	}
+	return repo.state
+}
+
+func (repo *TypeRepo) SelectAsset(label string) *Asset {
 	if state := ux.IfNilReturnError(repo); state.IsError() {
 		return nil
 	}
 	repo.state.SetFunction()
-	return repo.assets.findAsset(file)
+	label = filepath.Base(label)
+	return repo.assets.findAsset(label)
 }
 
 // Delete sends a HTTP DELETE request for the given asset to Github. Returns
 // nil if the asset was deleted OR there was nothing to delete.
-func (repo *TypeRepo) DeleteAsset(a *Asset) *ux.State {
+func (repo *TypeRepo) DeleteAsset(label string) *ux.State {
 	if state := repo.IsNil(); state.IsError() {
 		return state
 	}
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		URL := repo.generateApiUrl(AssetUri, a.Id)
-		resp, err := github.DoAuthRequest("DELETE", URL, "application/json", repo.Auth.Token, nil, nil)
-		if err != nil {
-			repo.state.SetError("failed to delete asset %s (ID: %d), HTTP error: %b", a.Name, a.Id, err)
+		if repo.assets.all == nil {
+			repo.state.SetError("No assets available")
 			break
 		}
 
-		//noinspection ALL
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusNoContent {
-			repo.state.SetError("failed to delete asset %s (ID: %d), status: %s", a.Name, a.Id, resp.Status)
+		ref := repo.SelectAsset(label)
+		if ref == nil {
+			repo.state.SetError("Release asset '%s' not available", label)
 			break
 		}
+
+		repo.state = repo.DeleteAssetRef(ref)
 	}
 
 	return repo.state
 }
 
-func (repo *TypeRepo) UploadAsset(file string) *ux.State {
+func (repo *TypeRepo) DeleteAssetRef(ref *Asset) *ux.State {
 	if state := repo.IsNil(); state.IsError() {
 		return state
 	}
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.state = repo.SetFile(file ,"")
-		if repo.state.IsNotOk() {
+		if ref == nil {
+			repo.messageError("Deleting Release asset FAILED - empty")
+			repo.state.SetError("Deleting Release asset FAILED - empty")
 			break
 		}
 
-		repo.state = repo.FileRead(file)
-		if repo.state.IsNotOk() {
-			repo.state.SetError("file '%s' does not exist", file)
+		repo.message("Deleting Release asset '%s' ...", ref.Name)
+		URL := repo.generateApiUrl(AssetUri, ref.Id)
+		resp, err := github.DoAuthRequest("DELETE", URL, "application/json", repo.Auth.Token, nil, nil)
+		if err != nil {
+			repo.messageError("Deleting Release asset '%s' FAILED", ref.Name)
+			repo.state.SetError("failed to delete asset %s (ID: %d), HTTP error: %b", ref.Name, ref.Id, err)
 			break
 		}
 		//noinspection ALL
-		defer repo.FileClose()
+		defer resp.Body.Close()
 
-		v := url.Values{}
-		v.Set("name", repo.file.Name)
-		if repo.file.Label != "" {
-			v.Set("label", repo.file.Label)
+		if resp.StatusCode != http.StatusNoContent {
+			repo.messageError("Deleting Release asset '%s' FAILED", ref.Name)
+			repo.state.SetError("failed to delete asset %s (ID: %d), status: %s", ref.Name, ref.Id, resp.Status)
+			break
 		}
 
+		repo.messageOk("Deleted Release asset '%s' OK", ref.Name)
+		repo.state.SetOk()
+	}
+
+	return repo.state
+}
+
+func (repo *TypeRepo) UploadAsset(overwrite bool, label string, path ...string) *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+
+	for range onlyOnce {
 		if repo.releases.selected == nil {
-			repo.state.SetError("no release defined")
+			repo.state.SetError("no release selected")
 			break
 		}
 		rel := repo.releases.selected
 
-		repo.message("Uploading Release asset '%s' ...", file)
+
+		file := NewFile(repo.runtime)
+		if file.state.IsNotOk() {
+			repo.state = file.state
+			break
+		}
+		repo.state = file.Set(overwrite, label, path...)
+		if repo.state.IsNotOk() {
+			break
+		}
+
+		for range onlyOnce {
+			asset := repo.SelectAsset(file.Label)
+			if asset == nil {
+				break
+			}
+
+			if overwrite == false {
+				break
+			}
+
+			repo.message("Asset (id: %d) exists in state %s: Removing ...", asset.Id, asset.State)
+			repo.state = repo.DeleteAsset(asset.Name)
+			if repo.state.IsNotOk() {
+				repo.state.SetError("Could not remove asset '%s' prior to upload")
+				break
+			}
+		}
+
+		repo.state = file.OpenRead()
+		if repo.state.IsNotOk() {
+			repo.state.SetError("file '%s' does not exist", file.Name)
+			break
+		}
+		//noinspection ALL
+		defer file.Close()
+
+		v := url.Values{}
+		v.Set("name", file.Name)
+		if file.Label != "" {
+			v.Set("label", file.Label)
+		}
+
+
+		// Everything set - begin upload.
+		repo.message("Uploading Release asset '%s' as label '%s' ...", file.Name, file.Label)
 		u := rel.CleanUploadUrl() + "?" + v.Encode()
-		resp, err := github.DoAuthRequest("POST", u, "application/octet-stream", repo.Auth.Token, nil, repo.file.Handle)
+		resp, err := github.DoAuthRequest("POST", u, "application/octet-stream", repo.Auth.Token, nil, file.fh)
 		if err != nil {
 			repo.state.SetError("can't create upload request to %v, %v", u, err)
 			break
@@ -219,7 +295,7 @@ func (repo *TypeRepo) UploadAsset(file string) *ux.State {
 			// (an asset in state "new"). Attempt to delete that now since it
 			// would clutter the list of Release assets.
 			repo.message("Asset (id: %d) failed to upload and is now in state %s: Removing...", asset.Id, asset.Name)
-			repo.state = repo.DeleteAsset(asset)
+			repo.state = repo.DeleteAssetRef(asset)
 			if repo.state.IsNotOk() {
 				repo.state.SetError("Upload failed (%s), could not delete partially uploaded asset (ID: %d, err: %v) in order to cleanly reset GH API state, please try again", resp.Status, asset.Id, err)
 				break
@@ -228,43 +304,65 @@ func (repo *TypeRepo) UploadAsset(file string) *ux.State {
 			break
 		}
 
+		repo.messageOk("Uploaded Release asset '%s' OK", file.Label)
 		repo.state.SetOk()
 	}
 
+	if repo.state.IsNotOk() {
+		repo.messageError("Uploading Release asset '%s' FAILED ...", label)
+	}
 	return repo.state
 }
 
-func (repo *TypeRepo) DownloadAsset(file string, overwrite bool) *ux.State {
+func (repo *TypeRepo) DownloadAsset(overwrite bool, label string, path ...string) *ux.State {
 	if state := repo.IsNil(); state.IsError() {
 		return state
 	}
 	repo.state.SetFunction()
 
 	for range onlyOnce {
-		repo.state = repo.SetFile(file ,"")
-		if repo.state.IsNotOk() {
+		if repo.releases.selected == nil {
+			repo.state.SetError("no release defined")
 			break
 		}
 
-		repo.state = repo.FileOpenWrite(file, overwrite)
+		file := NewFile(repo.runtime)
+		if file.state.IsNotOk() {
+			repo.state = file.state
+			break
+		}
+		repo.state = file.Set(overwrite, label, path...)
+		if repo.state.IsNotOk() {
+			break
+		}
+		repo.state = file.Path.StatPath()
+		if file.Path.Exists() && !overwrite {
+			repo.state.SetOk("Not overwriting file '%s'.", file.Path.GetPathAbs())
+			break
+		}
+
+
+		asset := repo.assets.findAsset(label)
+		if asset == nil {
+			repo.state.SetError("could not find asset named %s", file.Label)
+			break
+		}
+
+		repo.state = file.OpenWrite()
 		if repo.state.IsNotOk() {
 			break
 		}
 		//noinspection ALL
-		defer repo.FileClose()
+		defer file.Close()
 
-		asset := repo.assets.findAsset(file)
-		if asset == nil {
-			repo.state.SetError("could not find asset named %s", repo.file.Name)
-			break
-		}
 
-		repo.message("Downloading Release asset ...")
+		// Everything set - begin download.
+		repo.message("Downloading Release asset '%s' (bytes:%d) ...", asset.Name, asset.Size)
 		var resp *http.Response
 		var err error
 		if repo.Auth.Token == "" {
 			// Use the regular github.com site if we don't have a token.
-			URL := repo.generateApiUrl(releaseAssetDownload, repo.TagName, repo.file.Name)
+			URL := repo.generateApiUrl(releaseAssetDownload, repo.TagName, asset.Name)
 			resp, err = http.Get(URL)
 		} else {
 			URL := repo.generateApiUrl(AssetUri, asset.Id)
@@ -289,15 +387,78 @@ func (repo *TypeRepo) DownloadAsset(file string, overwrite bool) *ux.State {
 			break
 		}
 
-		repo.message("Saving file '%s' - %v", file, resp.Status)
-		repo.state = repo.FileWrite(resp.Body, contentLength)
+		repo.message("Saving asset '%s' to file '%s' - %v", file.Label, file.Name, resp.Status)
+		repo.state = file.Write(resp.Body, contentLength)
 		if repo.state.IsNotOk() {
 			break
 		}
 
+		repo.messageOk("Downloaded Release asset '%s' OK", label)
 		repo.state.SetOk()
 	}
 
+	if repo.state.IsNotOk() {
+		repo.messageError("Downloading Release asset '%s' FAILED ...", label)
+	}
+	return repo.state
+}
+
+func (repo *TypeRepo) DownloadAssets(overwrite bool, path ...string) *ux.State {
+	if state := repo.IsNil(); state.IsError() {
+		return state
+	}
+	repo.state.SetFunction()
+
+	for range onlyOnce {
+		if repo.releases.selected == nil {
+			repo.state.SetError("no release defined")
+			break
+		}
+
+
+		// Setup destination path.
+		file := toolPath.New(repo.runtime)
+		if file.State.IsNotOk() {
+			repo.state = file.State
+			break
+		}
+		file.SetPath(path...)
+		repo.state = file.StatPath()
+		if file.IsAFile() {
+			repo.state.SetError("path '%s' is a file, cannot download assets", file.GetPathAbs())
+			break
+		}
+		if file.NotExists() {
+			repo.state = file.Mkdir()
+			if repo.state.IsNotOk() {
+				break
+			}
+			repo.state = file.StatPath()
+		}
+		if repo.state.IsNotOk() {
+			break
+		}
+
+
+		savedFail := repo.state
+		for _, asset := range repo.Assets() {
+			repo.state = repo.DownloadAsset(overwrite, asset.Name, filepath.Join(filepath.Join(path...), asset.Name))
+			if repo.state.IsNotOk() {
+				savedFail = repo.state
+			}
+		}
+		if savedFail.IsNotOk() {
+			repo.state = savedFail
+			break
+		}
+
+		repo.messageOk("Downloaded Release all assets OK")
+		repo.state.SetOk()
+	}
+
+	if repo.state.IsNotOk() {
+		repo.messageError("Downloading Release all asset FAILED")
+	}
 	return repo.state
 }
 
@@ -402,17 +563,17 @@ func (a *assets) Print() {
 	fmt.Print(a.Sprint())
 }
 
-func (a *assets) findAsset(name string) *Asset {
+func (a *assets) findAsset(label string) *Asset {
 	for range onlyOnce {
 		a.selected = nil
 
-		if name == Latest {
+		if label == Latest {
 			a.selected = a.GetLatest()
 			break
 		}
 
 		for _, asset := range a.all {
-			if asset.Name == name {
+			if asset.Name == label {
 				a.selected = asset
 			}
 		}
