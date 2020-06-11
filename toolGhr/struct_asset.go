@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -39,19 +40,13 @@ func (repo *TypeRepo) FetchAssets(force bool) *ux.State {
 
 		repo.state = repo.ClientGet(&repo.assets.all, releaseIdUri, repo.releases.selected.Id)
 		if repo.state.IsNotOk() {
+			break
+		}
+
+		if repo.assets.all == nil {
 			repo.state.SetWarning("no assets found")
 			break
 		}
-		//URL := repo.generateApiUrl(releaseIdUri, repo.releases.selected.Id)
-		//err := repo.client.Get(URL, &repo.assets.all)
-		//if err != nil {
-		//	repo.state.SetError(err)
-		//	break
-		//}
-		//if repo.assets.all == nil {
-		//	repo.state.SetWarning("no assets found")
-		//	break
-		//}
 
 		repo.assets.latest = repo.assets.GetLatest()
 
@@ -59,13 +54,6 @@ func (repo *TypeRepo) FetchAssets(force bool) *ux.State {
 		for _, file := range repo.assets.all {
 			repo.Files = append(repo.Files, file.Name)
 		}
-
-		//if repo.file.Name != "" {
-		//	if repo.assets.findAsset(repo.file.Name) == nil {
-		//		repo.state.SetWarning("asset '%s' not found", repo.file.Name)
-		//		break
-		//	}
-		//}
 
 		repo.state.SetOk()
 		repo.state.SetResponse(&repo.assets)
@@ -131,6 +119,26 @@ func (repo *TypeRepo) SelectAsset(label string) *Asset {
 	repo.state.SetFunction()
 	label = filepath.Base(label)
 	return repo.assets.findAsset(label)
+}
+
+func (repo *TypeRepo) SelectRegexpAsset(label string) *Asset {
+	if state := ux.IfNilReturnError(repo); state.IsError() {
+		return nil
+	}
+	repo.state.SetFunction()
+	var asset *Asset
+
+	for range onlyOnce {
+		re := regexp.MustCompile(label)
+		if re == nil {
+			repo.state.SetError("Invalid regular expression.")
+			break
+		}
+
+		asset = repo.assets.regexpAsset(re)
+	}
+
+	return asset
 }
 
 // Delete sends a HTTP DELETE request for the given asset to Github. Returns
@@ -247,7 +255,7 @@ func (repo *TypeRepo) UploadAsset(overwrite bool, label string, path ...string) 
 		defer file.Close()
 
 		v := url.Values{}
-		v.Set("name", file.Name)
+		v.Set("name", strings.ToLower(file.Name))	// @TODO - selfupdate lowercase workaround.
 		if file.Label != "" {
 			v.Set("label", file.Label)
 		}
@@ -574,6 +582,20 @@ func (a *assets) findAsset(label string) *Asset {
 
 		for _, asset := range a.all {
 			if asset.Name == label {
+				a.selected = asset
+			}
+		}
+	}
+
+	return a.selected
+}
+
+func (a *assets) regexpAsset(label *regexp.Regexp) *Asset {
+	for range onlyOnce {
+		a.selected = nil
+
+		for _, asset := range a.all {
+			if label.MatchString(asset.Name) {
 				a.selected = asset
 			}
 		}

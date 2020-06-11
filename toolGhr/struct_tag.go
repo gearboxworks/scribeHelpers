@@ -26,30 +26,15 @@ func (repo *TypeRepo) FetchTags(force bool) *ux.State {
 
 		repo.state = repo.ClientGet(&repo.tags.all, tagsUri)
 		if repo.state.IsNotOk() {
-			repo.state.SetError("no tags found")
 			break
 		}
-		//URL := repo.generateApiUrl(tagsUri)
-		//err := repo.client.Get(URL, &repo.tags.all)
-		//if err != nil {
-		//	repo.state.SetError(err)
-		//	break
-		//}
-		//if repo.tags.all == nil {
-		//	repo.state.SetError("no tags found")
-		//	break
-		//}
 
-		// @TODO - figure out how to do this.
-		//// Sometimes we can't second guess what the "latest" is based on date alone.
-		//u = fmt.Sprintf(tagUri, repo.Organization, repo.Name, Latest)
-		//err = repo.client.Get(u, &repo.tags.latest)
-		//if err != nil {
-		//	repo.state.SetError(err)
-		//	break
-		//}
+		if repo.tags.all == nil {
+			repo.state.SetWarning("no tags found")
+			break
+		}
+
 		repo.tags.latest = repo.tags.GetLatest()
-
 		if repo.tags.findTag(repo.TagName) == nil {
 			repo.state.SetWarning("no tag '%s' found", repo.TagName)
 			break

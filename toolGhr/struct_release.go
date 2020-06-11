@@ -32,33 +32,20 @@ func (repo *TypeRepo) FetchReleases(force bool) *ux.State {
 
 		repo.state = repo.ClientGet(&repo.releases.all, releaseListUri)
 		if repo.state.IsNotOk() {
-			repo.state.SetError("no releases found")
 			break
 		}
-		//URL := repo.generateApiUrl(releaseListUri)
-		//err := repo.client.Get(URL, &repo.releases.all)
-		//if err != nil {
-		//	repo.state.SetError(err)
-		//	break
-		//}
-		//if repo.releases.all == nil {
-		//	repo.state.SetError("no releases found")
-		//	break
-		//}
+
+		if repo.releases.all == nil {
+			repo.state.SetWarning("no releases found")
+			break
+		}
 
 		// Sometimes we can't second guess what the "latest" is based on date alone.
 		repo.state = repo.ClientGet(&repo.releases.latest, releaseTagUri, Latest)
 		if repo.state.IsNotOk() {
-			repo.state.SetError("no releases found")
+			repo.state.SetWarning("no latest release found")
 			break
 		}
-		//URL = repo.generateApiUrl(releaseTagUri, Latest)
-		//err = repo.client.Get(URL, &repo.releases.latest)
-		//if err != nil {
-		//	repo.state.SetError(err)
-		//	break
-		//}
-
 
 		if repo.releases.findRelease(repo.TagName) == nil {
 			repo.state.SetWarning("no Release '%s' found", repo.TagName)

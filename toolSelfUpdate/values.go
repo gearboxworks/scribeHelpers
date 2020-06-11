@@ -31,9 +31,9 @@ func ReflectVersionValue(ref interface{}) *VersionValue {
 		case *string:
 			ret = VersionValue(semver.MustParse(*(ref.(*string))))
 		case []byte:
-			ret = VersionValue(semver.MustParse((ref.(string))))
+			ret = VersionValue(semver.MustParse(ref.(string)))
 		case string:
-			ret = VersionValue(semver.MustParse((ref.(string))))
+			ret = VersionValue(semver.MustParse(ref.(string)))
 	}
 	return &ret
 }

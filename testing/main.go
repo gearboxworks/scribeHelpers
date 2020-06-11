@@ -69,7 +69,8 @@ func PrintTestStop(test string) {
 
 
 func main() {
-	Test_GhrCopy()
+	//Test_GhrCopy()
+	Test_Ghr()
 
 	os.Exit(1)
 
@@ -122,7 +123,7 @@ func Test_GhrCopy() {
 	state = Dest.SetOverwrite(true)
 	PrintTestResult(state, test, "SetOverwrite(true)")
 
-	state = Dest.CopyFrom(Src.Repo, "dist")
+	state = Dest.CopyReleasesFrom(Src.Repo, "dist")
 	PrintTestResult(state, test, "CopyFrom(Src.Repo, \"dist\")")
 
 	PrintTestStop(test)
@@ -177,10 +178,10 @@ func Test_Ghr() {
 	//state = Test.Upload(true, "testing", "")
 	//PrintTestResult(state, test, "Upload(\"testing\", \"\", true)")
 
-	state = Test.UploadMultiple(true, "../testing/testing", "pkgreflect.go", "init.go")
+	state = Test.UploadMultiple(true, "../testing/Testing2", "pkgreflect.go", "init.go")
 	PrintTestResult(state, test, "Upload(\"testing\", \"\", true)")
 
-	state = Test.Download(true, "testing")
+	state = Test.Download(true, "testing2")
 	PrintTestResult(state, test, "Download(\"testing\")")
 
 	relData := toolGhr.TypeRepo{

@@ -81,7 +81,7 @@ func ReleaseSync(srcrepo string, binrepo string, version string, path string) *u
 		}
 
 		// Now sync the release in the destination repo.
-		state = Dest.CopyFrom(Src.Repo, path)
+		state = Dest.CopyReleasesFrom(Src.Repo, path)
 	}
 
 	return state

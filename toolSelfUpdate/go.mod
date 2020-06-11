@@ -12,6 +12,8 @@ replace github.com/newclarity/scribeHelpers/toolPrompt => ../toolPrompt
 
 replace github.com/newclarity/scribeHelpers/toolTypes => ../toolTypes
 
+replace github.com/newclarity/scribeHelpers/toolGhr => ../toolGhr
+
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/golang/protobuf v1.4.2 // indirect

@@ -24,6 +24,5 @@ require (
 	github.com/newclarity/scribeHelpers/toolTypes v0.0.0-20200606063537-e5c648daf391 // indirect
 	github.com/newclarity/scribeHelpers/ux v0.0.0-20200606063537-e5c648daf391
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80
-	github.com/voxelbrain/goptions v0.0.0-20180630082107-58cddc247ea2
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9 // indirect
 )

@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 )
 
 
@@ -59,22 +58,12 @@ func (at *TypeScribeArgs) LoadTemplateFile() *ux.State {
 			break
 		}
 
-
 		at.JsonStruct.TemplateFile.SetFileInfo(at.Template.File)
 
-		// Create template instance.
-		var t *template.Template
-		t, at.State = at.CreateTemplate()
-		t.Option("missingkey=error")
-
-		// Do it again - may have to perform recursion here.
-		var err error
-		at.TemplateRef, err = t.Parse(at.Template.String)
-		if err != nil {
-			at.State.SetError("Template read error: %s", err)
+		at.State = at.CreateTemplate()
+		if at.State.IsError() {
 			break
 		}
-		at.TemplateRef.Option("missingkey=error")
 	}
 
 	return at.State
@@ -186,7 +175,7 @@ func (at *TypeArgFile) ChangeSuffix(suffix string) {
 
 
 func (at *TypeArgFile) GetPath() string {
-	return at.File.GetPath()
+	return at.File.GetPathAbs()
 }
 func (at *TypeArgFile) GetPathAbs() string {
 	return at.File.GetPathAbs()

@@ -81,17 +81,17 @@ func (f *TypeFile) Set(overwrite bool, label string, path ...string) *ux.State {
 			break
 		}
 
-
 		if len(path) == 0 {
 			path = []string{label}
 		}
-		label = filepath.Base(label)
 
 		if !f.Path.SetPath(path...) {
 			f.state.SetError("provided file was not valid")
 			break
 		}
 
+		//label = strings.ToLower(filepath.Base(label))	// @TODO - selfupdate lowercase workaround.
+		label = filepath.Base(label)
 		f.Label = label
 		f.Name = label
 		if overwrite {

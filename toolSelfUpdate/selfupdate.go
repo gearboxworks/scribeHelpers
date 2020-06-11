@@ -17,7 +17,7 @@ func (su *TypeSelfUpdate) Update() *ux.State {
 
 		ux.PrintflnBlue("Checking '%s' for version greater than v%s", su.useRepo, su.version.ToString())
 		previous := su.version.ToSemVer()
-		latest, err := selfupdate.UpdateSelf(previous, su.useRepo)
+		latest, err := su.ref.UpdateSelf(previous, su.useRepo)
 		if err != nil {
 			su.State.SetError(err)
 			break
@@ -53,14 +53,14 @@ func (su *TypeSelfUpdate) GetVersion(version *VersionValue) *selfupdate.Release 
 			case version.IsNotValid():
 				fallthrough
 			case version.IsLatest():
-				release, ok, err = selfupdate.DetectLatest(su.useRepo)
+				release, ok, err = su.ref.DetectLatest(su.useRepo)
 
 			default:
 				v := version.ToString()
 				if !strings.HasPrefix(v, "v") {
 					v = "v" + v
 				}
-				release, ok, err = selfupdate.DetectVersion(su.useRepo, v)
+				release, ok, err = su.ref.DetectVersion(su.useRepo, v)
 		}
 
 		if !ok {

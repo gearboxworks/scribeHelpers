@@ -2,10 +2,22 @@ package loadTools
 
 import (
 	"fmt"
+	"github.com/Masterminds/sprig"
+	"github.com/newclarity/scribeHelpers/toolCopy"
 	"github.com/newclarity/scribeHelpers/toolExec"
+	"github.com/newclarity/scribeHelpers/toolGhr"
+	"github.com/newclarity/scribeHelpers/toolGit"
+	"github.com/newclarity/scribeHelpers/toolGitHub"
+	"github.com/newclarity/scribeHelpers/toolPath"
+	"github.com/newclarity/scribeHelpers/toolPrompt"
+	"github.com/newclarity/scribeHelpers/toolRuntime"
+	"github.com/newclarity/scribeHelpers/toolService"
+	"github.com/newclarity/scribeHelpers/toolSystem"
+	"github.com/newclarity/scribeHelpers/toolTypes"
+	"github.com/newclarity/scribeHelpers/toolUx"
 	"github.com/newclarity/scribeHelpers/ux"
-	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"text/template"
 )
@@ -34,10 +46,14 @@ func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 			// Validate json and template files/strings.
 			if at.Json.Filename == DefaultJsonFile {
 				at.Json.Filename = DefaultJsonString
+			} else if at.Json.Filename == SelectIgnore {
+				at.Json.Filename = DefaultJsonString
 			}
 			at.Json.SetInputFile(at.Json.Filename, false)
 
 			if at.Template.Filename == DefaultTemplateFile {
+				at.Template.Filename = DefaultTemplateString
+			} else if at.Template.Filename == SelectIgnore {
 				at.Template.Filename = DefaultTemplateString
 			}
 			at.Template.SetInputFile(at.Template.Filename, at.RemoveTemplate)
@@ -330,32 +346,58 @@ func (at *TypeScribeArgs) Run() *ux.State {
 }
 
 
-func (at *TypeScribeArgs) CreateTemplate() (*template.Template, *ux.State) {
-	var t *template.Template
+func (at *TypeScribeArgs) CreateTemplate() *ux.State {
 	if state := at.IsNil(); state.IsError() {
-		return nil, state
+		return state
 	}
 
 	for range onlyOnce {
-		// Define additional template functions.
-		at.State = DiscoverTools()
-		if at.State.IsNotOk() {
+		//// Define additional template functions.
+		//at.State = DiscoverTools()
+		//if at.State.IsNotOk() {
+		//	break
+		//}
+		//
+		//tfm := responseToFuncMap(at.State.GetResponse())
+		//at.State = at.ImportTools(tfm)
+		//if at.State.IsNotOk() {
+		//	break
+		//}
+		//
+		//// Add inbuilt Tools.
+		//at.Tools["PrintTools"] = PrintTools
+
+		if at.Tools == nil {
+			at.State = at.ImportTools(nil)
+			if at.State.IsError() {
+				break
+			}
+		}
+
+		t := template.New("JSON").Funcs(at.Tools)
+		if t == nil {
+			at.State.SetError("Template creation error.")
 			break
 		}
 
-		tfm := responseToFuncMap(at.State.GetResponse())
-		at.State = at.ImportTools(tfm)
-		if at.State.IsNotOk() {
+		t.Option("missingkey=error")
+
+		// Do it again - may have to perform recursion here.
+		var err error
+		at.TemplateRef, err = t.Parse(at.Template.String)
+		if err != nil {
+			at.State.SetError("Template read error: %s", err)
+			break
+		}
+		if at.TemplateRef == nil {
+			at.State.SetError("Template creation error.")
 			break
 		}
 
-		// Add inbuilt Tools.
-		at.Tools["PrintTools"] = PrintTools
-
-		t = template.New("JSON").Funcs(at.Tools)
+		at.TemplateRef.Option("missingkey=error")
 	}
 
-	return t, at.State
+	return at.State
 }
 
 
@@ -368,37 +410,171 @@ func (at *TypeScribeArgs) ImportTools(h *template.FuncMap) *ux.State {
 	}
 
 	for range onlyOnce {
-		if h == nil {
-			at.State.SetError("Error importing Tools - empty list.")
-			break
-		}
+		//if h == nil {
+		//	at.State.SetError("Error importing Tools - empty list.")
+		//	break
+		//}
+
+		at.Tools = make(template.FuncMap)
+		// Define external template functions.
+		at.Tools = sprig.TxtFuncMap()
 
 		for name, fn := range *h {
 			at.Tools[name] = fn
 		}
 
-		//// Define additional template functions.
-		//for name, fn := range h {
-		//	// Ignore GetTools function.
-		//	if name == "GetTools" {
-		//		continue
-		//	}
-		//
-		//	// Ignore any function that doesn't have a ToolPrefix
-		//	if !strings.HasPrefix(name, "Tool") {
-		//		continue
-		//	}
-		//
-		//	// Trim ToolPrefix from function template name.
-		//	name = strings.TrimPrefix(name, "Tool")
-		//	at.Tools[name] = fn.Interface()
+		for name, fn := range toolCopy.GetTools {
+			at.Tools[name] = fn
+		}
+
+		//for name, fn := range toolDocker.GetTools {
+		//	at.Tools[name] = fn
 		//}
+
+		for name, fn := range toolExec.GetTools {
+			at.Tools[name] = fn
+		}
+
+		//for name, fn := range toolGear.GetTools {
+		//	at.Tools[name] = fn
+		//}
+
+		for name, fn := range toolGhr.GetTools {
+			at.Tools[name] = fn
+		}
+
+		for name, fn := range toolGit.GetTools {
+			at.Tools[name] = fn
+		}
+
+		for name, fn := range toolGitHub.GetTools {
+			at.Tools[name] = fn
+		}
+
+		//for name, fn := range toolGoReleaser.GetTools {
+		//	at.Tools[name] = fn
+		//}
+
+		for name, fn := range toolPath.GetTools {
+			at.Tools[name] = fn
+		}
+
+		for name, fn := range toolPrompt.GetTools {
+			at.Tools[name] = fn
+		}
+
+		for name, fn := range toolRuntime.GetTools {
+			at.Tools[name] = fn
+		}
+
+		//for name, fn := range toolSelfUpdate.GetTools {
+		//	at.Tools[name] = fn
+		//}
+
+		for name, fn := range toolService.GetTools {
+			at.Tools[name] = fn
+		}
+
+		for name, fn := range toolSystem.GetTools {
+			at.Tools[name] = fn
+		}
+
+		for name, fn := range toolTypes.GetTools {
+			at.Tools[name] = fn
+		}
+
+		for name, fn := range toolUx.GetTools {
+			at.Tools[name] = fn
+		}
+
+
+		// Add inbuilt Tools.
+		at.Tools["PrintTools"] = PrintTools
 	}
 
 	return at.State
 }
 
 
+//func (at *TypeScribeArgs) ImportTools(h *template.FuncMap) *ux.State {
+//	if state := at.IsNil(); state.IsError() {
+//		return state
+//	}
+//
+//	for range onlyOnce {
+//		if h == nil {
+//			at.State.SetError("Error importing Tools - empty list.")
+//			break
+//		}
+//
+//		for name, fn := range *h {
+//			at.Tools[name] = fn
+//		}
+//
+//		//// Define additional template functions.
+//		//for name, fn := range h {
+//		//	// Ignore GetTools function.
+//		//	if name == "GetTools" {
+//		//		continue
+//		//	}
+//		//
+//		//	// Ignore any function that doesn't have a ToolPrefix
+//		//	if !strings.HasPrefix(name, "Tool") {
+//		//		continue
+//		//	}
+//		//
+//		//	// Trim ToolPrefix from function template name.
+//		//	name = strings.TrimPrefix(name, "Tool")
+//		//	at.Tools[name] = fn.Interface()
+//		//}
+//	}
+//
+//	return at.State
+//}
+
+
 func (at *TypeScribeArgs) PrintTools() {
-	_, _ = fmt.Fprintf(os.Stderr, PrintTools())
+	for range onlyOnce {
+		var ret string
+
+		ret += ux.SprintfCyan("List of defined template functions:\n")
+
+		files := make(Files)
+		for name, fn := range at.Tools {
+			Tool := _GetFunctionInfo(fn)
+
+			if _, ok := files[Tool.File]; !ok {
+				files[Tool.File] = make(Tools)
+			}
+
+			files[Tool.File][name] = *Tool
+			//fmt.Printf("Name[%s]: %s => %s\n", name, Tool.Name, Tool.Function)
+		}
+
+		for fn, fp := range files {
+			ret += ux.SprintfWhite("\n# Tool functions within: %s\n", fn)
+
+			// To store the keys in slice in sorted order
+			var keys SortedTools
+			for _, k := range fp {
+				keys = append(keys, k)
+			}
+			sort.Slice(keys, keys.Less)
+
+			//for _, hp := range fp {
+			for _, hp := range keys {
+				ret += fmt.Sprintf("%s( %s )\t=> ( %s )\n",
+					ux.SprintfGreen(hp.Name),
+					ux.SprintfCyan(hp.Args),
+					ux.SprintfYellow(hp.Return),
+				)
+
+				// fmt.Printf("%s\n\targs: %s\n\tReturn: %s\n", hp.Function, hp.args, hp.Return)
+			}
+		}
+
+		ret += ux.SprintfBlue("\nSee http://masterminds.github.io/sprig/ for additional functions...\n")
+
+		fmt.Print(ret)
+	}
 }

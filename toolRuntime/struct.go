@@ -5,6 +5,7 @@ import (
 	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"path"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -20,21 +21,31 @@ type TypeRuntime struct {
 	CmdDir         string		`json:"cmd_dir" mapstructure:"cmd_dir"`
 	CmdFile        string		`json:"cmd_file" mapstructure:"cmd_file"`
 
-	FullArgs       ExecArgs	`json:"full_args" mapstructure:"full_args"`
-	Args           ExecArgs	`json:"args" mapstructure:"args"`
+	FullArgs       ExecArgs		`json:"full_args" mapstructure:"full_args"`
+	Args           ExecArgs		`json:"args" mapstructure:"args"`
 
 	Env            ExecEnv		`json:"env" mapstructure:"env"`
 	EnvMap         Environment	`json:"env_map" mapstructure:"env_map"`
 
 	TimeStamp      time.Time	`json:"timestamp" mapstructure:"timestamp"`
 
-	Debug          bool        `json:"debug" mapstructure:"debug"`
+	GoRuntime      GoRuntime	`json:"go_runtime" mapstructure:"go_runtime"`
+
+	Debug          bool			`json:"debug" mapstructure:"debug"`
 	State          *ux.State	`json:"state" mapstructure:"state"`
 }
 
 type ExecArgs []string
 type ExecEnv []string
 type Environment map[string]string
+type GoRuntime struct {
+	Os string
+	Arch string
+	Root string
+	Version string
+	Compiler string
+	NumCpus int
+}
 
 //type ExecCommand struct {
 //	Dir string
@@ -60,13 +71,38 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 			break
 		}
 
+		ret = &TypeRuntime{
+			CmdName:    binary,
+			CmdVersion: version,
+			Cmd:        "",
+			CmdDir:     "",
+			CmdFile:    "",
+			FullArgs:   os.Args[1:],
+			Args:       os.Args[1:],
+			Env:        os.Environ(),
+			EnvMap:     make(Environment),
+			TimeStamp:  time.Now(),
+
+			GoRuntime: GoRuntime{
+				Os:       runtime.GOOS,
+				Arch:     runtime.GOARCH,
+				Root:     runtime.GOROOT(),
+				Version:  runtime.Version(),
+				Compiler: runtime.Compiler,
+				NumCpus:  runtime.NumCPU(),
+			},
+
+			Debug:      debugFlag,
+			State:      ux.NewState(binary, debugFlag),
+		}
+
+		for _, item := range os.Environ() {
+			s := strings.SplitN(item, "=", 2)
+			ret.EnvMap[s[0]] = s[1]
+		}
+
 		var err error
 		var exe string
-		exe, err = osext.Executable()
-		if err != nil {
-			ret.State.SetError(err)
-			break
-		}
 		//ret.Cmd, err = os.Executable()
 		//if err != nil {
 		//	ret.State.SetError(err)
@@ -77,26 +113,14 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 		//	ret.State.SetError(err)
 		//	break
 		//}
-
-		ret = &TypeRuntime{
-			CmdName:    binary,
-			CmdVersion: version,
-			Cmd:        exe,
-			CmdDir:     path.Dir(exe),
-			CmdFile:    path.Base(exe),
-			FullArgs:   os.Args[1:],
-			Args:       os.Args[1:],
-			Env:        os.Environ(),
-			EnvMap:     make(Environment),
-			TimeStamp:  time.Now(),
-
-			Debug:      debugFlag,
-			State:      ux.NewState(binary, debugFlag),
+		exe, err = osext.Executable()
+		if err != nil {
+			ret.State.SetError(err)
+			break
 		}
-		for _, item := range os.Environ() {
-			s := strings.SplitN(item, "=", 2)
-			ret.EnvMap[s[0]] = s[1]
-		}
+		ret.Cmd =     exe
+		ret.CmdDir =  path.Dir(exe)
+		ret.CmdFile = path.Base(exe)
 
 		ret.State.SetPackage("")
 		ret.State.SetFunction()

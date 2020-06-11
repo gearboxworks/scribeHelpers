@@ -3,6 +3,7 @@ package toolGhr
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/newclarity/scribeHelpers/toolGhr/github"
 	"github.com/newclarity/scribeHelpers/toolPath"
 	"github.com/newclarity/scribeHelpers/ux"
@@ -11,6 +12,93 @@ import (
 	"os"
 	"path/filepath"
 )
+
+
+// Copy repo release from source to destination.
+func CopyReleases(srcRepoUrl string, srcTag string, destRepoUrl string, cacheDir ...string) *ux.State {
+	state := ux.NewState("CopyReleases", false)
+
+	for range onlyOnce {
+		// Setup source repo.
+		Src := New(nil)
+		if Src.State.IsNotOk() {
+			state = Src.State
+			break
+		}
+		//state = Src.SetAuth(TypeAuth{ Token: "", AuthUser: "" })
+		//if state.IsNotOk() {
+		//	break
+		//}
+		state = Src.OpenUrl(srcRepoUrl)
+		if state.IsNotOk() {
+			break
+		}
+
+
+		// Setup destination repo.
+		Dest := New(nil)
+		if Src.State.IsNotOk() {
+			state = Src.State
+			break
+		}
+		//state = Src.SetAuth(TypeAuth{ Token: "", AuthUser: "" })
+		//if state.IsNotOk() {
+		//	break
+		//}
+		state = Dest.OpenUrl(destRepoUrl)
+		if state.IsNotOk() {
+			break
+		}
+		state = Dest.SetOverwrite(true)
+		if state.IsNotOk() {
+			break
+		}
+
+
+		// Now sync the release in the destination repo.
+		state = Dest.CopyReleasesFrom(Src.Repo, srcTag, cacheDir...)
+	}
+
+	return state
+}
+
+
+// Return asset for current architecture.
+func GetAsset(repoUrl string, tag string) (string, *ux.State) {
+	state := ux.NewState("GetAsset", false)
+	var ret string
+
+	for range onlyOnce {
+		// Setup source repo.
+		repo := New(nil)
+		if repo.State.IsNotOk() {
+			state = repo.State
+			break
+		}
+		//state = repo.SetAuth(TypeAuth{ Token: "", AuthUser: "" })
+		//if state.IsNotOk() {
+		//	break
+		//}
+		state = repo.OpenUrl(repoUrl)
+		if state.IsNotOk() {
+			break
+		}
+
+		state = repo.SetTag(tag)
+		if state.IsNotOk() {
+			break
+		}
+
+		ret, state = repo.GetAsset()
+		if state.IsNotOk() {
+			break
+		}
+
+		state.SetOk()
+	}
+
+	return ret, state
+}
 
 
 // Show repo information
@@ -51,7 +139,7 @@ func (ghr *TypeGhr) Info() *ux.State {
 
 
 // Show repo information
-func (ghr *TypeGhr) CopyFrom(srcRepo *TypeRepo, cacheDir string) *ux.State {
+func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir ...string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
 	}
@@ -65,12 +153,15 @@ func (ghr *TypeGhr) CopyFrom(srcRepo *TypeRepo, cacheDir string) *ux.State {
 
 
 		// Setup cache dir.
-		ghr.message("Setting up cache directory...")
+		if len(cacheDir) == 0 {
+			cacheDir = []string{"dist"}
+		}
+		ghr.message("Setting up cache directory '%s' ...", filepath.Join(cacheDir...))
 		dir := toolPath.New(ghr.runtime)
 		if ghr.State.IsNotOk() {
 			break
 		}
-		dir.SetPath(cacheDir)
+		dir.SetPath(cacheDir...)
 		ghr.State = dir.StatPath()
 		if ghr.State.IsError() {
 			break
@@ -78,10 +169,17 @@ func (ghr *TypeGhr) CopyFrom(srcRepo *TypeRepo, cacheDir string) *ux.State {
 
 
 		// Setup src repo.
-		ghr.message("Setting up source repo...")
+		ghr.message("Setting up source repo '%s' ...", srcRepo.GetUrl())
 		ghr.State = srcRepo.Fetch(true)
 		if ghr.State.IsError() {
 			break
+		}
+		if srcTag != "" {
+			ghr.State = srcRepo.SetTag(srcTag)
+			if ghr.State.IsError() {
+				ghr.State.SetError("No source release found")
+				break
+			}
 		}
 		srcRef := srcRepo.Release()
 		if srcRef == nil {
@@ -90,17 +188,9 @@ func (ghr *TypeGhr) CopyFrom(srcRepo *TypeRepo, cacheDir string) *ux.State {
 		}
 
 
-		// Copy src files to cache.
-		ghr.message("Download files from source repo to cache...")
-		ghr.State = srcRepo.DownloadAssets(false, cacheDir)
-		if ghr.State.IsError() {
-			break
-		}
-
-
 		// Setup destination repo.
 		dstRepo := ghr.Repo
-		ghr.message("Setup destination repo...")
+		ghr.message("Setup destination repo '%s' ...", dstRepo.GetUrl())
 		ghr.State = dstRepo.Fetch(true)
 		if ghr.State.IsError() {
 			break
@@ -119,7 +209,15 @@ func (ghr *TypeGhr) CopyFrom(srcRepo *TypeRepo, cacheDir string) *ux.State {
 
 		dstRepo.Files = []string{}
 		for _, file := range srcRepo.Files {
-			dstRepo.Files = append(dstRepo.Files, filepath.Join(cacheDir, file))
+			dstRepo.Files = append(dstRepo.Files, filepath.Join(filepath.Join(cacheDir...), file))
+		}
+
+
+		// Copy src files to cache.
+		ghr.message("Download %d files from source repo to cache dir '%s' ...", len(srcRepo.Files), dir.GetPath())
+		ghr.State = srcRepo.DownloadAssets(false, cacheDir...)
+		if ghr.State.IsError() {
+			break
 		}
 
 
@@ -275,6 +373,43 @@ func (ghr *TypeGhr) DeleteAssets(labels ...string) *ux.State {
 	}
 
 	return ghr.State
+}
+
+
+// Show repo information
+func (ghr *TypeGhr) GetAsset() (string, *ux.State) {
+	var ret string
+	if state := ghr.IsNil(); state.IsError() {
+		return ret, state
+	}
+	ghr.State.SetFunction()
+
+	for range onlyOnce {
+		ghr.State = ghr.isValid()
+		if ghr.State.IsNotOk() {
+			break
+		}
+
+		ghr.State = ghr.Repo.Fetch(true)
+		if ghr.State.IsError() {
+			break
+		}
+
+		label := fmt.Sprintf("(?i).*%s_%s.*",
+			ghr.runtime.GoRuntime.Os,
+			ghr.runtime.GoRuntime.Arch,
+			)
+
+		asset := ghr.Repo.SelectRegexpAsset(label)
+		if asset == nil {
+			break
+		}
+
+		ret = asset.Name
+		ghr.State.SetOk()
+	}
+
+	return ret, ghr.State
 }
 
 
