@@ -5,12 +5,12 @@ func (c *TypeOsCopy) SetSourcePath(path ...string) bool {
 	var ok bool
 
 	for range onlyOnce {
-		ok = c.Source.SetPath(path...)
+		ok = c.Paths.Source.SetPath(path...)
 		if !ok {
 			break
 		}
 
-		if c.Destination.IsValid() {
+		if c.Paths.Destination.IsValid() {
 			c.Valid = true
 		}
 
@@ -20,7 +20,7 @@ func (c *TypeOsCopy) SetSourcePath(path ...string) bool {
 	return ok
 }
 func (c *TypeOsCopy) GetSourcePath() string {
-	return c.Source.GetPath()
+	return c.Paths.Source.GetPath()
 }
 
 
@@ -28,12 +28,12 @@ func (c *TypeOsCopy) SetDestinationPath(path ...string) bool {
 	var ok bool
 
 	for range onlyOnce {
-		ok = c.Destination.SetPath(path...)
+		ok = c.Paths.Destination.SetPath(path...)
 		if !ok {
 			break
 		}
 
-		if c.Source.IsValid() {
+		if c.Paths.Source.IsValid() {
 			c.Valid = true
 		}
 
@@ -43,29 +43,29 @@ func (c *TypeOsCopy) SetDestinationPath(path ...string) bool {
 	return ok
 }
 func (c *TypeOsCopy) GetDestinationPath() string {
-	return c.Destination.GetPath()
+	return c.Paths.Destination.GetPath()
 }
 
 
 func (c *TypeOsCopy) SetExcludePaths(paths ...string) bool {
-	return c.Exclude.SetPaths(paths...)
+	return c.Paths.Exclude.SetPaths(paths...)
 }
 func (c *TypeOsCopy) AddExcludePaths(paths ...string) bool {
-	return c.Exclude.AddPaths(paths...)
+	return c.Paths.Exclude.AddPaths(paths...)
 }
 func (c *TypeOsCopy) GetExcludePaths() *PathArray {
-	return c.Exclude.GetPaths()
+	return c.Paths.Exclude.GetPaths()
 }
 
 
 func (c *TypeOsCopy) SetIncludePaths(paths ...string) bool {
-	return c.Include.SetPaths(paths...)
+	return c.Paths.Include.SetPaths(paths...)
 }
 func (c *TypeOsCopy) AddIncludePaths(paths ...string) bool {
-	return c.Include.AddPaths(paths...)
+	return c.Paths.Include.AddPaths(paths...)
 }
 func (c *TypeOsCopy) GetIncludePaths() *PathArray {
-	return c.Include.GetPaths()
+	return c.Paths.Include.GetPaths()
 }
 
 
@@ -100,4 +100,12 @@ func (c *TypeOsCopy) GetMethodAllowRemote() bool {
 }
 func (c *TypeOsCopy) GetMethodAvailable() bool {
 	return c.Method.GetAvailable()
+}
+
+
+func (c *TypeOsCopy) SetOverwrite() {
+	c.Paths.Destination.SetOverwriteable()
+}
+func (c *TypeOsCopy) CanOverwrite() bool {
+	return c.Paths.Destination.CanOverwrite()
 }

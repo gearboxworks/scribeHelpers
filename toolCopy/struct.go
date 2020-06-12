@@ -18,20 +18,24 @@ import (
 type OsCopyGetter interface {
 }
 
-type TypeOsPath toolPath.TypeOsPath
+//type TypeOsPath toolPath.TypeOsPath
 
 type TypeOsCopy struct {
+	Method *TypeCopyMethods				`json:"method" mapstructure:"method"`
+
+	Paths  TypeOsCopyPaths
+
+	Valid  bool							`json:"valid" mapstructure:"valid"`
+	Debug  bool							`json:"debug" mapstructure:"debug"`
+	State  *ux.State					`json:"state" mapstructure:"state"`
+}
+
+type TypeOsCopyPaths struct {
 	Source       *toolPath.TypeOsPath	`json:"source" mapstructure:"source"`
 	Destination  *toolPath.TypeOsPath	`json:"destination" mapstructure:"destination"`
 
 	Exclude PathArray					`json:"exclude" mapstructure:"exclude"`
 	Include PathArray					`json:"include" mapstructure:"include"`
-
-	Method *TypeCopyMethods				`json:"method" mapstructure:"method"`
-
-	Valid  bool							`json:"valid" mapstructure:"valid"`
-	Debug  bool							`json:"debug" mapstructure:"debug"`
-	State  *ux.State					`json:"state" mapstructure:"state"`
 }
 
 
@@ -51,11 +55,13 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeOsCopy {
 	runtime = runtime.EnsureNotNil()
 
 	c := &TypeOsCopy{
-		Source:       toolPath.New(runtime),
-		Destination:  toolPath.New(runtime),
+		Paths: TypeOsCopyPaths {
+			Source: toolPath.New(runtime),
+			Destination: toolPath.New(runtime),
 
-		Exclude: PathArray{},
-		Include: PathArray{},
+			Exclude: PathArray{},
+			Include: PathArray{},
+		},
 
 		Method: NewCopyMethod(),
 

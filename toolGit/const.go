@@ -1,6 +1,7 @@
 package toolGit
 
 const (
+	gitCommandClean = "clean"
 	gitCommandClone = "clone"
 	gitCommandInit = "init"
 	gitCommandAdd = "add"

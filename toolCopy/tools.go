@@ -52,7 +52,7 @@ func (c *ToolOsCopy) SetSourcePath(src ...interface{}) *ux.State {
 			c.State.SetError("%s source empty", c.Method.GetName())
 			break
 		}
-		if !c.Source.SetPath(*p...) {
+		if !c.Paths.Source.SetPath(*p...) {
 			c.State.SetError("%s source empty", c.Method.GetName())
 			break
 		}
@@ -85,7 +85,7 @@ func (c *ToolOsCopy) SetDestinationPath(dest ...interface{}) *ux.State {
 			c.State.SetError("%s destination empty", c.Method.GetName())
 			break
 		}
-		if !c.Destination.SetPath(*p...) {
+		if !c.Paths.Destination.SetPath(*p...) {
 			c.State.SetError("%s destination empty", c.Method.GetName())
 			break
 		}
@@ -113,7 +113,7 @@ func (c *ToolOsCopy) SetExcludePaths(exclude ...interface{}) *ux.State {
 		if e == nil {
 			break
 		}
-		if !c.Exclude.SetPaths(*e...) {
+		if !c.Paths.Exclude.SetPaths(*e...) {
 			// Do nothing. Allow empty exclude paths.
 		}
 		c.State.Clear()
@@ -137,7 +137,7 @@ func (c *ToolOsCopy) SetIncludePaths(include ...interface{}) *ux.State {
 		if i == nil {
 			break
 		}
-		if !c.Include.SetPaths(*i...) {
+		if !c.Paths.Include.SetPaths(*i...) {
 			// Do nothing. Allow empty exclude paths.
 		}
 		c.State.Clear()
@@ -156,15 +156,15 @@ func (c *ToolOsCopy) Run() *ux.State {
 	c.State.SetFunction()
 
 	for range onlyOnce {
-		c.State = c.Source.StatPath()
+		c.State = c.Paths.Source.StatPath()
 		if c.State.IsError() {
 			break
 		}
 
 		opts := []string{}
 		//opts = append(opts, c.RsyncOptions...)
-		opts = append(opts, c.Source.GetPath())
-		opts = append(opts, c.Destination.GetPath())
+		opts = append(opts, c.Paths.Source.GetPath())
+		opts = append(opts, c.Paths.Destination.GetPath())
 
 		cmd := exec.Command("rsync", opts...)
 

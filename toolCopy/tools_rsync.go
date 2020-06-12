@@ -18,35 +18,35 @@ func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *u
 		if s == nil {
 			break
 		}
-		if !c.Source.SetPath(*s) {
+		if !c.Paths.Source.SetPath(*s) {
 			break
 		}
-		c.State = c.Source.StatPath()
-		if !c.Source.Exists() {
+		c.State = c.Paths.Source.StatPath()
+		if !c.Paths.Source.Exists() {
 			//c.State.SetError("src path not found")
 			break
 		}
 
 
-		c.Destination.SetOverwriteable()
+		c.Paths.Destination.SetOverwriteable()
 
 		d := toolPath.ReflectAbsPath(dest)
 		if d == nil {
 			break
 		}
-		if !c.Destination.SetPath(*d) {
+		if !c.Paths.Destination.SetPath(*d) {
 			break
 		}
 		for range onlyOnce {
-			c.State = c.Destination.StatPath()
-			if c.Destination.NotExists() {
+			c.State = c.Paths.Destination.StatPath()
+			if c.Paths.Destination.NotExists() {
 				c.State.Clear()
 				break
 			}
-			if c.Destination.CanOverwrite() {
+			if c.Paths.Destination.CanOverwrite() {
 				break
 			}
-			c.State.SetError("cannot overwrite destination '%s'", c.Destination.GetPath())
+			c.State.SetError("cannot overwrite destination '%s'", c.Paths.Destination.GetPath())
 		}
 		if c.State.IsError() {
 			break
@@ -60,8 +60,8 @@ func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *u
 
 
 		task := grsync.NewTask(
-			c.Source.GetPath(),
-			c.Destination.GetPath(),
+			c.Paths.Source.GetPath(),
+			c.Paths.Destination.GetPath(),
 			c.Method.Selected.Options.(grsync.RsyncOptions),
 		)
 
@@ -95,8 +95,8 @@ func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *u
 
 		//opts := []string{}
 		////opts = append(opts, c.RsyncOptions...)
-		//opts = append(opts, c.Source.GetPath())
-		//opts = append(opts, c.Destination.GetPath())
+		//opts = append(opts, c.Paths.Source.GetPath())
+		//opts = append(opts, c.Paths.Destination.GetPath())
 		//cmd := exec.Command("rsync", opts...)
 		//out, err := cmd.CombinedOutput()
 		//c.State.SetOutput(out)

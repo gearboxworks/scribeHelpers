@@ -1,6 +1,7 @@
 package toolCopy
 
 import (
+	"fmt"
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
@@ -11,16 +12,25 @@ func (c *TypeOsCopy) Copy() *ux.State {
 	}
 
 	for range onlyOnce {
-		if !c.Source.Exists() {
+		c.State = c.Paths.Source.StatPath()
+
+		if !c.Paths.Source.Exists() {
+			c.State.SetError("src path not found")
+			break
+		}
+
+		if c.State.IsNotOk() {
 			c.State.SetError("src path not found")
 			break
 		}
 
 		for range onlyOnce {
-			if c.Destination.NotExists() {
+			c.State = c.Paths.Destination.StatPath()
+			if c.Paths.Destination.NotExists() {
+				c.State.SetOk()	// Destination path can actually not exist.
 				break
 			}
-			if c.Destination.CanOverwrite() {
+			if c.Paths.Destination.CanOverwrite() {
 				break
 			}
 			c.State.SetError("cannot overwrite destination")
@@ -30,9 +40,15 @@ func (c *TypeOsCopy) Copy() *ux.State {
 			break
 		}
 
-		// @TODO - do copying of files here
-
-		c.State.SetOk("chdir OK")
+		// @TODO Should be a better way.
+		method := c.Method.GetSelected()
+		name := c.Method.GetName()
+		fmt.Printf("Method: %s\n", name)
+		switch name {
+			case ConstMethodRsync:
+				fmt.Printf("RSYNC: %s\n", method.Name)
+				c.State = method.Run(&c.Paths, "1", "2", "3")
+		}
 	}
 
 	return c.State

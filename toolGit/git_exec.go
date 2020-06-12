@@ -20,6 +20,20 @@ func (g *TypeGit) GitClone(args ...string) *ux.State {
 
 
 // Usage:
+//		{{- $cmd := $git.GitClean }}
+//		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
+// func (me *ToolGit) GitClone(args ...interface{}) *ux.State {
+func (g *TypeGit) GitClean(args ...string) *ux.State {
+	if state := g.IsNil(); state.IsError() {
+		return state
+	}
+	g.State.SetFunction()
+	g.State = g.Exec(gitCommandClean, args...)
+	return g.State
+}
+
+
+// Usage:
 //		{{- $cmd := $git.GitInit }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
 func (g *TypeGit) GitInit(args ...string) *ux.State {

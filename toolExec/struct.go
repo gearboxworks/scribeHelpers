@@ -18,16 +18,18 @@ type TypeExecCommandGetter interface {
 }
 
 type TypeExecCommand struct {
-	cmd     *toolPath.TypeOsPath
-	args    []string
+	cmd        *toolPath.TypeOsPath
+	args       []string
 
-	show    bool
-	stdout  []byte
-	stderr  []byte
-	exit    int
+	workingDir *toolPath.TypeOsPath
 
-	Runtime *toolRuntime.TypeRuntime
-	State   *ux.State
+	show       bool
+	stdout     []byte
+	stderr     []byte
+	exit       int
+
+	Runtime    *toolRuntime.TypeRuntime
+	State      *ux.State
 }
 
 
@@ -35,16 +37,18 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeExecCommand {
 	runtime = runtime.EnsureNotNil()
 
 	ret := &TypeExecCommand {
-		cmd:    toolPath.New(runtime),
-		args:   nil,
+		cmd:        toolPath.New(runtime),
+		args:       nil,
 
-		show:   false,
-		stdout: []byte{},
-		stderr: []byte{},
-		exit:   0,
+		workingDir: nil,	// nil - means not defined.
 
-		Runtime:  runtime,
-		State:   ux.NewState(runtime.CmdName, runtime.Debug),
+		show:       false,
+		stdout:     []byte{},
+		stderr:     []byte{},
+		exit:       0,
+
+		Runtime:    runtime,
+		State:      ux.NewState(runtime.CmdName, runtime.Debug),
 	}
 	ret.State.SetPackage("")
 	ret.State.SetFunctionCaller()
@@ -149,6 +153,28 @@ func (e *TypeExecCommand) Run() *ux.State {
 			break
 		}
 
+		for range onlyOnce {
+			if e.workingDir == nil {
+				e.State.SetOk()
+				break
+			}
+			e.State = e.workingDir.StatPath()	// Re-stat as things may have changed.
+			if e.workingDir.NotExists() {
+				e.State.SetError("Working directory doesn't exist.")
+				break
+			}
+			if e.State.IsError() {
+				break
+			}
+			e.workingDir.Chdir()
+			if e.State.IsError() {
+				break
+			}
+		}
+		if e.State.IsError() {
+			break
+		}
+
 		//c := exec.Command((*cmds)[0], (*cmds)[1:]...)
 		c := exec.Command(e.cmd.GetPath(), e.args...)
 
@@ -158,14 +184,16 @@ func (e *TypeExecCommand) Run() *ux.State {
 			c.Stdout = io.MultiWriter(os.Stdout, &stdoutBuf)
 			c.Stderr = io.MultiWriter(os.Stderr, &stderrBuf)
 
-			err := c.Run()
-			if err != nil {
-				e.State.SetError(err)
-			}
+			err = c.Run()
+			//err = c.Run()
+			//if err != nil {
+			//	e.State.SetError(err)
+			//}
 
 			e.State.SetError(err)
 			e.stdout = stdoutBuf.Bytes()
 			e.stderr = stderrBuf.Bytes()
+			err = nil	// @TODO - The 'err' value within here needs to be not visible outside.
 
 		} else {
 			e.stdout, err = c.CombinedOutput()
@@ -213,12 +241,6 @@ func (e *TypeExecCommand) GetCmd() *toolPath.TypeOsPath {
 func (e *TypeExecCommand) GetCmdPath() string {
 	return e.cmd.GetPath()
 }
-//func (e *TypeExecCommand) GetExe() string {
-//	return e.exe
-//}
-//func (e *TypeExecCommand) GetPath() string {
-//	return e.exe
-//}
 func (e *TypeExecCommand) SetCmd(path ...string) *ux.State {
 	if state := e.IsNil(); state.IsError() {
 		return nil
@@ -247,12 +269,67 @@ func (e *TypeExecCommand) SetCmd(path ...string) *ux.State {
 
 	return e.State
 }
-//func (e *TypeExecCommand) SetExe(path ...string) *ux.State {
-//	return e.SetCmd(path...)
-//}
-//func (e *TypeExecCommand) SetPath(path ...string) *ux.State {
-//	return e.SetCmd(path...)
-//}
+
+
+func (e *TypeExecCommand) SetWorkingPath(path ...string) *ux.State {
+	if state := e.IsNil(); state.IsError() {
+		return nil
+	}
+
+	for range onlyOnce {
+		if e.workingDir == nil {
+			e.workingDir = toolPath.New(e.Runtime)
+		}
+
+		//@TODO - Sometimes a directory may not be present until actually running the command.
+		//@TODO - So maybe don't actually stat the dir here, but do it within TypeExecCommand.Run()
+		e.workingDir.SetPath(path...)
+		e.State = e.workingDir.StatPath()
+		if e.State.IsError() {
+			e.workingDir = nil	// nil - means not set.
+			break
+		}
+		if !e.workingDir.IsADir() {
+			e.State.SetError("Working path is not a directory.")
+			e.workingDir = nil	// nil - means not set.
+			break
+		}
+	}
+
+	return e.State
+}
+func (e *TypeExecCommand) GetWorkingPath() string {
+	var ret string
+	if state := e.IsNil(); state.IsError() {
+		return ""
+	}
+
+	for range onlyOnce {
+		if e.workingDir == nil {
+			break
+		}
+
+		ret = e.workingDir.GetPath()
+	}
+
+	return ret
+}
+func (e *TypeExecCommand) GetWorkingPathAbs() string {
+	var ret string
+	if state := e.IsNil(); state.IsError() {
+		return ""
+	}
+
+	for range onlyOnce {
+		if e.workingDir == nil {
+			break
+		}
+
+		ret = e.workingDir.GetPathAbs()
+	}
+
+	return ret
+}
 
 
 func (e *TypeExecCommand) GetArgs() []string {

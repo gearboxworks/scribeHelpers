@@ -78,7 +78,7 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 			CmdDir:     "",
 			CmdFile:    "",
 			FullArgs:   os.Args[1:],
-			Args:       os.Args[1:],
+			Args:       os.Args,
 			Env:        os.Environ(),
 			EnvMap:     make(Environment),
 			TimeStamp:  time.Now(),

@@ -2,7 +2,10 @@ package toolRuntime
 
 import "strings"
 
-func (me *ExecArgs) ToString() string {
-	return strings.Join(*me, " ")
+func (r *ExecArgs) ToString() string {
+	return strings.Join(*r, " ")
 }
 
+func (r *ExecArgs) String() string {
+	return strings.Join(*r, " ")
+}
