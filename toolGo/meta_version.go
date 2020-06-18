@@ -37,6 +37,11 @@ func (v *Version) String() string {
 }
 
 
+func (v *Version) Name() string {
+	return v.version.String()
+}
+
+
 func (v *Version) Get() Version {
 	return *v
 }

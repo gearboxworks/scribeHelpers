@@ -127,11 +127,11 @@ func (g *TypeGo) Parse(mode ...Mode) *ux.State {
 			mode = append(mode, Mode(0))
 		}
 
-		for i, _ := range g.Go.files {
+		for _, f := range g.Go.files {
 			//g.Go[i].Parse(f.Path.GetPath(), mode[0])
-			g.State = g.Go.files[i].Parse(mode[0])
-			if g.State.IsOk() {
-				g.Go.Found = g.Go.files[i]
+			g.State = f.Parse(mode[0])
+			if f.meta.Valid {
+				g.Go.Found = f
 				break
 			}
 		}

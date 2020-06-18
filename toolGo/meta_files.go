@@ -99,7 +99,10 @@ func (gf *GoFile) Parse(mode Mode) *ux.State {
 
 		if gf.Ast.Name == nil {
 			err = errors.New("not a goLang file")
+			break
 		}
+
+		gf.meta = gf.GetMeta()
 	}
 
 	return gf.State
@@ -136,14 +139,14 @@ func (gf *GoFile) GetMeta() *GoMeta {
 
 			//ux.PrintflnBlue("%s => %v", name, object)
 			switch decl := object.(type) {
-			case *ast.FuncDecl:
-				//ux.PrintflnBlue("Func")
-			case *ast.GenDecl:
-				for _, spec := range decl.Specs {
-					ok = gf.getGenDecl(spec)
-				}
-			default:
-				ux.PrintflnBlue("Unknown declaration @\n", decl.Pos())
+				case *ast.FuncDecl:
+					//ux.PrintflnBlue("Func")
+				case *ast.GenDecl:
+					for _, spec := range decl.Specs {
+						ok = gf.getGenDecl(spec)
+					}
+				default:
+					ux.PrintflnBlue("Unknown declaration @\n", decl.Pos())
 			}
 		}
 		if ok {
