@@ -86,7 +86,7 @@ func (gr *TypeGoReleaser) Release(path ...string) *ux.State {
 }
 
 
-func (gr *TypeGoReleaser) Build(path ...string) *ux.State {
+func (gr *TypeGoReleaser) Build(recurse bool, path ...string) *ux.State {
 	if state := gr.IsNil(); state.IsError() {
 		return state
 	}
@@ -98,6 +98,12 @@ func (gr *TypeGoReleaser) Build(path ...string) *ux.State {
 		if e.State.IsNotOk() {
 			gr.State = e.State
 			break
+		}
+
+		if recurse {
+			e.Paths.SetRecursive()
+		} else {
+			e.Paths.SetNonRecursive()
 		}
 
 		gr.State = e.Set("goreleaser", "--snapshot", "--skip-publish", "--rm-dist")

@@ -22,11 +22,14 @@ func (g *TypeGit) ChangedFiles() *ux.State {
 		}
 
 		var fps []string
-		fps = make([]string, len(g.State.OutputArray))
-		for i, fp := range g.State.OutputArray {
+		//fps = make([]string, len(g.State.OutputArray))
+		for _, fp := range g.State.OutputArray {
+			if fp == "" {
+				continue
+			}
 			s := strings.Fields(fp)
 			if len(s) > 1 {
-				fps[i] = s[1]
+				fps = append(fps, s[1])
 			}
 		}
 
@@ -58,11 +61,14 @@ func (g *TypeGit) AddFiles(args ...string) *ux.State {
 		}
 
 		var fps []string
-		fps = make([]string, len(g.State.OutputArray))
-		for i, fp := range g.State.OutputArray {
+		//fps = make([]string, len(g.State.OutputArray))
+		for _, fp := range g.State.OutputArray {
+			if fp == "" {
+				continue
+			}
 			s := strings.Fields(fp)
 			if len(s) > 1 {
-				fps[i] = s[1]
+				fps = append(fps, s[1])
 			}
 		}
 
