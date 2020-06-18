@@ -36,7 +36,7 @@ import (
 const DefaultPkgReflectFile = "pkgreflect.go"
 
 type PkgReflect struct {
-	//Paths      []toolPath.TypeOsPath
+	//goFiles      []toolPath.TypeOsPath
 
 	Notypes    bool		// "Don't list package types"
 	Nofuncs    bool		// "Don't list package functions"
