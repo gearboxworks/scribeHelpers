@@ -1,7 +1,7 @@
 package ux
 
 import (
-	"fmt"
+	//"fmt"
 	"reflect"
 	"strings"
 )
@@ -87,7 +87,7 @@ func (state *State) SetResponse(r interface{}) bool {
 func (r *TypeResponse) IsOfType(t string) bool {
 	var ok bool
 
-	fmt.Printf("%s - %s\n", r.ofType.String(), r.ofType.Name())
+	//fmt.Printf("%s - %s\n", r.ofType.String(), r.ofType.Name())
 	for range onlyOnce {
 		if r.ofType.String() == t {
 			ok = true
