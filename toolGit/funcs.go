@@ -230,6 +230,10 @@ func (g *TypeGit) Commit(paths []string, comment string, args ...interface{}) *u
 		}
 		files = g.State.GetResponse().GetStringArray()
 		if len(*files) > 0 {
+			//if (*files)[0] == "" {
+			//	// SIGH... Need to fix the empty strings of GetResponse()
+			//	break
+			//}
 			ux.PrintflnBlue("%d files changed in repo.", len(*files))
 			g.State = g.Exec(gitCommandCommit, "-m", c, ".")
 			if g.State.IsNotOk() {
