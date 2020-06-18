@@ -72,6 +72,14 @@ func (gc *GearConfig) CreateLinks(version string) *ux.State {
 		links := make(map[string]string)
 		var failed bool
 
+		// @TODO - Consider doing a chdir here...
+		// @TODO - os.Chdir(Runtime.CmdDir)
+		err := os.Chdir(gc.Runtime.CmdDir)
+		if err != nil {
+			gc.State.SetError(err)
+			break
+		}
+
 		for k, v := range gc.Run.Commands {
 			var err error
 			var dstFile string
@@ -121,9 +129,14 @@ func (gc *GearConfig) CreateLinks(version string) *ux.State {
 			if l == defaultBinary {
 			}
 
+			// @TODO - Since we did the following, then gc.Runtime.CmdFile is actually file.Base() and gc.Runtime.Cmd is the full path.
+			// @TODO - os.Symlink(gc.Runtime.CmdFile, dstFile)
+
 			fpel, err := filepath.EvalSymlinks(dstFile)
 			//fmt.Printf("%s\n", fpel)
-			if fpel != gc.Runtime.Cmd {
+			// @TODO - Confirm that the change from (absolute)gc.Runtime.Cmd to (relative)gc.Runtime.CmdFile works.
+			//if fpel != gc.Runtime.Cmd {
+			if fpel != gc.Runtime.CmdFile {
 				links[k] = "incorrect link"
 				failed = true
 			}
