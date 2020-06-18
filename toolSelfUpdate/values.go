@@ -2,6 +2,7 @@ package toolSelfUpdate
 
 import "github.com/blang/semver"
 
+
 type StringValue string
 type VersionValue semver.Version
 type FlagValue bool

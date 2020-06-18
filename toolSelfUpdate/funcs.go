@@ -2,10 +2,17 @@ package toolSelfUpdate
 
 import (
 	"fmt"
+	"github.com/blang/semver"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"strings"
 )
+
+
+func GetSemVer(v string) *VersionValue {
+	sver := (VersionValue)(semver.MustParse(v))
+	return &sver
+}
 
 
 func printVersion(release *selfupdate.Release) string {

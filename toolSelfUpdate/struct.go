@@ -8,6 +8,7 @@ import (
 	"runtime"
 )
 
+
 type SelfUpdateGetter interface {
 }
 
@@ -122,6 +123,8 @@ func addFilters(Binary string, Os string, Arch string) []string {
 	var ret []string
 	ret = append(ret, fmt.Sprintf("(?i)%s_.*_%s_%s.*", Binary, Os, Arch))
 	ret = append(ret, fmt.Sprintf("(?i)%s_%s_%s.*", Binary, Os, Arch))
+	ret = append(ret, fmt.Sprintf("(?i)%s-.*_%s_%s.*", Binary, Os, Arch))
+	ret = append(ret, fmt.Sprintf("(?i)%s-%s_%s.*", Binary, Os, Arch))
 	if Arch == "amd64" {
 		// This is recursive - so be careful what you place in the "Arch" argument.
 		ret = append(ret, addFilters(Binary, Os, "x86_64.*")...)

@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+
 func (su *TypeSelfUpdate) Update() *ux.State {
 	for range onlyOnce {
 		su.State = su.IsValid()
@@ -115,8 +116,11 @@ func (su *TypeSelfUpdate) IsUpdated(print bool) *ux.State {
 		if current == nil {
 			su.State.SetWarning("%s can be updated to v%s.",
 				su.name.ToString(),
-				su.version.ToString())
+				latest.Version.String())
 			if print {
+				ux.PrintflnWarning("%s can be updated to v%s.",
+					su.name.ToString(),
+					latest.Version.String())
 				ux.PrintflnWarning("Current version info unknown.")
 				ux.PrintflnBlue("Current version (v%s)\n", su.version.ToString())
 				ux.PrintflnBlue("Updated version (v%s)", latest.Version.String())
@@ -131,7 +135,7 @@ func (su *TypeSelfUpdate) IsUpdated(print bool) *ux.State {
 				su.name.ToString(),
 				su.version.ToString())
 			if print {
-				ux.PrintflnOk("%s", su.State.GetOk())
+				ux.PrintflnOk("%s\n", su.State.GetOk())
 				fmt.Printf(printVersion(current))
 			}
 			break
