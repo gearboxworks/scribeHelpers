@@ -20,11 +20,17 @@ const (
 	CmdLoad 			= "load"
 	CmdConvert 			= "convert"
 	CmdTools 			= "tools"
-	CmdVersion 			= "version"
 	CmdBuild 			= "build"
 	CmdPush 			= "push"
 	CmdRelease 			= "release"
+
 	CmdSelfUpdate		= "selfupdate"
+	CmdVersion 			= "version"
+	CmdVersionInfo		= "info"
+	CmdVersionList		= "list"
+	CmdVersionLatest	= "latest"
+	CmdVersionCheck		= "check"
+	CmdVersionUpdate	= "update"
 
 	FlagJsonFile     	= "json"
 	FlagTemplateFile	= "template"
