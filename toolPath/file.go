@@ -111,6 +111,67 @@ func (p *TypeOsPath) GetSeparator() string {
 }
 
 
+func (p *TypeOsPath) Foo() *ux.State {
+	for range onlyOnce {
+		p.State.SetFunction()
+		p.State.Clear()
+
+		if !p.IsValid() {
+			p.State.SetWarning("path is invalid")
+			break
+		}
+
+		p.StatPath()
+		if p.State.IsError() {
+			break
+		}
+		if !p._Exists {
+			p.State.SetError("file '%s' not found", p._Path)
+			break
+		}
+		if p._IsDir {
+			p.State.SetError("path '%s' is a directory", p._Path)
+			break
+		}
+
+
+
+		//f, err := os.Open("/tmp/dat")
+		//
+		//b1 := make([]byte, 5)
+		//n1, err := f.Read(b1)
+		//
+		//fmt.Printf("%d bytes: %s\n", n1, string(b1[:n1]))
+		//o3, err := f.Seek(6, 0)
+		//
+		//b3 := make([]byte, 2)
+		//n3, err := io.ReadAtLeast(f, b3, 2)
+		//
+		//fmt.Printf("%d bytes @ %d: %s\n", n3, o3, string(b3))
+		//
+		//r4 := bufio.NewReader(f)
+		//b4, err := r4.Peek(5)
+		//check(err)
+		//fmt.Printf("5 bytes: %s\n", string(b4))
+
+
+
+		var d []byte
+		var err error
+		d, err = ioutil.ReadFile(p._Path)
+		if err != nil {
+			p.State.SetError(err)
+			break
+		}
+
+		p.LoadContents(d)
+		p.State.SetOk("file '%s' read OK", p._Path)
+	}
+
+	return p.State
+}
+
+
 func (p *TypeOsPath) ReadFile() *ux.State {
 	for range onlyOnce {
 		p.State.SetFunction()

@@ -33,6 +33,9 @@ func (p *TypeOsPath) Chdir() *ux.State {
 			break
 		}
 
+		// @TODO - If we change dir and it's relative, we will lose the path.
+		// @TODO - This can be both good or bad.
+
 		err := os.Chdir(p._Path)
 		p.State.SetError(err)
 		if p.State.IsError() {

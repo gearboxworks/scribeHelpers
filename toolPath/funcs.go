@@ -170,12 +170,67 @@ func (p *TypeOsPath) GetFilename() string {
 }
 
 
-//func (p *TypeOsPath) SetDirname(dirname string) {
-//	// @TODO - Add in extra logic to convert dirname to path.
-//	p._Dirname = dirname
-//}
+func (p *TypeOsPath) GetParentDir() string {
+	var ret string
+	for range onlyOnce {
+		// Filesystems are funny, especially when you symlink a directory.
+		// The parent, (".."), doesn't always point to the direct parent.
+		d1 := p.GetDirnameAbs()
+		d2 := p.GetParentDirAbs()
+		s, err := filepath.Rel(d1, d2)
+		if err == nil {
+			ret = s
+		}
+		//var s string
+		//var s2 string
+		//var err error
+		//ret = filepath.Join(p._Dirname, "..")
+		//s, err = filepath.Abs(ret)
+		//if err != nil {
+		//	break
+		//}
+		//s2, err = filepath.Abs(p._Dirname)
+		//if err != nil {
+		//	break
+		//}
+		//s, err = filepath.Rel(s2, s)
+		//if err == nil {
+		//	ret = s
+		//}
+	}
+	return ret
+}
+func (p *TypeOsPath) GetParentDirAbs() string {
+	var ret string
+	for range onlyOnce {
+		// Filesystems are funny, especially when you symlink a directory.
+		// The parent, (".."), doesn't always point to the direct parent.
+		var s string
+		var err error
+		ret = filepath.Join(p._Dirname, "..")
+		s, err = filepath.Abs(ret)
+		if err != nil {
+			break
+		}
+		ret = s
+	}
+	return ret
+}
+
+
 func (p *TypeOsPath) GetDirname() string {
 	return p._Dirname
+}
+func (p *TypeOsPath) GetDirnameAbs() string {
+	var s string
+	for range onlyOnce {
+		var err error
+		s, err = filepath.Abs(p._Dirname)
+		if err != nil {
+			s = p._Dirname
+		}
+	}
+	return s
 }
 
 
