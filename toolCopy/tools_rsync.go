@@ -95,8 +95,8 @@ func ToolCopyRsync(src interface{}, dest interface{}, exclude ...interface{}) *u
 
 		//opts := []string{}
 		////opts = append(opts, c.RsyncOptions...)
-		//opts = append(opts, c.Paths.Source.GetPath())
-		//opts = append(opts, c.Paths.Destination.GetPath())
+		//opts = append(opts, c.goFiles.Source.GetPath())
+		//opts = append(opts, c.goFiles.Destination.GetPath())
 		//cmd := exec.Command("rsync", opts...)
 		//out, err := cmd.CombinedOutput()
 		//c.State.SetOutput(out)

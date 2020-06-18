@@ -1,12 +1,11 @@
 package toolCopy
 
 import (
-	"fmt"
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
 
-func (c *TypeOsCopy) Copy() *ux.State {
+func (c *TypeOsCopy) Copy(args ...string) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
@@ -43,11 +42,9 @@ func (c *TypeOsCopy) Copy() *ux.State {
 		// @TODO Should be a better way.
 		method := c.Method.GetSelected()
 		name := c.Method.GetName()
-		fmt.Printf("Method: %s\n", name)
 		switch name {
 			case ConstMethodRsync:
-				fmt.Printf("RSYNC: %s\n", method.Name)
-				c.State = method.Run(&c.Paths, "1", "2", "3")
+				c.State = method.Run(&c.Paths, args...)
 		}
 	}
 
