@@ -10,7 +10,7 @@ import (
 
 func (gf *GoFiles) ShowTree() {
 	for range onlyOnce {
-		for _, f := range *gf {
+		for _, f := range gf.files {
 			ux.PrintflnBlue("\n##########")
 			ux.PrintflnBlue("# Filename: %v\n", f.Path.GetPathAbs())
 
@@ -50,11 +50,13 @@ func printTopFive(counts map[string]int) {
 	}
 }
 
+
 type visitor struct {
 	pkgDecl map[*ast.GenDecl]bool
 	locals  map[string]int
 	globals map[string]int
 }
+
 
 func newVisitor(f *ast.File) visitor {
 	decls := make(map[*ast.GenDecl]bool)
@@ -70,6 +72,7 @@ func newVisitor(f *ast.File) visitor {
 		make(map[string]int),
 	}
 }
+
 
 func (v visitor) Visit(n ast.Node) ast.Visitor {
 	if n == nil {
@@ -118,6 +121,7 @@ func (v visitor) Visit(n ast.Node) ast.Visitor {
 	return v
 }
 
+
 func (v visitor) local(n ast.Node) {
 	ident, ok := n.(*ast.Ident)
 	if !ok {
@@ -130,6 +134,7 @@ func (v visitor) local(n ast.Node) {
 		v.locals[ident.Name]++
 	}
 }
+
 
 func (v visitor) localList(fs []*ast.Field) {
 	for _, f := range fs {

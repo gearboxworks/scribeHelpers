@@ -19,7 +19,7 @@ type GoGetter interface {
 
 
 type TypeGo struct {
-	Files   GoFiles
+	Go      GoFiles
 
 	goFiles *toolPath.TypeOsPaths
 	fset    *token.FileSet
@@ -42,7 +42,7 @@ func New(rt *toolRuntime.TypeRuntime) *TypeGo {
 	rt = rt.EnsureNotNil()
 
 	g := &TypeGo{
-		Files:   GoFiles{},
+		Go: GoFiles{},
 
 		goFiles: toolPath.NewPaths(rt),
 		fset:    token.NewFileSet(),
@@ -104,13 +104,13 @@ func (g *TypeGo) Find(path ...string) *ux.State {
 			break
 		}
 
-		g.Files = GoFiles{}
+		g.Go = GoFiles{}
 		for _, f := range g.goFiles.Paths {
 			gf := NewGoFile(g.runtime, g.fset, f)
-			if gf.state.IsNotOk() {
-				g.State = gf.state
+			if gf.State.IsNotOk() {
+				g.State = gf.State
 			}
-			g.Files = append(g.Files, gf)
+			g.Go.files = append(g.Go.files, gf)
 		}
 	}
 
@@ -127,9 +127,13 @@ func (g *TypeGo) Parse(mode ...Mode) *ux.State {
 			mode = append(mode, Mode(0))
 		}
 
-		for i, _ := range g.Files {
-			//g.Files[i].Parse(f.Path.GetPath(), mode[0])
-			g.Files[i].Parse(mode[0])
+		for i, _ := range g.Go.files {
+			//g.Go[i].Parse(f.Path.GetPath(), mode[0])
+			g.State = g.Go.files[i].Parse(mode[0])
+			if g.State.IsOk() {
+				g.Go.Found = g.Go.files[i]
+				break
+			}
 		}
 	}
 
@@ -140,7 +144,7 @@ func (g *TypeGo) Count() int {
 	if state := g.IsNil(); state.IsError() {
 		return 0
 	}
-	return len(g.Files)
+	return len(g.Go.files)
 }
 
 func (g *TypeGo) String() string {
@@ -150,7 +154,7 @@ func (g *TypeGo) String() string {
 	var ret string
 
 	for range onlyOnce {
-		for _, f := range g.Files {
+		for _, f := range g.Go.files {
 			ret += fmt.Sprintf("%v", f.String())
 		}
 	}
@@ -189,11 +193,29 @@ func (g *TypeGo) GetPackageName(path ...string) string {
 			break
 		}
 
-		if len(g.Files) == 0 {
+		if len(g.Go.files) == 0 {
 			break
 		}
 
-		ret = g.Files[0].Ast.Name.Name
+		ret = g.Go.files[0].Ast.Name.Name
+	}
+
+	return ret
+}
+
+
+func (gf *GoFiles) GetMeta() *GoMeta {
+	var ret *GoMeta
+
+	for range onlyOnce {
+		for _, f := range gf.files {
+			//ux.PrintflnBlue("# %s", f.Path.GetPath())
+			//ux.PrintflnCyan("%v", f.Ast.Name)
+			ret = f.GetMeta()
+			if ret != nil {
+				break
+			}
+		}
 	}
 
 	return ret

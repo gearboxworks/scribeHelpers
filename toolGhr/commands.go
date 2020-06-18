@@ -204,7 +204,7 @@ func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir 
 		dstRepo.Draft       = srcRef.Draft
 		dstRepo.Prerelease  = srcRef.Prerelease
 		dstRepo.Target      = srcRepo.Target
-		//dstRepo.Files       = srcRepo.Files
+		//dstRepo.Go       = srcRepo.Go
 		//dstRepo.Overwrite     = srcRepo.Overwrite
 
 		dstRepo.Files = []string{}

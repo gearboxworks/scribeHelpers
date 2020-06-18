@@ -193,7 +193,7 @@ func Test_Ghr() {
 		Prerelease:   false,
 		Target:       "",
 		Overwrite:    true,
-		//Files:        []string{"../testing/testing", "pkgreflect.go", "init.go"},
+		//Go:        []string{"../testing/testing", "pkgreflect.go", "init.go"},
 		Auth:         &toolGhr.TypeAuth{ Token: "", AuthUser: "" },
 	}
 	state = Test.SetFilePath(".*\\.go", "../testing")

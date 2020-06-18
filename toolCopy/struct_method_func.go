@@ -115,7 +115,7 @@ func _CopyRunRsync(ref *TypeCopyMethod, paths *TypeOsCopyPaths, args ...string) 
 		//waitStatus := cmd.ProcessState.Sys().(syscall.WaitStatus)
 		//ref.state.ExitCode = waitStatus.ExitStatus()
 
-		ref.state.SetOk("Files copied with %s OK", ref.Name)
+		ref.state.SetOk("Go copied with %s OK", ref.Name)
 	}
 
 	return ref.state
@@ -238,7 +238,7 @@ func _CopyRunCp(ref *TypeCopyMethod, paths *TypeOsCopyPaths, args ...string) *ux
 		//waitStatus := cmd.ProcessState.Sys().(syscall.WaitStatus)
 		//ref.state.ExitCode = waitStatus.ExitStatus()
 
-		ref.state.SetOk("Files copied with %s OK", ref.Name)
+		ref.state.SetOk("Go copied with %s OK", ref.Name)
 	}
 
 	return ref.state

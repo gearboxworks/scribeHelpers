@@ -6,7 +6,7 @@ import "reflect"
 
 var Types = map[string]reflect.Type{
 	"FileInfo": reflect.TypeOf((*FileInfo)(nil)).Elem(),
-	"Files": reflect.TypeOf((*Files)(nil)).Elem(),
+	"Go": reflect.TypeOf((*Files)(nil)).Elem(),
 	"PkgReflect": reflect.TypeOf((*PkgReflect)(nil)).Elem(),
 	"SortedTools": reflect.TypeOf((*SortedTools)(nil)).Elem(),
 	"Tool": reflect.TypeOf((*Tool)(nil)).Elem(),

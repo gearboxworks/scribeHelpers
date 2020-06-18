@@ -1,6 +1,7 @@
 package toolPath
 
 import (
+	"bytes"
 	"github.com/newclarity/scribeHelpers/toolPrompt"
 	"github.com/newclarity/scribeHelpers/ux"
 	"io/ioutil"
@@ -61,6 +62,11 @@ func (p *TypeOsPath) AppendContents(data ...interface{}) {
 				case []byte:
 					s := removeDupeEol(string(d.([]byte)))
 					//s := removeDupeEol(d.(string))
+					sa = append(sa, strings.Split(s, p._Separator)...)
+
+				case *bytes.Buffer:
+					b := d.(*bytes.Buffer).String()
+					s := removeDupeEol(b)
 					sa = append(sa, strings.Split(s, p._Separator)...)
 			}
 
