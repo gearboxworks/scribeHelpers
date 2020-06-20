@@ -1,8 +1,8 @@
 package loadTools
 
 import (
-	"encoding/json"
 	"github.com/newclarity/scribeHelpers/toolPath"
+	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"path/filepath"
@@ -10,121 +10,34 @@ import (
 )
 
 
-func (at *TypeScribeArgs) LoadJsonFile() *ux.State {
-	if state := at.IsNil(); state.IsError() {
-		return state
-	}
-
-	for range onlyOnce {
-		if at.JsonStruct == nil {
-			at.State.SetError("Json structure is nil")
-			break
-		}
-
-		if at.Json.IsNotOk() {
-			break
-		}
-
-		at.JsonStruct.JsonFile.SetFileInfo(at.Json.File)
-		at.JsonStruct.JsonString = at.Json.String
-		at.JsonStruct.JsonString = strings.ReplaceAll(at.JsonStruct.JsonString, "\n", "")
-		at.JsonStruct.JsonString = strings.ReplaceAll(at.JsonStruct.JsonString, "\t", "")
-
-		// Process JSON string.
-		at.JsonStruct.Json = make(map[string]interface{})
-		err := json.Unmarshal([]byte(at.Json.String), &at.JsonStruct.Json)
-		if err != nil {
-			at.State.SetError("Processing error: %s", err)
-			break
-		}
-	}
-
-	return at.State
-}
-
-
-func (at *TypeScribeArgs) LoadTemplateFile() *ux.State {
-	if state := at.IsNil(); state.IsError() {
-		return state
-	}
-
-	for range onlyOnce {
-		if at.JsonStruct == nil {
-			at.State.SetError("Json structure is nil")
-			break
-		}
-
-		if at.Template.IsNotOk() {
-			break
-		}
-
-		at.JsonStruct.TemplateFile.SetFileInfo(at.Template.File)
-
-		at.State = at.CreateTemplate()
-		if at.State.IsError() {
-			break
-		}
-	}
-
-	return at.State
-}
-
-
-func (at *TypeScribeArgs) LoadOutputFile() *ux.State {
-	if state := at.IsNil(); state.IsError() {
-		return state
-	}
-
-	for range onlyOnce {
-		if at.JsonStruct == nil {
-			at.State.SetError("Json structure is nil")
-			break
-		}
-
-		if at.Output.IsNotOk() {
-			break
-		}
-
-
-		if at.Output.Filename == DefaultOutFile {
-			at.State = at.Output.File.SetFileHandle(os.Stdout)
-			if at.State.IsNotOk() {
-				at.State.SetError("Output file error: %s", at.State.GetError())
-				break
-			}
-
-		} else {
-			at.State = at.Output.File.OpenFile()
-			if at.State.IsNotOk() {
-				at.State.SetError("Output file error: %s", at.State.GetError())
-				break
-			}
-		}
-
-
-		at.OutputFh, at.State = at.Output.File.GetFileHandle()
-		if at.State.IsNotOk() {
-			at.State.SetError("Output file error: %s", at.State.GetError())
-			break
-		}
-
-		at.JsonStruct.OutFile.SetFileInfo(at.Output.File)
-	}
-
-	return at.State
-}
-
-
 type TypeArgFile struct {
-	File     *toolPath.TypeOsPath
+	File          string
+	DefaultString string
+	DefaultFile   string
+	valid         bool
+	*toolPath.TypeOsPath
 
-	Filename string
-	String   string
-	isFile   bool
-	isDir    bool
-	isString bool
+	//String   string
+	//isDir    bool
+	//isFile   bool
+	//isString bool
+	//
+	//State    *ux.State
+}
 
-	State    *ux.State
+
+func NewArgFile(rt *toolRuntime.TypeRuntime) *TypeArgFile {
+	rt = rt.EnsureNotNil()
+
+	af := TypeArgFile{
+		File:          "",
+		DefaultString: "",
+		DefaultFile:   "",
+		valid:         false,
+		TypeOsPath:    toolPath.New(rt),
+	}
+
+	return &af
 }
 
 
@@ -137,93 +50,94 @@ func (at *TypeArgFile) IsNil() *ux.State {
 }
 
 
-func (at *TypeArgFile) IsOk() bool {
-	var ok bool
+func (at *TypeArgFile) SetDefaults(file string, str string) *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	at.DefaultFile = file
+	at.DefaultString = str
+	return at.State
+}
 
+
+func (at *TypeArgFile) IsSet() bool {
+	var ok bool
 	for range onlyOnce {
-		if at.File == nil {
-			ok = false
+		if !at.valid {
 			break
 		}
 
-		if at.isFile {
-			ok = true
+		if at.File == "" {
 			break
 		}
 
-		if at.isString {
-			ok = true
+		if at.File == SelectIgnore {
 			break
 		}
 
-		ok = false
+		if at.File == SelectDefault {
+			break
+		}
+
+		if at.File == SelectStdout {
+			break
+		}
+
+		ok = true
 	}
-
 	return ok
+}
+func (at *TypeArgFile) IsNotSet() bool {
+	return !at.IsSet()
 }
 
 
+func (at *TypeArgFile) IsFileSet() bool {
+	var ok bool
+	for range onlyOnce {
+		if at.File == SelectFile {
+			ok = true
+			break
+		}
+	}
+	return ok
+}
+func (at *TypeArgFile) IsNotFileSet() bool {
+	return !at.IsFileSet()
+}
+
+
+func (at *TypeArgFile) IsOk() bool {
+	return at.valid
+}
 func (at *TypeArgFile) IsNotOk() bool {
-	return !at.IsOk()
+	return !at.valid
 }
 
 
-func (at *TypeArgFile) ChangeSuffix(suffix string) {
-	s := filepath.Ext(at.Filename)
-	at.Filename = at.Filename[:len(at.Filename) - len(s)] + suffix
-}
-
-
-func (at *TypeArgFile) GetPath() string {
-	return at.File.GetPathAbs()
-}
-func (at *TypeArgFile) GetPathAbs() string {
-	return at.File.GetPathAbs()
-}
-func (at *TypeArgFile) GetPathRel() string {
-	return at.File.GetPathRel()
-}
-
-
-func (at *TypeArgFile) Exists() bool {
-	return at.File.Exists()
-}
-
-
-func (at *TypeArgFile) IsAFile() bool {
+func (at *TypeArgFile) ChangeDir() bool {
 	var ok bool
-	if at.File.Exists() {
+	for range onlyOnce {
+		if at.File != SelectFile {
+			break
+		}
+
+		if at.Chdir().IsNotOk() {
+			break
+		}
+
 		ok = true
 	}
-	return ok
-}
 
-
-func (at *TypeArgFile) IsAString() bool {
-	var ok bool
-	if at.File.NotExists() {
-		ok = true
-	}
 	return ok
 }
 
 
 func (at *TypeArgFile) IsStdFd() bool {
-	var ok bool
-
-	for range onlyOnce {
-		if at.File.Exists() {
-			break
-		}
-
-		if at.String != "" {
-			break
-		}
-
-		ok = true
+	if at.File == SelectStdout {
+		return true
 	}
-
-	return ok
+	return false
 }
 
 
@@ -234,6 +148,186 @@ func (at *TypeArgFile) IsStdout() bool {
 
 func (at *TypeArgFile) IsStdin() bool {
 	return at.IsStdFd()
+}
+
+
+func (at *TypeArgFile) Ignore() *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	return at.SetInputFile(SelectIgnore)
+}
+
+
+func (at *TypeArgFile) IsIgnore() bool {
+	if state := at.IsNil(); state.IsError() {
+		return true
+	}
+	if at.File == SelectIgnore {
+		return true
+	}
+	return false
+}
+
+
+func (at *TypeArgFile) IsNotIgnore() bool {
+	return !at.IsIgnore()
+}
+
+
+func (at *TypeArgFile) SetInputFile(fileName string) *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		if fileName == "" {
+			at.State.SetError("No input file specified.")
+			break
+		}
+
+		if fileName == SelectIgnore {
+			at.valid = true
+			at.File = SelectIgnore
+			at.SetContents(at.DefaultString)
+			at.State.SetOk("Ignore file.")
+			break
+		}
+
+		if fileName == SelectDefault {
+			at.valid = true
+			at.File = SelectDefault
+			at.SetContents(at.DefaultString)
+			at.State.SetOk("Input string set.")
+			break
+		}
+
+		if fileName == at.DefaultFile {
+			at.valid = true
+			at.File = SelectDefault
+			at.SetContents(at.DefaultString)
+			at.State.SetOk("Input string set.")
+			break
+		}
+
+		at.SetPath(fileName)
+		at.State = at.StatPath()
+		if at.Exists() {
+			at.State = at.ReadFile()
+			if at.State.IsOk() {
+				at.valid = true
+				at.File = SelectFile
+				at.State.SetOk("Input file '%s' read OK.", at.GetPath())
+				break
+			}
+		}
+
+		if at.isAString(fileName) {
+			at.valid = true
+			at.File = SelectString
+			at.SetContents(fileName)
+			at.State.SetOk("Input string set.")
+			break
+		}
+
+		at.valid = false
+		at.State.SetError("Argument is neither filename nor string.")
+	}
+
+	return at.State
+}
+
+
+func (at *TypeArgFile) SetOutputFile(fileName string, overwrite bool) *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		if fileName == SelectStdout {
+			fileName = DefaultOutFile
+		} else if fileName == "" {
+			fileName = DefaultOutFile
+		} else if fileName == "-" {
+			fileName = DefaultOutFile
+		}
+
+		if fileName == DefaultOutFile {
+			at.valid = true
+			at.File = SelectDefault
+			at.State.SetOk()
+			at.SetOverwriteable()
+			at.SetFileHandle(os.Stdout)
+			break
+		}
+
+		at.SetPath(fileName)
+		at.State = at.StatPath()
+		if overwrite {
+			at.SetOverwriteable()
+			//at.State.SetOk()
+			//break
+		}
+
+		//if at.Exists() {
+		//	at.State.SetError("Output file '%s' exists.", at.GetPath())
+		//	break
+		//}
+
+		at.State = at.OpenFile()
+		if at.State.IsNotOk() {
+			break
+		}
+	}
+
+	return at.State
+}
+
+
+func (at *TypeArgFile) SetInputString(fileString string) *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		if fileString == "" {
+			at.State.SetError("No input string specified.")
+			break
+		}
+
+		at.valid = true
+		at.File = SelectString
+		at.SetContents(fileString)
+		at.State.SetOk()
+	}
+
+	return at.State
+}
+
+
+func (at *TypeArgFile) SetInputStringArray(stringArray []string) *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		if len(stringArray) == 0 {
+			at.State.SetError("No input string specified.")
+			break
+		}
+
+		at.valid = true
+		at.File = SelectString
+		at.SetContents(stringArray)
+		at.State.SetOk()
+	}
+
+	return at.State
+}
+
+
+func (at *TypeArgFile) SetDefaultString() *ux.State {
+	return at.SetInputString(at.DefaultString)
 }
 
 
@@ -300,126 +394,8 @@ func isAString(arg string) bool {
 }
 
 
-func (at *TypeArgFile) SetInputFile(file string, remove bool) *ux.State {
-	for range onlyOnce {
-		if file == "" {
-			at.State.SetError("No input file specified.")
-			break
-		}
-
-		if at.Filename == SelectIgnore {
-			at.isFile = false
-			at.isString = true
-			break
-		}
-
-		if at.File == nil {
-			at.File = toolPath.ToolNewPath(file)
-		}
-
-		if remove {
-			at.File.SetRemoveable()
-		}
-
-		at.State = at.File.StatPath()
-		if at.File.Exists() {
-			at.State = at.File.ReadFile()
-			if at.State.IsOk() {
-				at.isFile = true
-				at.isString = false
-
-				at.String = at.File.GetContentString()
-				at.Filename = file
-				at.State.SetOk("Input file '%s' read OK.", at.File.GetPath())
-				break
-			}
-		}
-
-		if at.isAString(file) {
-			at.isFile = false
-			at.isString = true
-
-			at.File.SetContents(file)
-			at.String = file
-			at.Filename = "string"
-			at.State.SetOk("Input string set.")
-			break
-		}
-
-		at.State.SetError("Argument is neither filename nor string.")
-		break
-
-	}
-
-	return at.State
-}
-
-
-func (at *TypeArgFile) SetOutputFile(file string, overwrite bool) *ux.State {
-
-	for range onlyOnce {
-		if file == "" {
-			// Assume STDOUT
-			file = DefaultOutFile
-		}
-		if file == "-" {
-			// Assume STDOUT
-			file = DefaultOutFile
-		}
-
-		if at.File == nil {
-			at.File = toolPath.ToolNewPath(file)
-			//at.TypeFile.State.Clear()	// Special case.
-		}
-		at.isFile = true
-
-		if file == DefaultOutFile {
-			overwrite = true
-		}
-
-		if overwrite {
-			at.State.SetOk("Output file '%s' set to writeable.", at.Filename)
-			at.File.SetOverwriteable()
-		}
-	}
-
-	return at.State
-}
-
-
-func (at *TypeArgFile) SetWorkingPath(file string, changeDir bool) *ux.State {
-
-	for range onlyOnce {
-		if file == "" {
-			file = DefaultWorkingPath
-		}
-
-		if at.File == nil {
-			at.File = toolPath.ToolNewPath(file)
-		}
-		at.isDir = true
-
-		at.State = at.File.StatPath()
-		if at.File.NotExists() {
-			at.State.SetError("Error directory '%s' does not exist.")
-			break
-		}
-
-		if file == DefaultWorkingPath {
-			// No need to change dir to "."
-			break
-		}
-
-		if !changeDir {
-			break
-		}
-
-		at.State = at.File.Chdir()
-		if at.State.IsNotOk() {
-			at.State.SetError("Error changing directory: %s")
-			break
-		}
-	}
-
-	return at.State
+func ChangeSuffix(file string, suffix string) string {
+	s := filepath.Ext(file)
+	file = file[:len(file) - len(s)] + suffix
+	return file
 }

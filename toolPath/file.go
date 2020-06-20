@@ -99,6 +99,11 @@ func (p *TypeOsPath) GetContentString() string {
 }
 
 
+func (p *TypeOsPath) GetContentLength() int {
+	return len(p._String)
+}
+
+
 func (p *TypeOsPath) GetContentArray() []string {
 	return p._Array
 }

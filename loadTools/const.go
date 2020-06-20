@@ -1,20 +1,28 @@
 package loadTools
 
 const (
-	SelectStdout = "select:stdout"
-	SelectConvert = "select:convert"
-	SelectIgnore = "select:ignore"
+	SelectStdout	= "select:stdout"
+	SelectConvert	= "select:convert"
+	SelectIgnore	= "select:ignore"
+	SelectString	= "select:string"
+	SelectFile		= "select:file"
+	SelectDefault	= "select:default"
 
-	DefaultJsonString 		= "{}"
-	DefaultTemplateString 	= "{{ .Exec.CmdName }}"
+	DefaultScribeFile 			= "default.scribe"
+	DefaultScribeFileSuffix 	= ".scribe"
+	DefaultScribeString			= ".Exec.CmdName"
 
-	DefaultJsonFile 		= "scribe.json"
-	DefaultTemplateFile 	= "scribe.tmpl"
-	DefaultOutFile 			= "/dev/stdout"
-	DefaultWorkingPath	    = "."
-
+	DefaultJsonFile 			= "default.json"
 	DefaultJsonFileSuffix 		= ".json"
+	DefaultJsonString 			= "{}"
+
+	DefaultTemplateFile 		= "default.tmpl"
 	DefaultTemplateFileSuffix 	= ".tmpl"
+	DefaultTemplateString 		= "{{ .Exec.CmdName }}"
+
+	DefaultOutFile 				= "/dev/stdout"
+	DefaultWorkingPath	    	= "."
+
 
 	CmdRun 				= "run"
 	CmdLoad 			= "load"
@@ -32,6 +40,7 @@ const (
 	CmdVersionCheck		= "check"
 	CmdVersionUpdate	= "update"
 
+	FlagScribeFile     	= "scribe"
 	FlagJsonFile     	= "json"
 	FlagTemplateFile	= "template"
 	FlagOutputFile	    = "out"
@@ -43,6 +52,7 @@ const (
 	FlagRemoveOutput	= "rm-out"
 	FlagDebug 			= "debug"
 	FlagQuiet			= "quiet"
+	FlagVerbose			= "verbose"
 
 	FlagVersion 		= "version"
 	FlagHelpFunctions	= "help-functions"

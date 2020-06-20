@@ -17,10 +17,255 @@ import (
 	"github.com/newclarity/scribeHelpers/toolUx"
 	"github.com/newclarity/scribeHelpers/ux"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 	"text/template"
 )
+
+
+func (at *TypeScribeArgs) ProcessArgs(cmd string, args []string) *ux.State {
+	for range onlyOnce {
+		at.State = at.CheckArgs(cmd, args...)
+		if at.State.IsNotOk() {
+			break
+		}
+
+		at.State = at.ValidateArgs()
+		if at.State.IsNotOk() {
+			break
+		}
+	}
+
+	return at.State
+}
+
+
+func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
+	for range onlyTwice {
+		if len(args) >= 1 {
+			ext := filepath.Ext(args[0])
+
+			if ext == ".scribe" {
+				if at.Scribe.IsNotIgnore() {
+					at.PrintflnNotify("Setting scribe file '%s'", args[0])
+					at.Template.File = args[0]
+					args = args[1:]
+				}
+			}
+
+			if ext == ".json" {
+				if at.Json.IsNotIgnore() {
+					at.PrintflnNotify("Setting JSON file '%s'", args[0])
+					at.Json.File = args[0]
+					args = args[1:]
+				}
+				continue
+			}
+
+			if ext == ".tmpl" {
+				if at.Template.IsNotIgnore() {
+					at.PrintflnNotify("Setting template file '%s'", args[0])
+					at.Template.File = args[0]
+					args = args[1:]
+				}
+			}
+		}
+	}
+
+	for range onlyOnce {
+		err := at.Runtime.SetArgs(cmd)
+		if err != nil {
+			at.State.SetError(err)
+			break
+		}
+
+		err = at.Runtime.AddArgs(args...)
+		if err != nil {
+			at.State.SetError(err)
+			break
+		}
+	}
+
+	return at.State
+}
+
+
+func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
+	for range onlyOnce {
+		// Fetch input files.
+		for range onlyOnce {
+			// Validate scribe file OR string.
+			at.State = at.Scribe.SetInputFile(at.Scribe.File)
+			if at.State.IsNotOk() {
+				break
+			}
+			// scribe:OK
+			if at.Scribe.IsSet() {
+				// Add {{ and }} to scribe file.
+				ca := at.Scribe.GetContentArray()
+				if len(ca) == 0 {
+					break
+				}
+
+				for l := range ca {
+					ca[l] = fmt.Sprintf("{{ %s }}", ca[l])
+				}
+
+				at.PrintflnNotify("Using scribe file '%s' of %d bytes.", at.Scribe.GetPath(), at.Scribe.GetContentLength())
+				at.Template.SetInputStringArray(ca)
+				at.Json.SetDefaultString()
+				break
+			}
+
+			// Validate json file OR string.
+			at.State = at.Json.SetInputFile(at.Json.File)
+			if at.State.IsNotOk() {
+				break
+			}
+			at.PrintflnNotify("Using JSON file '%s' of %d bytes.", at.Json.GetPath(), at.Json.GetContentLength())
+
+			// Validate template file OR string.
+			at.State = at.Template.SetInputFile(at.Template.File)
+			if at.State.IsNotOk() {
+				break
+			}
+			if at.RemoveTemplate {
+				at.PrintflnNotify("Will remove template file '%s' afterwards.", at.Template.GetPath())
+				at.Template.SetRemoveable()
+			}
+			at.PrintflnNotify("Using template file '%s' of %d bytes.", at.Template.GetPath(), at.Template.GetContentLength())
+		}
+		if at.State.IsNotOk() {
+			break
+		}
+
+
+		// If JSON set and template not set, try and use the JSON filename with a tmpl extension.
+		for range onlyOnce {
+			if at.Json.IsNotSet() {
+				break
+			}
+
+			if at.Template.IsSet() {
+				break
+			}
+
+			newFile := ChangeSuffix(at.Json.GetPath(), DefaultTemplateFileSuffix)
+			at.State = at.Template.SetInputFile(newFile)
+			if at.Template.IsNotOk() {
+				at.State.SetError("Template not provided.")
+				break
+			}
+		}
+		if at.State.IsNotOk() {
+			break
+		}
+
+
+		// If Template set and JSON not set, try and use the template filename with a json extension.
+		for range onlyOnce {
+			if at.Template.IsNotSet() {
+				break
+			}
+
+			if at.Json.IsSet() {
+				break
+			}
+
+			newFile := ChangeSuffix(at.Template.GetPath(), DefaultJsonFileSuffix)
+			at.State = at.Json.SetInputFile(newFile)
+			if at.Json.IsNotOk() {
+				at.State.SetError("Json not provided.")
+				break
+			}
+		}
+		if at.State.IsNotOk() {
+			break
+		}
+
+
+		// If Template set and JSON not set, try and use the template filename with a json extension.
+		if at.Json.IsNotOk() && at.Template.IsNotOk() {
+			at.State.SetError("No input files provided.")
+			break
+		}
+
+
+		// Strip out #! at start of template.
+		for range onlyOnce {
+			if !at.StripHashBang {
+				break
+			}
+
+			ca := at.Template.GetContentArray()
+			if len(ca) == 0 {
+				break
+			}
+
+			if !strings.HasPrefix(ca[0], "#!") {
+				break
+			}
+
+			at.PrintflnNotify("Stripping '#!' from template file '%s'.", at.Template.GetPath())
+			at.Template.SetContents(ca[1:])
+		}
+
+
+		// Set output file.
+		for range onlyOnce {
+			if at.Output.File != SelectConvert {
+				break
+			}
+
+			if at.Template.IsNotFileSet() {
+				at.Output.File = SelectStdout
+				break
+			}
+
+			at.Output.File = strings.TrimSuffix(at.Template.GetPathAbs(), DefaultTemplateFileSuffix)
+		}
+		at.State = at.Output.SetOutputFile(at.Output.File, at.ForceOverwrite)
+		if at.State.IsNotOk() {
+			break
+		}
+
+
+		at.State.SetOk("Processed input files.")
+	}
+
+	return at.State
+}
+
+
+// if at.Chdir { Attempt to change directories to any of the input files. }
+func (at *TypeScribeArgs) ChangeDir() *ux.State {
+	for range onlyOnce {
+		if !at.Chdir {
+			break
+		}
+
+		if at.Scribe.ChangeDir() {
+			at.PrintflnNotify("Changed to scribe directory '%s'", at.Scribe.GetDirname())
+			at.State.SetOk()
+			break
+		}
+
+		if at.Json.ChangeDir() {
+			at.PrintflnNotify("Changed to JSON directory '%s'", at.Json.GetDirname())
+			at.State.SetOk()
+			break
+		}
+
+		if at.Template.ChangeDir() {
+			at.PrintflnNotify("Changed to template directory '%s'", at.Template.GetDirname())
+			at.State.SetOk()
+			break
+		}
+	}
+
+	return at.State
+}
 
 
 func (at *TypeScribeArgs) ValidateArgs() *ux.State {
@@ -40,151 +285,23 @@ func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 		}
 
 
-		////////////////////////////////////////////////////
-		// Fetch input files.
-		for range onlyOnce {
-			// Validate json and template files/strings.
-			if at.Json.Filename == DefaultJsonFile {
-				at.Json.Filename = DefaultJsonString
-			} else if at.Json.Filename == SelectIgnore {
-				at.Json.Filename = DefaultJsonString
-			}
-			at.Json.SetInputFile(at.Json.Filename, false)
-
-			if at.Template.Filename == DefaultTemplateFile {
-				at.Template.Filename = DefaultTemplateString
-			} else if at.Template.Filename == SelectIgnore {
-				at.Template.Filename = DefaultTemplateString
-			}
-			at.Template.SetInputFile(at.Template.Filename, at.RemoveTemplate)
-
-			at.State.Clear()
-
-			// json:empty && tmpl:empty
-			if at.Json.IsNotOk() && at.Template.IsNotOk() {
-				at.Json.SetInputFile(DefaultJsonFile, false)
-				if at.Json.IsNotOk() {
-					at.State.SetError("Neither template nor json provided.")
-					break
-				}
-
-				at.Template.Filename = at.Json.Filename
-				at.Template.ChangeSuffix(DefaultTemplateFileSuffix)
-				at.Template.SetInputFile(at.Template.Filename, false)
-				if at.Json.IsNotOk() {
-					at.State.SetError("Neither template nor json provided.")
-					break
-				}
-			}
-
-			// json:OK && tmpl:OK
-			if at.Json.IsOk() && at.Template.IsOk() {
-				at.State.SetOk()
-				break
-			}
-
-			// json:OK && tmpl:empty
-			if at.Json.IsOk() && at.Template.IsNotOk() {
-				at.Template.Filename = at.Json.Filename
-				at.Template.ChangeSuffix(DefaultTemplateFileSuffix)
-				at.Template.SetInputFile(at.Template.Filename, false)
-				if at.Template.IsNotOk() {
-					at.State.SetError("Template not provided.")
-					break
-				}
-			}
-
-			// json:empty && tmpl:OK
-			if at.Json.IsNotOk() && at.Template.IsOk() {
-				at.Json.Filename = at.Template.Filename
-				at.Json.ChangeSuffix(DefaultJsonFileSuffix)
-				at.Json.SetInputFile(at.Json.Filename, false)
-				if at.Json.IsNotOk() {
-					at.State.SetError("Json not provided.")
-					break
-				}
-			}
-
-			// json:empty && tmpl:empty
-			if at.Json.IsNotOk() && at.Template.IsNotOk() {
-				at.State.SetError("Neither template nor json provided.")
-				break
-			}
-		}
-
+		// Change to working path first.
+		at.WorkingPath.SetPath(at.WorkingPath.File)
+		at.State = at.WorkingPath.Chdir()
 		if at.State.IsNotOk() {
 			break
 		}
 
 
-		////////////////////////////////////////////////////
-		// Strip out #! at start of template.
-		for range onlyOnce {
-			if !at.StripHashBang {
-				break
-			}
-
-			ca := at.Template.File.GetContentArray()
-			if len(ca) == 0 {
-				break
-			}
-
-			if !strings.HasPrefix(ca[0], "#!") {
-				break
-			}
-
-			at.Template.File.SetContents(ca[1:])
-		}
-
-
-		////////////////////////////////////////////////////
-		// Add {{ and }} to template file.
-		for range onlyOnce {
-			if !at.AddBrackets {
-				break
-			}
-
-			ca := at.Template.File.GetContentArray()
-			if len(ca) == 0 {
-				break
-			}
-
-			for l := range ca {
-				ca[l] = fmt.Sprintf("{{- %s }}", ca[l])
-			}
-
-			at.Template.File.SetContents(ca)
-		}
-
-
-		////////////////////////////////////////////////////
-		// Output file.
-		if at.Output.Filename == SelectStdout {
-			at.Output.Filename = DefaultOutFile
-			at.ForceOverwrite = true
-		} else if at.Output.Filename == SelectConvert {
-			at.Output.Filename = strings.TrimSuffix(at.Template.Filename, DefaultTemplateFileSuffix)
-		}
-		at.State = at.Output.SetOutputFile(at.Output.Filename, at.ForceOverwrite)
+		// Process and load all input files.
+		at.State = at.ProcessInputFiles()
 		if at.State.IsNotOk() {
 			break
 		}
 
 
-		////////////////////////////////////////////////////
-		// Chdir.
-		if at.Chdir {
-			at.State = at.Json.File.Chdir()
-			if at.State.IsNotOk() {
-				at.State.SetError("Error changing directory: %s")
-				break
-			}
-		}
-
-
-		////////////////////////////////////////////////////
-		// WorkingPath
-		at.State = at.WorkingPath.SetWorkingPath(at.WorkingPath.Filename, true)
+		// Attempt to change directories to any of the input files.
+		at.State = at.ChangeDir()
 		if at.State.IsNotOk() {
 			break
 		}
@@ -204,6 +321,8 @@ func (at *TypeScribeArgs) Load() *ux.State {
 	}
 
 	for range onlyOnce {
+		at.PrintflnNotify("Loading template file '%s'", at.Template.GetPath())
+
 		if at.JsonStruct == nil {
 			at.JsonStruct = NewJsonStruct(at.Runtime.CmdName, at.Runtime.CmdVersion, at.Debug)
 		}
@@ -213,22 +332,25 @@ func (at *TypeScribeArgs) Load() *ux.State {
 		at.JsonStruct.CreationDate = at.JsonStruct.Exec.TimeStampString()
 		at.JsonStruct.Env = at.JsonStruct.Exec.GetEnvMap()
 
-		at.State = at.LoadJsonFile()
+		at.State = at.JsonStruct.LoadJsonFile(at.Json)
 		if at.State.IsNotOk() {
-			at.State.SetError("Json error: %s", at.State.GetError())
 			break
 		}
 
-		at.State = at.LoadTemplateFile()
+		at.State = at.JsonStruct.LoadTemplateFile(at.Template)
 		if at.State.IsNotOk() {
-			at.State.SetError("Template error: %s", at.State.GetError())
 			break
 		}
 
 		at.JsonStruct.CreationInfo = fmt.Sprintf("Created on %s, using template:%s and json:%s", at.JsonStruct.CreationDate, at.JsonStruct.TemplateFile.Name, at.JsonStruct.JsonFile.Name)
 		at.JsonStruct.CreationWarning = "WARNING: This file has been auto-generated. DO NOT EDIT: WARNING"
 
-		at.State.Clear()
+		at.State = at.CreateTemplate()
+		if at.State.IsError() {
+			break
+		}
+
+		at.State.SetOk()
 	}
 
 	return at.State
@@ -241,24 +363,16 @@ func (at *TypeScribeArgs) Run() *ux.State {
 	}
 
 	for range onlyOnce {
-		if at.Output.Filename == "" {
-			at.State.SetError("No output file specified.")
-			break
-		}
+		at.PrintflnNotify("Processing template file '%s'. Output sent to '%s'", at.Template.GetPath(), at.Output.GetPath())
 
-		at.State = at.LoadOutputFile()
-		if at.State.IsNotOk() {
-			break
-		}
-
-		err := at.TemplateRef.Execute(at.OutputFh, &at.JsonStruct)
+		err := at.TemplateRef.Execute(at.Output.FileHandle, &at.JsonStruct)
 		//err := at.TemplateRef.Execute(os.Stdout, &at.JsonStruct)
 		if err != nil {
 			at.State.SetError("Error processing template: %s", err)
 			break
 		}
 
-		at.State = at.Output.File.CloseFile()
+		at.State = at.Output.CloseFile()
 		if at.State.IsNotOk() {
 			at.State.SetError("Error closing output: %s", err)
 			break
@@ -266,16 +380,16 @@ func (at *TypeScribeArgs) Run() *ux.State {
 
 		// Are we treating this as a shell script?
 		if at.ExecShell {
-			ux.PrintflnOk("Executing file '%s'", at.Output.Filename)
+			at.PrintflnNotify("Executing file '%s'", at.Output.GetPath())
 
 			//outFile := toolPath.ToolNewPath(at.OutFile)
-			bashFile := at.Output.File
-			at.State = bashFile.StatPath()
+			//bashFile := at.Output
+			at.State = at.Output.StatPath()
 			if at.State.IsNotOk() {
 				//at.State.SetError("Shell script error: %s", err)
 				break
 			}
-			bashFile.Chmod(0755)
+			at.Output.Chmod(0755)
 
 			exe := toolExec.New(at.Runtime)
 			at.State = exe.State
@@ -296,7 +410,7 @@ func (at *TypeScribeArgs) Run() *ux.State {
 				break
 			}
 
-			at.State = exe.SetArgs(bashFile.GetPath())
+			at.State = exe.SetArgs(at.Output.GetPath())
 			if at.State.IsError() {
 				at.State.SetError("Shell script error: %s", at.State.GetError())
 				break
@@ -314,19 +428,20 @@ func (at *TypeScribeArgs) Run() *ux.State {
 				break
 			}
 
-			if at.QuietProgress {
-				fmt.Printf("# STDOUT from script: %s\n", bashFile.GetPath())
-				fmt.Printf("%s\n", exe.GetStdoutString())
-
-				fmt.Printf("# STDERR from script: %s\n", bashFile.GetPath())
-				fmt.Printf("%s\n", exe.GetStderrString())
-
-				fmt.Printf("# Exit code from script: %s\n", bashFile.GetPath())
-				fmt.Printf("%d\n", exe.GetExitCode())
-			}
+			//if at.QuietProgress {
+			//	fmt.Printf("# STDOUT from script: %s\n", at.Output.GetPath())
+			//	fmt.Printf("%s\n", exe.GetStdoutString())
+			//
+			//	fmt.Printf("# STDERR from script: %s\n", at.Output.GetPath())
+			//	fmt.Printf("%s\n", exe.GetStderrString())
+			//
+			//	fmt.Printf("# Exit code from script: %s\n", at.Output.GetPath())
+			//	fmt.Printf("%d\n", exe.GetExitCode())
+			//}
 
 			if at.RemoveOutput {
-				at.State = bashFile.RemoveFile()
+				at.PrintflnNotify("Removing output file '%s'.", at.Output.GetPath())
+				at.State = at.Output.RemoveFile()
 				if at.State.IsError() {
 					at.State.SetError("Shell script error: %s", at.State.GetError())
 					break
@@ -335,7 +450,8 @@ func (at *TypeScribeArgs) Run() *ux.State {
 		}
 
 		if at.RemoveTemplate {
-			at.State = at.Template.File.RemoveFile()
+			at.PrintflnNotify("Removing template file '%s'.", at.Template.GetPath())
+			at.State = at.Template.RemoveFile()
 			if at.State.IsNotOk() {
 				break
 			}
@@ -352,49 +468,44 @@ func (at *TypeScribeArgs) CreateTemplate() *ux.State {
 	}
 
 	for range onlyOnce {
-		//// Define additional template functions.
-		//at.State = DiscoverTools()
-		//if at.State.IsNotOk() {
-		//	break
-		//}
-		//
-		//tfm := responseToFuncMap(at.State.GetResponse())
-		//at.State = at.ImportTools(tfm)
-		//if at.State.IsNotOk() {
-		//	break
-		//}
-		//
-		//// Add inbuilt Tools.
-		//at.Tools["PrintTools"] = PrintTools
-
-		if at.Tools == nil {
+		//if at.Tools == nil {
 			at.State = at.ImportTools(nil)
 			if at.State.IsError() {
 				break
 			}
-		}
+		//}
 
-		t := template.New("JSON").Funcs(at.Tools)
-		if t == nil {
-			at.State.SetError("Template creation error.")
+		at.TemplateRef = template.New("JSON")
+		if at.TemplateRef == nil {
+			at.State.SetError("Template error - cannot init.")
 			break
 		}
 
-		t.Option("missingkey=error")
+		at.TemplateRef = at.TemplateRef.Funcs(at.Tools)
+		if at.TemplateRef == nil {
+			at.State.SetError("Template error - cannot load tools.")
+			break
+		}
+
+		at.TemplateRef = at.TemplateRef.Option("missingkey=error")
+		if at.TemplateRef == nil {
+			at.State.SetError("Template error - cannot set options.")
+			break
+		}
 
 		// Do it again - may have to perform recursion here.
 		var err error
-		at.TemplateRef, err = t.Parse(at.Template.String)
+		at.TemplateRef, err = at.TemplateRef.Parse(at.Template.GetContentString())
 		if err != nil {
-			at.State.SetError("Template read error: %s", err)
-			break
-		}
-		if at.TemplateRef == nil {
-			at.State.SetError("Template creation error.")
+			at.State.SetError("Template error - cannot parse - %v", err)
 			break
 		}
 
-		at.TemplateRef.Option("missingkey=error")
+		at.TemplateRef = at.TemplateRef.Option("missingkey=error")
+		if at.TemplateRef == nil {
+			at.State.SetError("Template error - cannot set options.")
+			break
+		}
 	}
 
 	return at.State
@@ -402,7 +513,8 @@ func (at *TypeScribeArgs) CreateTemplate() *ux.State {
 
 
 // Ability to import from an external package.
-// You need to run `pkgreflect scribe/tools` after code changes.
+// You need to run `buildtool pkgreflect scribe/tools` after code changes.
+// OR add a "go:generate buildtool pkgreflect scribe/tools" comment to main.go.
 // func (at *TypeScribeArgs) ImportTools(h map[string]reflect.Value) *ux.State {
 func (at *TypeScribeArgs) ImportTools(h *template.FuncMap) *ux.State {
 	if state := at.IsNil(); state.IsError() {
@@ -410,19 +522,15 @@ func (at *TypeScribeArgs) ImportTools(h *template.FuncMap) *ux.State {
 	}
 
 	for range onlyOnce {
-		//if h == nil {
-		//	at.State.SetError("Error importing Tools - empty list.")
-		//	break
-		//}
-
 		at.Tools = make(template.FuncMap)
 		// Define external template functions.
 		at.Tools = sprig.TxtFuncMap()
 
-		for name, fn := range *h {
-			at.Tools[name] = fn
+		if h != nil {
+			for name, fn := range *h {
+				at.Tools[name] = fn
+			}
 		}
-
 		for name, fn := range toolCopy.GetTools {
 			at.Tools[name] = fn
 		}
@@ -496,43 +604,6 @@ func (at *TypeScribeArgs) ImportTools(h *template.FuncMap) *ux.State {
 }
 
 
-//func (at *TypeScribeArgs) ImportTools(h *template.FuncMap) *ux.State {
-//	if state := at.IsNil(); state.IsError() {
-//		return state
-//	}
-//
-//	for range onlyOnce {
-//		if h == nil {
-//			at.State.SetError("Error importing Tools - empty list.")
-//			break
-//		}
-//
-//		for name, fn := range *h {
-//			at.Tools[name] = fn
-//		}
-//
-//		//// Define additional template functions.
-//		//for name, fn := range h {
-//		//	// Ignore GetTools function.
-//		//	if name == "GetTools" {
-//		//		continue
-//		//	}
-//		//
-//		//	// Ignore any function that doesn't have a ToolPrefix
-//		//	if !strings.HasPrefix(name, "Tool") {
-//		//		continue
-//		//	}
-//		//
-//		//	// Trim ToolPrefix from function template name.
-//		//	name = strings.TrimPrefix(name, "Tool")
-//		//	at.Tools[name] = fn.Interface()
-//		//}
-//	}
-//
-//	return at.State
-//}
-
-
 func (at *TypeScribeArgs) PrintTools() {
 	for range onlyOnce {
 		var ret string
@@ -548,7 +619,6 @@ func (at *TypeScribeArgs) PrintTools() {
 			}
 
 			files[Tool.File][name] = *Tool
-			//fmt.Printf("Name[%s]: %s => %s\n", name, Tool.Name, Tool.Function)
 		}
 
 		for fn, fp := range files {
@@ -561,15 +631,12 @@ func (at *TypeScribeArgs) PrintTools() {
 			}
 			sort.Slice(keys, keys.Less)
 
-			//for _, hp := range fp {
 			for _, hp := range keys {
 				ret += fmt.Sprintf("%s( %s )\t=> ( %s )\n",
 					ux.SprintfGreen(hp.Name),
 					ux.SprintfCyan(hp.Args),
 					ux.SprintfYellow(hp.Return),
 				)
-
-				// fmt.Printf("%s\n\targs: %s\n\tReturn: %s\n", hp.Function, hp.args, hp.Return)
 			}
 		}
 
