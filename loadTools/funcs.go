@@ -49,7 +49,7 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 			if ext == ".scribe" {
 				if at.Scribe.IsNotIgnore() {
 					at.PrintflnNotify("Setting scribe file '%s'", args[0])
-					at.Template.File = args[0]
+					at.Scribe.File = args[0]
 					args = args[1:]
 				}
 			}

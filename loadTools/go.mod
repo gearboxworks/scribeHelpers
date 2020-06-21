@@ -47,12 +47,13 @@ require (
 	github.com/newclarity/scribeHelpers/toolGhr v0.0.0-00010101000000-000000000000
 	github.com/newclarity/scribeHelpers/toolGit v0.0.0-00010101000000-000000000000
 	github.com/newclarity/scribeHelpers/toolGitHub v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/toolPath v0.0.0-20200606063537-e5c648daf391
-	github.com/newclarity/scribeHelpers/toolPrompt v0.0.0-20200606063537-e5c648daf391
-	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200606063537-e5c648daf391
+	github.com/newclarity/scribeHelpers/toolPath v0.0.0-20200611181056-b2e5f7fd5978
+	github.com/newclarity/scribeHelpers/toolPrompt v0.0.0-20200611181056-b2e5f7fd5978
+	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200611181056-b2e5f7fd5978
 	github.com/newclarity/scribeHelpers/toolService v0.0.0-00010101000000-000000000000
 	github.com/newclarity/scribeHelpers/toolSystem v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/toolTypes v0.0.0-20200606063537-e5c648daf391
+	github.com/newclarity/scribeHelpers/toolTypes v0.0.0-20200611181056-b2e5f7fd5978
 	github.com/newclarity/scribeHelpers/toolUx v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/ux v0.0.0-20200606063537-e5c648daf391
+	github.com/newclarity/scribeHelpers/ux v0.0.0-20200611181056-b2e5f7fd5978
+	github.com/spf13/cobra v1.0.0
 )

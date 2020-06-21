@@ -3,6 +3,7 @@ package loadTools
 import (
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/spf13/cobra"
 	"text/template"
 )
 
@@ -44,6 +45,7 @@ type TypeScribeArgs struct {
 	Runtime        *toolRuntime.TypeRuntime
 	State          *ux.State
 	valid          bool
+	cmd            *cobra.Command
 }
 
 
