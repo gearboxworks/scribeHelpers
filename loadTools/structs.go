@@ -46,47 +46,58 @@ type TypeScribeArgs struct {
 	State          *ux.State
 	valid          bool
 	cmd            *cobra.Command
+	//cmdHelp        *toolCobraHelp.TypeCommands
 }
 
 
 func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
-	rt := toolRuntime.New(binary, version, debugFlag)
+	var p TypeScribeArgs
 
-	p := TypeScribeArgs{
-		Json:           NewArgFile(rt),		// &TypeArgFile{State: ux.NewState(binary, debugFlag)},
+	for range onlyOnce {
+		rt := toolRuntime.New(binary, version, debugFlag)
 
-		Scribe:         NewArgFile(rt),		// &TypeArgFile{State: ux.NewState(binary, debugFlag)},
+		p = TypeScribeArgs{
+			Json: NewArgFile(rt), // &TypeArgFile{State: ux.NewState(binary, debugFlag)},
 
-		Template:       NewArgFile(rt),		// &TypeArgFile{State: ux.NewState(binary, debugFlag)},
-		TemplateRef:    nil,
+			Scribe: NewArgFile(rt), // &TypeArgFile{State: ux.NewState(binary, debugFlag)},
 
-		Output:         NewArgFile(rt),		// &TypeArgFile{State: ux.NewState(binary, debugFlag)},
+			Template:    NewArgFile(rt), // &TypeArgFile{State: ux.NewState(binary, debugFlag)},
+			TemplateRef: nil,
 
-		WorkingPath:    NewArgFile(rt),		// &TypeArgFile{State: ux.NewState(binary, debugFlag)},
+			Output: NewArgFile(rt), // &TypeArgFile{State: ux.NewState(binary, debugFlag)},
 
-		ExecShell:      false,
-		Chdir:          false,
-		RemoveTemplate: false,
-		ForceOverwrite: false,
-		RemoveOutput:   false,
-		Debug:          false,
-		StripHashBang:  false,
-		Verbose:        false,
+			WorkingPath: NewArgFile(rt), // &TypeArgFile{State: ux.NewState(binary, debugFlag)},
 
-		JsonStruct:     nil,
+			ExecShell:      false,
+			Chdir:          false,
+			RemoveTemplate: false,
+			ForceOverwrite: false,
+			RemoveOutput:   false,
+			Debug:          false,
+			StripHashBang:  false,
+			Verbose:        false,
 
-		Tools:          make(template.FuncMap),
+			JsonStruct: nil,
 
-		Runtime:        rt,
-		State:          ux.NewState(binary, debugFlag),
-		valid:          false,
+			Tools: make(template.FuncMap),
+
+			Runtime: rt,
+			State:   ux.NewState(binary, debugFlag),
+			valid:   false,
+			//cmdHelp: toolCobraHelp.New(rt),
+		}
+		p.State.SetPackage("")
+		p.State.SetFunctionCaller()
+
+		p.Scribe.SetDefaults(DefaultScribeFile, DefaultScribeString)
+		p.Json.SetDefaults(DefaultJsonFile, DefaultJsonString)
+		p.Template.SetDefaults(DefaultTemplateFile, DefaultTemplateString)
+
+		p.State = p.ImportTools(nil)
+		if p.State.IsError() {
+			break
+		}
 	}
-	p.State.SetPackage("")
-	p.State.SetFunctionCaller()
-
-	p.Scribe.SetDefaults(DefaultScribeFile, DefaultScribeString)
-	p.Json.SetDefaults(DefaultJsonFile, DefaultJsonString)
-	p.Template.SetDefaults(DefaultTemplateFile, DefaultTemplateString)
 
 	return &p
 }

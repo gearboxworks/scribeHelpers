@@ -23,6 +23,7 @@ const (
 	DefaultOutFile 				= "/dev/stdout"
 	DefaultWorkingPath	    	= "."
 
+	CmdRoot				= "scribe"
 
 	CmdRun 				= "run"
 	CmdLoad 			= "load"
@@ -32,13 +33,13 @@ const (
 	CmdPush 			= "push"
 	CmdRelease 			= "release"
 
-	CmdSelfUpdate		= "selfupdate"
-	CmdVersion 			= "version"
-	CmdVersionInfo		= "info"
-	CmdVersionList		= "list"
-	CmdVersionLatest	= "latest"
-	CmdVersionCheck		= "check"
-	CmdVersionUpdate	= "update"
+	//CmdSelfUpdate		= "selfupdate"
+	//CmdVersion 			= "version"
+	//CmdVersionInfo		= "info"
+	//CmdVersionList		= "list"
+	//CmdVersionLatest	= "latest"
+	//CmdVersionCheck		= "check"
+	//CmdVersionUpdate	= "update"
 
 	FlagScribeFile     	= "scribe"
 	FlagJsonFile     	= "json"

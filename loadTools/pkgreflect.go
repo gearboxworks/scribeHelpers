@@ -36,7 +36,6 @@ var Consts = map[string]reflect.Value{
 	"CmdRelease": reflect.ValueOf(CmdRelease),
 	"CmdRun": reflect.ValueOf(CmdRun),
 	"CmdTools": reflect.ValueOf(CmdTools),
-	"CmdVersion": reflect.ValueOf(CmdVersion),
 	"DefaultJsonFile": reflect.ValueOf(DefaultJsonFile),
 	"DefaultJsonFileSuffix": reflect.ValueOf(DefaultJsonFileSuffix),
 	"DefaultJsonString": reflect.ValueOf(DefaultJsonString),

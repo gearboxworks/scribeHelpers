@@ -5,6 +5,7 @@ import (
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
+	"github.com/spf13/cobra"
 	"runtime"
 )
 
@@ -35,6 +36,7 @@ type TypeSelfUpdate struct {
 
 	runtime    *toolRuntime.TypeRuntime
 	State      *ux.State
+	cmd        *cobra.Command
 }
 
 

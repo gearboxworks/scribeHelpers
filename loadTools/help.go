@@ -9,7 +9,44 @@ import (
 )
 
 
-func _GetUsage(c *cobra.Command) string {
+func (at *TypeScribeArgs) ParseScribeFlags(cmd *cobra.Command) bool {
+	var ok bool
+	for range onlyOnce {
+		fl := cmd.Flags()
+
+		// Show HelpVariables.
+		ok, _ = fl.GetBool(FlagHelpVariables)
+		if ok {
+			at.ShowHelpVariables()
+			break
+		}
+
+		// Show HelpFunctions.
+		ok, _ = fl.GetBool(FlagHelpFunctions)
+		if ok {
+			at.ShowHelpFunctions()
+			break
+		}
+
+		// Show HelpExamples.
+		ok, _ = fl.GetBool(FlagHelpExamples)
+		if ok {
+			at.ShowHelpExamples()
+			break
+		}
+
+		// Show all help.
+		ok, _ = fl.GetBool(FlagHelpAll)
+		if ok {
+			at.ShowHelpAll()
+			break
+		}
+	}
+	return ok
+}
+
+
+func (at *TypeScribeArgs) _GetUsage(c *cobra.Command) string {
 	var str string
 
 	if c.Parent() == nil {
@@ -28,27 +65,27 @@ func _GetUsage(c *cobra.Command) string {
 }
 
 
-func _GetVersion(c *cobra.Command) string {
+func (at *TypeScribeArgs) _GetVersion(c *cobra.Command) string {
 	var str string
 
 	if c.Parent() == nil {
-		str = ux.SprintfBlue("%s ", Cmd.Runtime.CmdName)
-		str += ux.SprintfCyan("v%s", Cmd.Runtime.CmdVersion)
+		str = ux.SprintfBlue("%s ", at.Runtime.CmdName)
+		str += ux.SprintfCyan("v%s", at.Runtime.CmdVersion)
 	}
 
 	return str
 }
 
 
-func SetHelp(c *cobra.Command) {
+func (at *TypeScribeArgs) SetHelp(c *cobra.Command) {
 	var tmplHelp string
 	var tmplUsage string
 
 	//fmt.Printf("%s", rootCmd.UsageTemplate())
 	//fmt.Printf("%s", rootCmd.HelpTemplate())
 
-	cobra.AddTemplateFunc("GetUsage", _GetUsage)
-	cobra.AddTemplateFunc("GetVersion", _GetVersion)
+	cobra.AddTemplateFunc("GetUsage", at._GetUsage)
+	cobra.AddTemplateFunc("GetVersion", at._GetVersion)
 
 	cobra.AddTemplateFunc("SprintfBlue", ux.SprintfBlue)
 	cobra.AddTemplateFunc("SprintfCyan", ux.SprintfCyan)
@@ -126,20 +163,20 @@ func SetHelp(c *cobra.Command) {
 }
 
 
-func HelpAll() {
+func (at *TypeScribeArgs) ShowHelpAll() {
 	for range onlyOnce {
-		HelpFunctions()
-		HelpVariables()
-		HelpExamples()
+		at.ShowHelpFunctions()
+		at.ShowHelpVariables()
+		at.ShowHelpExamples()
 	}
 
-	Cmd.State.Clear()
+	at.State.Clear()
 }
 
 
-func Help() {
+func (at *TypeScribeArgs) Help() {
 	for range onlyOnce {
-		ux.PrintflnBlue("%s v%s:", defaults.BinaryName, defaults.BinaryVersion)
+		ux.PrintflnBlue("%s v%s:", at.Runtime.Cmd, at.Runtime.CmdVersion)
 		ux.PrintflnBlue("\tThe ultimate config file generator.")
 		ux.PrintflnBlue("\tFeed it a JSON and GoLang template file, I'll do the rest.")
 		ux.PrintflnBlue("")
@@ -149,20 +186,20 @@ func Help() {
 		ux.PrintflnBlue("")
 	}
 
-	Cmd.State.Clear()
+	at.State.Clear()
 }
 
 
-func HelpFunctions() {
+func (at *TypeScribeArgs) ShowHelpFunctions() {
 	for range onlyOnce {
-		Cmd.PrintTools()
+		at.PrintTools()
 	}
 
-	Cmd.State.Clear()
+	at.State.Clear()
 }
 
 
-func HelpVariables() {
+func (at *TypeScribeArgs) ShowHelpVariables() {
 	for range onlyOnce {
 		ux.PrintfBlue("Keys accessible within your template file:\n")
 		fmt.Printf("%s - %s\n", ux.SprintfBlue("\t{{ .Json }}"), ux.SprintfWhite("Your JSON file will appear here."))
@@ -195,19 +232,11 @@ func HelpVariables() {
 		fmt.Printf("\n")
 	}
 
-	Cmd.State.Clear()
+	at.State.Clear()
 }
 
 
-type Example struct {
-	Command string
-	Args []string
-	Info string
-}
-type Examples []Example
-
-
-func HelpExamples() {
+func (at *TypeScribeArgs) ShowHelpExamples() {
 	for range onlyOnce {
 		var examples Examples
 
@@ -278,11 +307,26 @@ func HelpExamples() {
 		for _, v := range examples {
 			fmt.Printf("# %s\n\t%s %s\n\n",
 				ux.SprintfBlue(v.Info),
-				ux.SprintfCyan("%s %s", defaults.BinaryName, v.Command),
+				ux.SprintfCyan("%s %s", at.Runtime.Cmd, v.Command),
 				ux.SprintfWhite(strings.Join(v.Args, " ")),
 			)
 		}
 	}
 
-	Cmd.State.Clear()
+	at.State.Clear()
 }
+
+
+type Example struct {
+	Command string
+	Args []string
+	Info string
+}
+type Examples []Example
+
+
+//func (at *TypeScribeArgs) AddExample(example Example) {
+//	for range onlyOnce {
+//		at.HelpExamples = append(at.HelpExamples, example)
+//	}
+//}
