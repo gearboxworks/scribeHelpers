@@ -26,6 +26,8 @@ import (
 
 func (at *TypeScribeArgs) ProcessArgs(cmd string, args []string) *ux.State {
 	for range onlyOnce {
+		at.State.SetOk()
+
 		at.State = at.CheckArgs(cmd, args...)
 		if at.State.IsNotOk() {
 			break
@@ -49,7 +51,7 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 			if ext == ".scribe" {
 				if at.Scribe.IsNotIgnore() {
 					at.PrintflnNotify("Setting scribe file '%s'", args[0])
-					at.Scribe.File = args[0]
+					at.Scribe.Arg = args[0]
 					args = args[1:]
 				}
 			}
@@ -57,7 +59,7 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 			if ext == ".json" {
 				if at.Json.IsNotIgnore() {
 					at.PrintflnNotify("Setting JSON file '%s'", args[0])
-					at.Json.File = args[0]
+					at.Json.Arg = args[0]
 					args = args[1:]
 				}
 				continue
@@ -66,7 +68,7 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 			if ext == ".tmpl" {
 				if at.Template.IsNotIgnore() {
 					at.PrintflnNotify("Setting template file '%s'", args[0])
-					at.Template.File = args[0]
+					at.Template.Arg = args[0]
 					args = args[1:]
 				}
 			}
@@ -96,10 +98,10 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 		// Fetch input files.
 		for range onlyOnce {
 			// Validate scribe file OR string.
-			at.State = at.Scribe.SetInputFile(at.Scribe.File)
-			if at.State.IsNotOk() {
-				break
-			}
+			at.State = at.Scribe.SetInputFile(at.Scribe.Value)
+			//if at.State.IsNotOk() {
+			//	break
+			//}
 			// scribe:OK
 			if at.Scribe.IsSet() {
 				// Add {{ and }} to scribe file.
@@ -114,22 +116,22 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 
 				at.PrintflnNotify("Using scribe file '%s' of %d bytes.", at.Scribe.GetPath(), at.Scribe.GetContentLength())
 				at.Template.SetInputStringArray(ca)
-				at.Json.SetDefaultString()
+				at.Json.SetDefaultString("")
 				break
 			}
 
 			// Validate json file OR string.
-			at.State = at.Json.SetInputFile(at.Json.File)
-			if at.State.IsNotOk() {
-				break
-			}
+			at.State = at.Json.SetInputFile(at.Json.Value)
+			//if at.State.IsNotOk() {
+			//	break
+			//}
 			at.PrintflnNotify("Using JSON file '%s' of %d bytes.", at.Json.GetPath(), at.Json.GetContentLength())
 
 			// Validate template file OR string.
-			at.State = at.Template.SetInputFile(at.Template.File)
-			if at.State.IsNotOk() {
-				break
-			}
+			at.State = at.Template.SetInputFile(at.Template.Value)
+			//if at.State.IsNotOk() {
+			//	break
+			//}
 			if at.RemoveTemplate {
 				at.PrintflnNotify("Will remove template file '%s' afterwards.", at.Template.GetPath())
 				at.Template.SetRemoveable()
@@ -143,11 +145,15 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 
 		// If JSON set and template not set, try and use the JSON filename with a tmpl extension.
 		for range onlyOnce {
+			if at.Template.IsSet() {
+				break
+			}
+
 			if at.Json.IsNotSet() {
 				break
 			}
 
-			if at.Template.IsSet() {
+			if at.Json.Arg != SelectFile {
 				break
 			}
 
@@ -165,11 +171,15 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 
 		// If Template set and JSON not set, try and use the template filename with a json extension.
 		for range onlyOnce {
+			if at.Json.IsSet() {
+				break
+			}
+
 			if at.Template.IsNotSet() {
 				break
 			}
 
-			if at.Json.IsSet() {
+			if at.Template.Arg != SelectFile {
 				break
 			}
 
@@ -214,18 +224,18 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 
 		// Set output file.
 		for range onlyOnce {
-			if at.Output.File != SelectConvert {
+			if at.Output.Arg != SelectConvert {
 				break
 			}
 
 			if at.Template.IsNotFileSet() {
-				at.Output.File = SelectStdout
+				at.Output.Arg = SelectStdout
 				break
 			}
 
-			at.Output.File = strings.TrimSuffix(at.Template.GetPathAbs(), DefaultTemplateFileSuffix)
+			at.Output.Arg = strings.TrimSuffix(at.Template.GetPathAbs(), DefaultTemplateFileSuffix)
 		}
-		at.State = at.Output.SetOutputFile(at.Output.File, at.ForceOverwrite)
+		at.State = at.Output.SetOutputFile(at.Output.Arg, at.ForceOverwrite)
 		if at.State.IsNotOk() {
 			break
 		}
@@ -286,7 +296,7 @@ func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 
 
 		// Change to working path first.
-		at.WorkingPath.SetPath(at.WorkingPath.File)
+		at.WorkingPath.SetPath(at.WorkingPath.Value)
 		at.State = at.WorkingPath.Chdir()
 		if at.State.IsNotOk() {
 			break
@@ -332,12 +342,12 @@ func (at *TypeScribeArgs) Load() *ux.State {
 		at.JsonStruct.CreationDate = at.JsonStruct.Exec.TimeStampString()
 		at.JsonStruct.Env = at.JsonStruct.Exec.GetEnvMap()
 
-		at.State = at.JsonStruct.LoadJsonFile(at.Json)
+		at.State = at.JsonStruct.LoadJsonFile(at.Json.TypeArgFile)
 		if at.State.IsNotOk() {
 			break
 		}
 
-		at.State = at.JsonStruct.LoadTemplateFile(at.Template)
+		at.State = at.JsonStruct.LoadTemplateFile(at.Template.TypeArgFile)
 		if at.State.IsNotOk() {
 			break
 		}
@@ -468,12 +478,12 @@ func (at *TypeScribeArgs) CreateTemplate() *ux.State {
 	}
 
 	for range onlyOnce {
-		//if at.Tools == nil {
+		if at.Tools == nil {
 			at.State = at.ImportTools(nil)
 			if at.State.IsError() {
 				break
 			}
-		//}
+		}
 
 		at.TemplateRef = template.New("JSON")
 		if at.TemplateRef == nil {

@@ -12,15 +12,18 @@ var onlyTwice = []string{"", ""}
 
 
 type TypeScribeArgs struct {
-	Scribe          *TypeArgFile
+	ConfigPath     string		`json:"config_path" mapstructure:"config_path"`
+	ConfigDir      string		`json:"config_dir" mapstructure:"config_dir"`
+	ConfigFile     string		`json:"config_file" mapstructure:"config_file"`
 
-	Json            *TypeArgFile
-	Template        *TypeArgFile
-	TemplateRef     *template.Template
+	Scribe         *ScribeFile
+	Json           *JsonFile
+	Template       *TemplateFile
+	TemplateRef    *template.Template
 
-	Output          *TypeArgFile
+	Output         *TypeArgFile
 
-	WorkingPath     *TypeArgFile
+	WorkingPath    *TypeArgFile
 
 	ExecShell      bool // Cmd: "run"
 	Chdir          bool // Flag: --chdir
@@ -57,11 +60,11 @@ func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
 		rt := toolRuntime.New(binary, version, debugFlag)
 
 		p = TypeScribeArgs{
-			Json: NewArgFile(rt), // &TypeArgFile{State: ux.NewState(binary, debugFlag)},
+			Json: &JsonFile{TypeArgFile: NewArgFile(rt)},
 
-			Scribe: NewArgFile(rt), // &TypeArgFile{State: ux.NewState(binary, debugFlag)},
+			Scribe: &ScribeFile{TypeArgFile: NewArgFile(rt)},
 
-			Template:    NewArgFile(rt), // &TypeArgFile{State: ux.NewState(binary, debugFlag)},
+			Template:    &TemplateFile{TypeArgFile: NewArgFile(rt)},
 			TemplateRef: nil,
 
 			Output: NewArgFile(rt), // &TypeArgFile{State: ux.NewState(binary, debugFlag)},

@@ -41,6 +41,8 @@ const (
 	//CmdVersionCheck		= "check"
 	//CmdVersionUpdate	= "update"
 
+	FlagConfigFile     	= "config"
+
 	FlagScribeFile     	= "scribe"
 	FlagJsonFile     	= "json"
 	FlagTemplateFile	= "template"

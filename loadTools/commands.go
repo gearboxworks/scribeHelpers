@@ -42,8 +42,13 @@ Where [file] is:
 package loadTools
 
 import (
+	"fmt"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
 )
 
 
@@ -109,28 +114,33 @@ For example: #!/usr/bin/env scribe --json gearbox.json run
 			at.cmd = cmd
 		}
 
+		at.cmd.AddCommand(convertCmd)
+		at.cmd.AddCommand(toolsCmd)
+		at.cmd.AddCommand(loadCmd)
+		at.cmd.AddCommand(runCmd)
+		at.SetHelp(at.cmd)
 
-		//if subCmd {
-		//	at.cmd.AddCommand(rootCmd)
-		//	at.SetHelp(rootCmd)
-		//
-		//	rootCmd.AddCommand(convertCmd)
-		//	rootCmd.AddCommand(toolsCmd)
-		//	rootCmd.AddCommand(loadCmd)
-		//	rootCmd.AddCommand(runCmd)
-		//} else {
-			at.cmd.AddCommand(convertCmd)
-			at.cmd.AddCommand(toolsCmd)
-			at.cmd.AddCommand(loadCmd)
-			at.cmd.AddCommand(runCmd)
-			at.SetHelp(at.cmd)
-		//}
+		if at.Scribe.DefaultFile == "" {
+			at.Scribe.DefaultFile = DefaultScribeFile
+		}
+		if at.Json.DefaultFile == "" {
+			at.Json.DefaultFile = DefaultJsonFile
+		}
+		if at.Template.DefaultFile == "" {
+			at.Template.DefaultFile = DefaultTemplateFile
+		}
+		if at.Output.DefaultFile == "" {
+			at.Output.DefaultFile = DefaultOutFile
+		}
+		if at.WorkingPath.DefaultFile == "" {
+			at.WorkingPath.DefaultFile = DefaultWorkingPath
+		}
 
-		at.cmd.Flags().StringVarP(&at.Scribe.File, FlagScribeFile, "s", DefaultScribeFile, ux.SprintfBlue("Alternative SCRIBE file."))
-		at.cmd.Flags().StringVarP(&at.Json.File, FlagJsonFile, "j", DefaultJsonFile, ux.SprintfBlue("Alternative JSON file."))
-		at.cmd.Flags().StringVarP(&at.Template.File, FlagTemplateFile, "t", DefaultTemplateFile, ux.SprintfBlue("Alternative template file."))
-		at.cmd.Flags().StringVarP(&at.Output.File, FlagOutputFile, "o", DefaultOutFile, ux.SprintfBlue("Output file."))
-		at.cmd.Flags().StringVarP(&at.WorkingPath.File, FlagWorkingPath, "p", DefaultWorkingPath, ux.SprintfBlue("Set working path."))
+		at.cmd.Flags().StringVarP(&at.Scribe.Value, FlagScribeFile, "s", at.Scribe.DefaultFile, ux.SprintfBlue("Alternative SCRIBE file."))
+		at.cmd.Flags().StringVarP(&at.Json.Value, FlagJsonFile, "j", at.Json.DefaultFile, ux.SprintfBlue("Alternative JSON file."))
+		at.cmd.Flags().StringVarP(&at.Template.Value, FlagTemplateFile, "t", at.Template.DefaultFile, ux.SprintfBlue("Alternative template file."))
+		at.cmd.Flags().StringVarP(&at.Output.Value, FlagOutputFile, "o", at.Output.DefaultFile, ux.SprintfBlue("Output file."))
+		at.cmd.Flags().StringVarP(&at.WorkingPath.Value, FlagWorkingPath, "p", at.WorkingPath.DefaultFile, ux.SprintfBlue("Set working path."))
 
 		at.cmd.Flags().BoolVarP(&at.Chdir, FlagChdir, "c", false, ux.SprintfBlue("Change to directory containing %s", DefaultJsonFile))
 		at.cmd.Flags().BoolVarP(&at.RemoveTemplate, FlagRemoveTemplate, "", false, ux.SprintfBlue("Remove template file afterwards."))
@@ -145,12 +155,261 @@ For example: #!/usr/bin/env scribe --json gearbox.json run
 		at.cmd.Flags().BoolVarP(&at.HelpVariables, FlagHelpVariables, "", false, ux.SprintfBlue("Help on template variables."))
 		at.cmd.Flags().BoolVarP(&at.HelpFunctions, FlagHelpFunctions, "", false, ux.SprintfBlue("Help on template functions."))
 		at.cmd.Flags().BoolVarP(&at.HelpExamples, FlagHelpExamples, "", false, ux.SprintfBlue("Help on template examples."))
+
+		cobra.EnableCommandSorting = false
 	}
 	return at.State
 }
 
 
+func (at *TypeScribeArgs) AddConfigOption(persistent bool, hidden bool) *ux.State {
+	for range onlyOnce {
+		if at.cmd == nil {
+			at.State.SetError("Need to call LoadCommands first.")
+			break
+		}
+
+		var fs *pflag.FlagSet
+		if persistent {
+			fs = at.cmd.PersistentFlags()
+		} else {
+			fs = at.cmd.Flags()
+		}
+
+		at.DiscoverConfigDir()
+		if at.State.IsNotOk() {
+			// No error - just ignore.
+			at.State.SetOk()
+			break
+		}
+
+		//fileDir := filepath.Join(at.Runtime.User.HomeDir, ".gearbox")
+		//stat, err := os.Stat(fileDir)
+		//if os.IsNotExist(err) {
+		//	at.State.SetError("path does not exist - %s", err)
+		//	break
+		//}
+		//if !stat.IsDir() {
+		//	at.State.SetError("config file directory '%s' is not a directory", fileDir)
+		//	break
+		//}
+		//
+		//fileName := fmt.Sprintf("%s-config.json", prefix)
+		//filePath := filepath.Join(fileDir, fileName)
+
+		fs.StringVar(&at.ConfigFile, FlagConfigFile, at.ConfigPath, ux.SprintfBlue("Alternative command option config file."))
+
+		_ = viper.BindPFlag(FlagScribeFile, at.cmd.Flags().Lookup(FlagScribeFile))
+		_ = viper.BindPFlag(FlagJsonFile, at.cmd.Flags().Lookup(FlagJsonFile))
+		_ = viper.BindPFlag(FlagTemplateFile, at.cmd.Flags().Lookup(FlagTemplateFile))
+		_ = viper.BindPFlag(FlagOutputFile, at.cmd.Flags().Lookup(FlagOutputFile))
+		_ = viper.BindPFlag(FlagWorkingPath, at.cmd.Flags().Lookup(FlagWorkingPath))
+
+		_ = viper.BindPFlag(FlagChdir, at.cmd.Flags().Lookup(FlagChdir))
+		_ = viper.BindPFlag(FlagRemoveTemplate, at.cmd.Flags().Lookup(FlagRemoveTemplate))
+		_ = viper.BindPFlag(FlagForce, at.cmd.Flags().Lookup(FlagForce))
+		_ = viper.BindPFlag(FlagRemoveOutput, at.cmd.Flags().Lookup(FlagRemoveOutput))
+		_ = viper.BindPFlag(FlagQuiet, at.cmd.Flags().Lookup(FlagQuiet))
+		_ = viper.BindPFlag(FlagVerbose, at.cmd.Flags().Lookup(FlagVerbose))
+
+		_ = viper.BindPFlag(FlagDebug, at.cmd.Flags().Lookup(FlagDebug))
+
+		_ = viper.BindPFlag(FlagHelpAll, at.cmd.Flags().Lookup(FlagHelpAll))
+		_ = viper.BindPFlag(FlagHelpVariables, at.cmd.Flags().Lookup(FlagHelpVariables))
+		_ = viper.BindPFlag(FlagHelpFunctions, at.cmd.Flags().Lookup(FlagHelpFunctions))
+		_ = viper.BindPFlag(FlagHelpExamples, at.cmd.Flags().Lookup(FlagHelpExamples))
+
+		cobra.OnInitialize(at.initConfig)
+
+		if hidden {
+			err := at.cmd.PersistentFlags().MarkHidden(FlagConfigFile)
+			if err != nil {
+				at.State.SetError(err)
+			}
+		}
+	}
+
+	return at.State
+}
+
+
+func (at *TypeScribeArgs) DiscoverConfigDir() *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		var files []string
+		files = append(files, filepath.Join(at.Runtime.CmdDir, at.Runtime.CmdFile + "-config.json"))
+		files = append(files, filepath.Join(at.Runtime.CmdDir, "scribe-config.json"))
+		files = append(files, filepath.Join(at.Runtime.CmdDir, "scribe.json"))
+
+		files = append(files, filepath.Join(at.Runtime.User.HomeDir, ".gearbox", at.Runtime.CmdFile + "-config.json"))
+		files = append(files, filepath.Join(at.Runtime.User.HomeDir, ".gearbox", "scribe-config.json"))
+		files = append(files, filepath.Join(at.Runtime.User.HomeDir, ".gearbox", "scribe.json"))
+
+		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("usr", "local", "gearbox", "etc", at.Runtime.CmdFile + "-config.json")))
+		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("usr", "local", "gearbox", "etc", "scribe-config.json")))
+		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("usr", "local", "gearbox", "etc", "scribe.json")))
+
+		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("opt", "gearbox", "etc", at.Runtime.CmdFile + "-config.json")))
+		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("opt", "gearbox", "etc", "scribe-config.json")))
+		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("opt", "gearbox", "etc", "scribe.json")))
+
+		at.ConfigDir = ""
+		at.ConfigFile = ""
+		for _, check := range files {
+			at.isFileExisting(check)
+			if at.State.IsNotOk() {
+				continue
+			}
+
+			at.ConfigPath = check
+			at.ConfigDir = filepath.Dir(check)
+			at.ConfigFile = filepath.Base(check)
+			at.State.SetOk()
+			break
+		}
+	}
+
+	//if at.State.IsNotOk() {
+	//	at.State.SetWarning("No config file found")
+	//}
+
+	return at.State
+}
+
+
+func (at *TypeScribeArgs) isDirExisting(path string) *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		stat, err := os.Stat(path)
+		if os.IsNotExist(err) {
+			at.State.SetWarning("path does not exist - %s", err)
+			break
+		}
+
+		if !stat.IsDir() {
+			at.State.SetWarning("config file directory '%s' is not a directory", path)
+			break
+		}
+	}
+
+	return at.State
+}
+
+
+func (at *TypeScribeArgs) isFileExisting(path string) *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		at.isDirExisting(filepath.Dir(path))
+		if at.State.IsNotOk() {
+			break
+		}
+
+		stat, err := os.Stat(path)
+		if os.IsNotExist(err) {
+			at.State.SetWarning("path does not exist - %s", err)
+			break
+		}
+
+		if stat.IsDir() {
+			at.State.SetWarning("config file '%s' is a directory", path)
+			break
+		}
+	}
+
+	return at.State
+}
+
+
+// initConfig reads in config file and ENV variables if set.
+func (at *TypeScribeArgs) initConfig() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return
+	}
+	var err error
+
+	for range onlyOnce {
+		if at.ConfigPath != "" {
+			viper.SetConfigFile(at.ConfigPath)
+			// Use config file from the flag.
+		} else {
+			// Search config in home directory with name "launch" (without extension).
+			dir := filepath.Join(at.Runtime.User.HomeDir, ".gearbox")
+
+			viper.AddConfigPath(dir)
+			viper.SetConfigName("scribe")
+		}
+
+		//viper.AutomaticEnv() // read in environment variables that match
+
+		// If a config file is found, read it in.
+		err = viper.ReadInConfig()
+		if err != nil {
+			at.State.SetError(err)
+			ux.PrintflnWarning("config file, (%s), error - %s", at.ConfigPath, err)
+			break
+		}
+
+		//ux.Printf("using config file '%s'\n", viper.ConfigFileUsed())
+		//_ = viper.WriteConfig()
+	}
+}
+
+
+func (at *TypeScribeArgs) ReadConfig() *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		// If a config file is found, read it in.
+		err := viper.ReadInConfig()
+		if err != nil {
+			at.State.SetError(err)
+			break
+		}
+
+		at.State.SetOk()
+		//ux.Printf("using config file '%s'\n", viper.ConfigFileUsed())
+		//_ = viper.WriteConfig()
+	}
+
+	return at.State
+}
+
+
+func (at *TypeScribeArgs) WriteConfig() *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		err := viper.WriteConfig()
+		if err != nil {
+			at.State.SetError(err)
+			break
+		}
+
+		at.State.SetOk()
+	}
+
+	return at.State
+}
+
+
 func (at *TypeScribeArgs) CmdRoot(cmd *cobra.Command, args []string) {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return
+	}
+
 	for range onlyOnce {
 		if at.ParseScribeFlags(cmd) {
 			break
@@ -162,6 +421,12 @@ func (at *TypeScribeArgs) CmdRoot(cmd *cobra.Command, args []string) {
 			break
 		}
 
+		at.Load()
+		if at.State.IsNotOk() {
+			at.State.PrintResponse()
+			break
+		}
+
 		// Show help if no commands specified.
 		if len(args) == 0 {
 			_ = cmd.Help()
@@ -169,24 +434,42 @@ func (at *TypeScribeArgs) CmdRoot(cmd *cobra.Command, args []string) {
 			break
 		}
 	}
+
+	return
 }
 
 
 func (at *TypeScribeArgs) CmdTools(cmd *cobra.Command, args []string) {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return
+	}
+
 	for range onlyOnce {
 		at.State = at.ProcessArgs(cmd.Use, args)
 		// Ignore errors as there's no args.
 
+		at.Load()
+		if at.State.IsNotOk() {
+			at.State.PrintResponse()
+			break
+		}
+
 		at.PrintTools()
 		at.State.Clear()
 	}
+
+	return
 }
 
 
 func (at *TypeScribeArgs) CmdConvert(cmd *cobra.Command, args []string) {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return
+	}
+
 	for range onlyOnce {
 		at.RemoveTemplate = true
-		at.Output.File = SelectConvert
+		at.Output.Arg = SelectConvert
 
 		at.State = at.ProcessArgs(cmd.Use, args)
 		if at.State.IsNotOk() {
@@ -201,10 +484,16 @@ func (at *TypeScribeArgs) CmdConvert(cmd *cobra.Command, args []string) {
 		at.PrintflnNotify("Converting file '%s' => '%s'", at.Template.GetPath(), at.Output.GetPath())
 		at.State = at.Run()
 	}
+
+	return
 }
 
 
 func (at *TypeScribeArgs) CmdLoad(cmd *cobra.Command, args []string) {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return
+	}
+
 	for range onlyOnce {
 		at.State = at.ProcessArgs(cmd.Use, args)
 		if at.State.IsNotOk() {
@@ -218,14 +507,23 @@ func (at *TypeScribeArgs) CmdLoad(cmd *cobra.Command, args []string) {
 
 		at.PrintflnNotify("Loading template '%s' and saving result to '%s'", at.Template.GetPath(), at.Output.GetPath())
 		at.State = at.Run()
+		if at.State.IsNotOk() {
+			break
+		}
 	}
+
+	return
 }
 
 
 func (at *TypeScribeArgs) CmdRun(cmd *cobra.Command, args []string) {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return
+	}
+
 	for range onlyOnce {
 		at.ExecShell = true
-		at.Output.File = SelectConvert
+		at.Output.Arg = SelectConvert
 		at.StripHashBang = true
 
 		/*
@@ -247,10 +545,29 @@ func (at *TypeScribeArgs) CmdRun(cmd *cobra.Command, args []string) {
 		at.PrintflnNotify("Loading template '%s' and saving result to '%s'", at.Template.GetPath(), at.Output.GetPath())
 		at.State = at.Run()
 	}
+
+	return
 }
 
 
-func (at *TypeScribeArgs) FlagHide(flag string) {
+func (at *TypeScribeArgs) FlagGet(flag string) *pflag.Flag {
+	var ret *pflag.Flag
+	for range onlyOnce {
+		ret = at.cmd.Flag(flag)
+		if ret == nil {
+			at.State.SetError("Unknown flag '%s'.", flag)
+			break
+		}
+	}
+	return ret
+}
+
+
+func (at *TypeScribeArgs) FlagHide(flag string) *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
 	for range onlyOnce {
 		//err := at.cmd.Flags().MarkHidden(flag)
 		//if err != nil {
@@ -266,10 +583,16 @@ func (at *TypeScribeArgs) FlagHide(flag string) {
 
 		f.Hidden = true
 	}
+
+	return at.State
 }
 
 
-func (at *TypeScribeArgs) FlagSetDefault(flag string, def string) {
+func (at *TypeScribeArgs) FlagSetDefault(flag string, def string) *ux.State {
+	if state := ux.IfNilReturnError(at); state.IsError() {
+		return state
+	}
+
 	for range onlyOnce {
 		f := at.cmd.Flag(flag)
 		if f == nil {
@@ -279,4 +602,6 @@ func (at *TypeScribeArgs) FlagSetDefault(flag string, def string) {
 
 		f.DefValue = def
 	}
+
+	return at.State
 }

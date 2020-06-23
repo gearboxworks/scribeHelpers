@@ -11,7 +11,8 @@ import (
 
 
 type TypeArgFile struct {
-	File          string
+	Arg           string
+	Value         string
 	DefaultString string
 	DefaultFile   string
 	valid         bool
@@ -24,13 +25,23 @@ type TypeArgFile struct {
 	//
 	//State    *ux.State
 }
+type ScribeFile struct {
+	*TypeArgFile
+}
+type JsonFile struct {
+	*TypeArgFile
+}
+type TemplateFile struct {
+	*TypeArgFile
+}
 
 
 func NewArgFile(rt *toolRuntime.TypeRuntime) *TypeArgFile {
 	rt = rt.EnsureNotNil()
 
 	af := TypeArgFile{
-		File:          "",
+		Arg:           "",
+		Value:         "",
 		DefaultString: "",
 		DefaultFile:   "",
 		valid:         false,
@@ -50,12 +61,122 @@ func (at *TypeArgFile) IsNil() *ux.State {
 }
 
 
-func (at *TypeArgFile) SetDefaults(file string, str string) *ux.State {
+func (at *ScribeFile) SetDefaults(file string, str string) *ux.State {
 	if state := at.IsNil(); state.IsError() {
 		return state
 	}
-	at.DefaultFile = file
-	at.DefaultString = str
+	at.SetDefaultFile(file)
+	at.SetDefaultString(str)
+	return at.State
+}
+func (at *ScribeFile) SetDefaultFile(file string) *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	if file == "" {
+		at.DefaultFile = DefaultScribeFile
+		at.Arg = SelectDefault
+		at.Value = at.DefaultFile
+	} else {
+		at.DefaultFile = file
+		at.Arg = SelectFile
+		at.Value = file
+	}
+	return at.State
+}
+func (at *ScribeFile) SetDefaultString(str string) *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	if str == "" {
+		at.DefaultString = DefaultScribeString
+		at.Arg = SelectDefault
+		at.Value = at.DefaultString
+	} else {
+		at.DefaultString = str
+		at.Arg = SelectString
+		at.Value = str
+	}
+	return at.State
+}
+
+
+func (at *JsonFile) SetDefaults(file string, str string) *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	at.SetDefaultFile(file)
+	at.SetDefaultString(str)
+	return at.State
+}
+func (at *JsonFile) SetDefaultFile(file string) *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	if file == "" {
+		at.DefaultFile = DefaultJsonFile
+		at.Arg = SelectDefault
+		at.Value = at.DefaultFile
+	} else {
+		at.DefaultFile = file
+		at.Arg = SelectFile
+		at.Value = file
+	}
+	return at.State
+}
+func (at *JsonFile) SetDefaultString(str string) *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	if str == "" {
+		at.DefaultString = DefaultJsonString
+		at.Arg = SelectDefault
+		at.Value = at.DefaultString
+	} else {
+		at.DefaultString = str
+		at.Arg = SelectString
+		at.Value = str
+	}
+	return at.State
+}
+
+
+func (at *TemplateFile) SetDefaults(file string, str string) *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	at.SetDefaultFile(file)
+	at.SetDefaultString(str)
+	return at.State
+}
+func (at *TemplateFile) SetDefaultFile(file string) *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	if file == "" {
+		at.DefaultFile = DefaultTemplateFile
+		at.Arg = SelectDefault
+		at.Value = at.DefaultFile
+	} else {
+		at.DefaultFile = file
+		at.Arg = SelectFile
+		at.Value = file
+	}
+	return at.State
+}
+func (at *TemplateFile) SetDefaultString(str string) *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+	if str == "" {
+		at.DefaultString = DefaultTemplateString
+		at.Arg = SelectDefault
+		at.Value = at.DefaultString
+	} else {
+		at.DefaultString = str
+		at.Arg = SelectString
+		at.Value = str
+	}
 	return at.State
 }
 
@@ -67,19 +188,23 @@ func (at *TypeArgFile) IsSet() bool {
 			break
 		}
 
-		if at.File == "" {
+		if at.Value == "" {
 			break
 		}
 
-		if at.File == SelectIgnore {
+		if at.Arg == "" {
 			break
 		}
 
-		if at.File == SelectDefault {
+		if at.Arg == SelectIgnore {
 			break
 		}
 
-		if at.File == SelectStdout {
+		if at.Arg == SelectDefault {
+			break
+		}
+
+		if at.Arg == SelectStdout {
 			break
 		}
 
@@ -95,7 +220,7 @@ func (at *TypeArgFile) IsNotSet() bool {
 func (at *TypeArgFile) IsFileSet() bool {
 	var ok bool
 	for range onlyOnce {
-		if at.File == SelectFile {
+		if at.Arg == SelectFile {
 			ok = true
 			break
 		}
@@ -118,7 +243,7 @@ func (at *TypeArgFile) IsNotOk() bool {
 func (at *TypeArgFile) ChangeDir() bool {
 	var ok bool
 	for range onlyOnce {
-		if at.File != SelectFile {
+		if at.Arg != SelectFile {
 			break
 		}
 
@@ -134,7 +259,7 @@ func (at *TypeArgFile) ChangeDir() bool {
 
 
 func (at *TypeArgFile) IsStdFd() bool {
-	if at.File == SelectStdout {
+	if at.Arg == SelectStdout {
 		return true
 	}
 	return false
@@ -163,7 +288,7 @@ func (at *TypeArgFile) IsIgnore() bool {
 	if state := at.IsNil(); state.IsError() {
 		return true
 	}
-	if at.File == SelectIgnore {
+	if at.Arg == SelectIgnore {
 		return true
 	}
 	return false
@@ -186,27 +311,47 @@ func (at *TypeArgFile) SetInputFile(fileName string) *ux.State {
 			break
 		}
 
-		if fileName == SelectIgnore {
-			at.valid = true
-			at.File = SelectIgnore
-			at.SetContents(at.DefaultString)
-			at.State.SetOk("Ignore file.")
-			break
+		for range onlyOnce {
+			if fileName == SelectIgnore {
+				at.valid = true
+				at.Arg = SelectIgnore
+				at.Value = ""
+				at.SetContents(at.DefaultString)
+				at.State.SetOk("Ignore file.")
+				break
+			}
+
+			if fileName == SelectDefault {
+				at.valid = true
+				at.Arg = SelectDefault
+				at.Value = at.DefaultFile
+				at.SetContents(at.DefaultString)
+				at.State.SetOk("Input string set.")
+				break
+			}
+
+			if fileName == at.DefaultFile {
+				at.valid = true
+				at.Arg = SelectFile
+				at.Value = at.DefaultFile
+				at.SetContents(at.DefaultString)
+				at.State.SetOk("Input file set.")
+				break
+			}
+
+			if at.isAString(fileName) {
+				at.valid = true
+				at.Arg = SelectString
+				at.Value = at.DefaultString
+				at.SetContents(fileName)
+				at.State.SetOk("Input string set.")
+				break
+			}
+
+			at.Arg = SelectFile
 		}
 
-		if fileName == SelectDefault {
-			at.valid = true
-			at.File = SelectDefault
-			at.SetContents(at.DefaultString)
-			at.State.SetOk("Input string set.")
-			break
-		}
-
-		if fileName == at.DefaultFile {
-			at.valid = true
-			at.File = SelectDefault
-			at.SetContents(at.DefaultString)
-			at.State.SetOk("Input string set.")
+		if at.Arg != SelectFile {
 			break
 		}
 
@@ -216,22 +361,21 @@ func (at *TypeArgFile) SetInputFile(fileName string) *ux.State {
 			at.State = at.ReadFile()
 			if at.State.IsOk() {
 				at.valid = true
-				at.File = SelectFile
+				at.Arg = SelectFile
 				at.State.SetOk("Input file '%s' read OK.", at.GetPath())
 				break
 			}
 		}
 
-		if at.isAString(fileName) {
-			at.valid = true
-			at.File = SelectString
-			at.SetContents(fileName)
-			at.State.SetOk("Input string set.")
-			break
-		}
+		// Drop back to string.
+		at.valid = true
+		at.Arg = SelectDefault
+		at.Value = at.DefaultFile
+		at.SetContents(at.DefaultString)
+		at.State.SetOk("Input string set.")
 
-		at.valid = false
-		at.State.SetError("Argument is neither filename nor string.")
+		//at.valid = false
+		//at.State.SetError("Argument is neither filename nor string.")
 	}
 
 	return at.State
@@ -251,10 +395,11 @@ func (at *TypeArgFile) SetOutputFile(fileName string, overwrite bool) *ux.State 
 		} else if fileName == "-" {
 			fileName = DefaultOutFile
 		}
+		at.Value = fileName
 
 		if fileName == DefaultOutFile {
 			at.valid = true
-			at.File = SelectDefault
+			at.Arg = SelectDefault
 			at.State.SetOk()
 			at.SetOverwriteable()
 			at.SetFileHandle(os.Stdout)
@@ -296,7 +441,8 @@ func (at *TypeArgFile) SetInputString(fileString string) *ux.State {
 		}
 
 		at.valid = true
-		at.File = SelectString
+		at.Arg = SelectString
+		at.Value = fileString
 		at.SetContents(fileString)
 		at.State.SetOk()
 	}
@@ -317,7 +463,8 @@ func (at *TypeArgFile) SetInputStringArray(stringArray []string) *ux.State {
 		}
 
 		at.valid = true
-		at.File = SelectString
+		at.Arg = SelectString
+		at.Value = strings.Join(stringArray, "\n")
 		at.SetContents(stringArray)
 		at.State.SetOk()
 	}
