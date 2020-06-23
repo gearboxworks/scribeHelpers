@@ -61,14 +61,14 @@ func NewContainer(runtime *toolRuntime.TypeRuntime) *Container {
 }
 
 
-func (i *Container) EnsureNotNil() *Container {
+func (c *Container) EnsureNotNil() *Container {
 	for range onlyOnce {
-		if i == nil {
-			i = NewContainer(nil)
+		if c == nil {
+			c = NewContainer(nil)
 		}
-		i.State = i.State.EnsureNotNil()
+		c.State = c.State.EnsureNotNil()
 	}
-	return i
+	return c
 }
 
 

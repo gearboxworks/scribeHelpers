@@ -3,6 +3,7 @@ package toolGear
 import (
 	"context"
 	"github.com/docker/docker/client"
+	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/toolGear/gearSsh"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
@@ -12,6 +13,8 @@ import (
 type DockerGear struct {
 	Image     *Image
 	Container *Container
+
+	gearConfig *gearConfig.GearConfig
 
 	Client    *client.Client
 	Ssh       *gearSsh.Ssh
@@ -39,6 +42,8 @@ func New(runtime *toolRuntime.TypeRuntime) *DockerGear {
 
 		gear.Image = NewImage(runtime)
 		gear.Container = NewContainer(runtime)
+
+		gear.gearConfig = gearConfig.New(runtime)
 
 		var err error
 		gear.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -113,4 +118,43 @@ func (gear *DockerGear) AddVolume(local string, remote string) bool {
 
 func (gear *DockerGear) ContainerCreate(gearName string, gearVersion string) *ux.State {
 	return gear.Container.ContainerCreate(gearName, gearVersion)
+}
+
+
+func (gear *DockerGear) List(name string) *ux.State {
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		_, gear.State = gear.ImageList(name)
+		if gear.State.IsError() {
+			break
+		}
+
+		_, gear.State = gear.ContainerList(name)
+		if gear.State.IsError() {
+			break
+		}
+
+		gear.State = gear.NetworkList(DefaultNetwork)
+	}
+
+	return gear.State
+}
+
+
+func (gear *DockerGear) ParseGearConfig(cs string) *ux.State {
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gear.State = gear.gearConfig.ParseJson(cs)
+		if gear.State.IsNotOk() {
+			break
+		}
+	}
+
+	return gear.State
 }

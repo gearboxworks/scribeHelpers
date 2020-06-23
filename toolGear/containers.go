@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
@@ -136,6 +137,131 @@ func (gear *DockerGear) ContainerList(f string) (int, *ux.State) {
 	}
 
 	return count, gear.State
+}
+
+func (gear *DockerGear) ContainerSprintf(f string) string {
+	var ret string
+	if state := gear.IsNil(); state.IsError() {
+		ret = ux.SprintfRed("No Gearbox containers found.\n")
+		return ret
+	}
+
+	for range onlyOnce {
+		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		//noinspection GoDeferInLoop
+		defer cancel()
+
+		var containers []types.Container
+		var err error
+		containers, err = gear.Client.ContainerList(ctx, types.ContainerListOptions{Size: true, All: true})
+		if err != nil {
+			gear.State.SetError("gear list error: %s", err)
+			ret = ux.SprintfRed("Provider error: %s\n", err)
+			break
+		}
+
+		ret = ux.SprintfCyan("Installed Gearbox gears:\n")
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{
+			"Name",
+			"Class",
+			"State",
+			"Image",
+			"Ports",
+			"SSH port",
+			"IP Address",
+			"Mounts",
+			"Size",
+		})
+
+
+		//gc := toolGear.NewGearConfig(gear.Runtime)
+		gc := gearConfig.New(gear.Runtime)
+		for _, c := range containers {
+			//c.State = gc.ParseJson(c.Summary.Labels["gearbox.json"])
+			//if c.State.IsError() {
+			//	break
+			//}
+			gear.State = gc.ParseJson(c.Labels["gearbox.json"])
+			if gear.State.IsError() {
+				continue
+			}
+
+			if gc.Meta.Organization != DefaultOrganization {
+				continue
+			}
+
+			if f != "" {
+				if gc.Meta.Name != f {
+					continue
+				}
+			}
+
+			name := strings.TrimPrefix(c.Names[0], "/")
+
+			sshPort := ""
+			var ports string
+			for _, p := range c.Ports {
+				if p.PrivatePort == 22 {
+					sshPort = fmt.Sprintf("%d", p.PublicPort)
+					continue
+				}
+				//ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
+				if p.IP == "0.0.0.0" {
+					ports += fmt.Sprintf("%d => %d\n", p.PublicPort, p.PrivatePort)
+				} else {
+					ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
+				}
+			}
+			if sshPort == "0" {
+				sshPort = "none"
+			}
+
+			var mounts string
+			for _, m := range c.Mounts {
+				// ms += fmt.Sprintf("%s(%s) host:%s => container:%s (RW:%v)\n", m.Name, m.Type, m.Source, m.Destination, m.RW)
+				mounts += fmt.Sprintf("host:%s\n\t=> container:%s (RW:%v)\n", m.Source, m.Destination, m.RW)
+			}
+
+			var ipAddress string
+			for k, n := range c.NetworkSettings.Networks {
+				ipAddress += fmt.Sprintf("(%s) %s\n", k, n.IPAddress)
+			}
+
+			var state string
+			if c.State == ux.StateRunning {
+				state = ux.SprintfGreen(c.State)
+			} else {
+				state = ux.SprintfYellow(c.State)
+			}
+
+			t.AppendRow([]interface{}{
+				ux.SprintfWhite(name),
+				ux.SprintfWhite(gc.Meta.Class),
+				state,
+				ux.SprintfWhite(c.Image),
+				ux.SprintfWhite(ports),
+				ux.SprintfWhite(sshPort),
+				ux.SprintfWhite(ipAddress),
+				ux.SprintfWhite(mounts),
+				ux.SprintfWhite(humanize.Bytes(uint64(c.SizeRootFs))),
+			})
+		}
+
+		gear.State.ClearError()
+		count := t.Length()
+		if count == 0 {
+			ret += ux.SprintfYellow("No Gearbox containers found.\n")
+			break
+		}
+		ret += ux.SprintfGreen("Found %d Gearbox containers.\n", count)
+
+		ret += t.Render()
+		//ux.PrintflnBlue("")
+	}
+
+	return ret
 }
 
 func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool, *ux.State) {

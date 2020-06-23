@@ -7,27 +7,53 @@ import (
 )
 
 
+//func ReflectString(ref interface{}) *string {
+//	var s string
+//
+//	for range onlyOnce {
+//		switch ref.(type) {
+//			case []byte:
+//				s = ref.(string)
+//			case string:
+//				s = ref.(string)
+//			case []string:
+//				s = strings.Join(ref.([]string), ux.DefaultSeparator)
+//		}
+//		//value := reflect.ValueOf(ref)
+//		//if value.Kind() == reflect.String {
+//		//	st := value.String()
+//		//	s = &st
+//		//	break
+//		//}
+//	}
+//
+//	return &s
+//}
+
 func ReflectString(ref interface{}) *string {
-	var s string
+	var s *string
 
 	for range onlyOnce {
-		switch ref.(type) {
-			case []byte:
-				s = ref.(string)
-			case string:
-				s = ref.(string)
-			case []string:
-				s = strings.Join(ref.([]string), ux.DefaultSeparator)
-		}
 		//value := reflect.ValueOf(ref)
 		//if value.Kind() == reflect.String {
 		//	st := value.String()
 		//	s = &st
 		//	break
 		//}
+		switch ref.(type) {
+			case []byte:
+				sr := ref.(string)
+				s = &sr
+			case string:
+				sr := ref.(string)
+				s = &sr
+			case []string:
+				sr := strings.Join(ref.([]string), ux.DefaultSeparator)
+				s = &sr
+		}
 	}
 
-	return &s
+	return s
 }
 
 func ReflectStrings(ref ...interface{}) *[]string {

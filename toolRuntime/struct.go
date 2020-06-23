@@ -4,6 +4,7 @@ import (
 	"github.com/kardianos/osext"
 	"github.com/newclarity/scribeHelpers/ux"
 	"os"
+	"os/user"
 	"path"
 	"runtime"
 	"strings"
@@ -31,9 +32,12 @@ type TypeRuntime struct {
 
 	GoRuntime      GoRuntime	`json:"go_runtime" mapstructure:"go_runtime"`
 
+	User           User			`json:"user" mapstructure:"user"`
+
 	Debug          bool			`json:"debug" mapstructure:"debug"`
 	State          *ux.State	`json:"state" mapstructure:"state"`
 }
+
 
 type ExecArgs []string
 type ExecEnv []string
@@ -47,13 +51,10 @@ type GoRuntime struct {
 	NumCpus int
 }
 
-//type ExecCommand struct {
-//	Dir string
-//	TypeFile string
-//	FullPath string
-//	AsLink bool
-//}
-// var RunAs ExecCommand
+
+type User struct {
+	*user.User
+}
 
 
 // Instead of creating every time, let's cache the initial result in a global variable.
@@ -121,6 +122,12 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 		ret.Cmd =     exe
 		ret.CmdDir =  path.Dir(exe)
 		ret.CmdFile = path.Base(exe)
+
+		ret.User.User, err = user.Current()
+		if err != nil {
+			ret.State.SetError(err)
+			break
+		}
 
 		ret.State.SetPackage("")
 		ret.State.SetFunction()

@@ -84,12 +84,12 @@ func (gc *GearConfig) IsValid() *ux.State {
 
 
 func (gc *GearConfig) ParseJson(cs string) *ux.State {
-
 	if gc == nil {
 		gc = gc.EnsureNotNil()
-		fmt.Printf("HEY")
+		ux.PrintfRed("GearConfig is nil!\n")
 		return gc.State
 	}
+
 	for range onlyOnce {
 		gc.State = gc.State.EnsureNotNil()
 
@@ -141,4 +141,29 @@ func (gc *GearConfig) IsMatchedGear(gearName string, gearVersion string, tagVers
 	}
 
 	return ok
+}
+
+
+func (gc *GearConfig) String() string {
+	var ret string
+	if state := ux.IfNilReturnError(gc); state.IsError() {
+		return ux.SprintfRed("GearConfig is empty.\n")
+	}
+
+	for range onlyOnce {
+		if gc.Schema == "" {
+			ret = ux.SprintfRed("GearConfig is empty.\n")
+			break
+		}
+
+		ret += ux.SprintfBlue("Schema: %s\n", gc.Schema)
+		ret += ux.SprintfBlue("%v", gc.Meta.String())
+		ret += ux.SprintfBlue("%v", gc.Build.String())
+		ret += ux.SprintfBlue("%v", gc.Run.String())
+		ret += ux.SprintfBlue("%v", gc.Project.String())
+		ret += ux.SprintfBlue("%v", gc.Extensions.String())
+		ret += ux.SprintfBlue("%v", gc.Versions.String())
+	}
+
+	return ret
 }
