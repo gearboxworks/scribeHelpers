@@ -51,7 +51,8 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 			if ext == ".scribe" {
 				if at.Scribe.IsNotIgnore() {
 					at.PrintflnNotify("Setting scribe file '%s'", args[0])
-					at.Scribe.Arg = args[0]
+					at.Scribe.Value = args[0]
+					at.Scribe.Arg = SelectFile
 					args = args[1:]
 				}
 			}
@@ -59,7 +60,8 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 			if ext == ".json" {
 				if at.Json.IsNotIgnore() {
 					at.PrintflnNotify("Setting JSON file '%s'", args[0])
-					at.Json.Arg = args[0]
+					at.Json.Value = args[0]
+					at.Json.Arg = SelectFile
 					args = args[1:]
 				}
 				continue
@@ -68,7 +70,8 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 			if ext == ".tmpl" {
 				if at.Template.IsNotIgnore() {
 					at.PrintflnNotify("Setting template file '%s'", args[0])
-					at.Template.Arg = args[0]
+					at.Template.Value = args[0]
+					at.Template.Arg = SelectFile
 					args = args[1:]
 				}
 			}

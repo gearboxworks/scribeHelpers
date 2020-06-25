@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/newclarity/scribeHelpers/ux"
 	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"strings"
 )
 
@@ -115,16 +116,17 @@ func (g *TypeGit) Lock() *ux.State {
 	g.State.SetFunction()
 
 	for range onlyOnce {
-		g.State = g.GetTagObject(LockTag)
+		var ot *object.Tag
+		ot, g.State = g.GetTagObject(LockTag)
 		if g.State.IsError() {
 			break
 		}
 
-		ot := responseToObjectTag(g.State.GetResponse())
-		if ot == nil {
-			g.State.SetError("Error tags empty.")
-			break
-		}
+		//ot := responseToObjectTag(g.State.GetResponse())
+		//if ot == nil {
+		//	g.State.SetError("Error tags empty.")
+		//	break
+		//}
 
 		g.State.SetResponse(ot.ID())
 	}

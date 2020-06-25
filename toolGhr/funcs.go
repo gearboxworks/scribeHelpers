@@ -125,6 +125,16 @@ func (m *message) String() string {
 }
 
 
+func AddVersionPrefix(v string) string {
+	if !strings.HasPrefix(v, "v") {
+		v = "v" + v
+	}
+	return v
+}
+func RemoveVersionPrefix(v string) string {
+	return strings.TrimPrefix(v, "v")
+}
+
 /* nvls returns the first value in xs that is not empty. */
 func nvls(xs ...string) string {
 	for _, s := range xs {

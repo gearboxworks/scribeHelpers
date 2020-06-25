@@ -140,11 +140,22 @@ func (g *TypeGit) SetPath(path ...string) *ux.State {
 
 
 // Usage:
+//		{{- $cmd := $git.GetPath }}
+//		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
+func (g *TypeGit) GetPath() string {
+	if state := g.IsNil(); state.IsError() {
+		return ""
+	}
+	return g.Base.GetPath()
+}
+
+
+// Usage:
 //		{{- $cmd := $git.GetUrl }}
 //		{{- if $cmd.IsOk }}{{ $cmd.data }}{{- end }}
-func (g *TypeGit) GetUrl() *ux.State {
+func (g *TypeGit) GetUrl() (string, *ux.State) {
 	if state := g.IsNil(); state.IsError() {
-		return state
+		return "", state
 	}
 	g.State.SetFunction()
 
@@ -155,10 +166,11 @@ func (g *TypeGit) GetUrl() *ux.State {
 		}
 
 		g.Url = g.State.Output
-		g.State.SetResponse(&g.State.Output)
+		//g.Url = g.State.Output
+		//g.State.SetResponse(&g.State.Output)
 	}
 
-	return g.State
+	return g.Url, g.State
 }
 
 
