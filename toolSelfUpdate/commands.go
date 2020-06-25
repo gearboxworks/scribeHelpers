@@ -1,10 +1,14 @@
 package toolSelfUpdate
 
 import (
+	"context"
 	"fmt"
+	"github.com/google/go-github/v30/github"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"github.com/tcnksm/go-gitconfig"
+	"os"
 	"strings"
 )
 
@@ -21,8 +25,8 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 
 		var versionCmd = &cobra.Command{
 			Use:                   CmdVersion,
-			Short:                 ux.SprintfMagenta(su.runtime.CmdName) + ux.SprintfBlue(" - Self-manage this executable."),
-			Long:                  ux.SprintfMagenta(su.runtime.CmdName) + ux.SprintfBlue(" - Self-manage this executable."),
+			Short:                 ux.SprintfMagenta(su.Runtime.CmdName) + ux.SprintfBlue(" - Self-manage this executable."),
+			Long:                  ux.SprintfMagenta(su.Runtime.CmdName) + ux.SprintfBlue(" - Self-manage this executable."),
 			DisableFlagParsing:    true,
 			DisableFlagsInUseLine: true,
 			Run: func(cmd *cobra.Command, args []string) {
@@ -31,8 +35,8 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 		}
 		var selfUpdateCmd = &cobra.Command{
 			Use:                   CmdSelfUpdate,
-			Short:                 ux.SprintfMagenta(su.runtime.CmdName) + ux.SprintfBlue(" - Update version of executable."),
-			Long:                  ux.SprintfMagenta(su.runtime.CmdName) + ux.SprintfBlue(" - Check and update the latest version."),
+			Short:                 ux.SprintfMagenta(su.Runtime.CmdName) + ux.SprintfBlue(" - Update version of executable."),
+			Long:                  ux.SprintfMagenta(su.Runtime.CmdName) + ux.SprintfBlue(" - Check and update the latest version."),
 			DisableFlagParsing:    true,
 			DisableFlagsInUseLine: true,
 			Run: func(cmd *cobra.Command, args []string) {
@@ -102,7 +106,7 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 		versionCmd.AddCommand(versionUpdateCmd)
 
 		if !disableVflag {
-			su.cmd.Flags().BoolP(FlagVersion, "v", false, ux.SprintfBlue("Display version of %s", su.runtime.CmdName))
+			su.cmd.Flags().BoolP(FlagVersion, "v", false, ux.SprintfBlue("Display version of %s", su.Runtime.CmdName))
 		}
 	}
 
@@ -122,27 +126,21 @@ func (su *TypeSelfUpdate) Version(cmd *cobra.Command, args ...string) *ux.State 
 
 
 func (su *TypeSelfUpdate) VersionShow() *ux.State {
-	su.runtime.PrintNameVersion()
+	su.Runtime.PrintNameVersion()
 	su.State.SetOk()
 	return su.State
 }
 
 
-//func (su *TypeSelfUpdate) VersionInfo(v *toolRuntime.VersionValue) *ux.State {
 func (su *TypeSelfUpdate) VersionInfo(args ...string) *ux.State {
 	for range onlyOnce {
 		if len(args) == 0 {
 			args = []string{CmdVersionLatest}
 		}
 
-		//update := toolSelfUpdate.New(su.Runtime)
-		//if update.State.IsError() {
-		//	su.State = update.State
-		//	break
-		//}
-
 		for _, v := range args {
-			su.State = su.PrintVersion(GetSemVer(v))
+			fv := GetSemVer(v)
+			su.State = su.PrintVersion(fv)
 			if su.State.IsNotOk() {
 				break
 			}
@@ -155,22 +153,31 @@ func (su *TypeSelfUpdate) VersionInfo(args ...string) *ux.State {
 
 func (su *TypeSelfUpdate) VersionList(args ...string) *ux.State {
 	for range onlyOnce {
-		if len(args) == 0 {
-			// @TODO = Obtain full list of versions.
-			args = []string{CmdVersionLatest}
+		token := os.Getenv("GITHUB_TOKEN")
+		if token == "" {
+			token, _ = gitconfig.GithubToken()
 		}
 
-		//update := toolSelfUpdate.New(su.Runtime)
-		//if update.State.IsError() {
-		//	su.State = update.State
-		//	break
-		//}
+		var err error
+		gh := github.NewClient(newHTTPClient(context.Background(), token))
+		var rels []*github.RepositoryRelease
+		rels, _, err = gh.Repositories.ListReleases(context.Background(), su.useRepo.Owner, su.useRepo.Name, nil)
+		if err != nil {
+			su.State.SetError(err)
+			break
+		}
 
-		for _, v := range args {
-			su.State = su.PrintVersion(GetSemVer(v))
-			if su.State.IsNotOk() {
-				break
+		for _, rel := range rels {
+			su.State = su.PrintVersionSummary(*rel.TagName)
+			if su.State.IsOk() {
+				continue
 			}
+			su.State = su.PrintVersionSummary(*rel.Name)
+			if su.State.IsOk() {
+				continue
+			}
+			// WORKAROUND: (selfupdate) - If selfupdate.Release returns nil, then print direct.
+			su.State = su.PrintSummary(rel)
 		}
 	}
 
@@ -180,12 +187,6 @@ func (su *TypeSelfUpdate) VersionList(args ...string) *ux.State {
 
 func (su *TypeSelfUpdate) VersionCheck() *ux.State {
 	for range onlyOnce {
-		//update := toolSelfUpdate.New(su.Runtime)
-		//if update.State.IsError() {
-		//	su.State = update.State
-		//	break
-		//}
-
 		su.State = su.IsUpdated(true)
 		if su.State.IsError() {
 			break
@@ -198,18 +199,27 @@ func (su *TypeSelfUpdate) VersionCheck() *ux.State {
 
 func (su *TypeSelfUpdate) VersionUpdate() *ux.State {
 	for range onlyOnce {
-		//update := toolSelfUpdate.New(su.Runtime)
-		//if update.State.IsError() {
-		//	su.State = update.State
-		//	break
-		//}
-
 		su.State = su.IsUpdated(true)
 		if su.State.IsError() {
 			break
 		}
 
-		su.State = su.Update()
+		su.State = su.CreateDummyBinary()
+		if su.State.IsNotOk() {
+			break
+		}
+
+		su.State = su.UpdateTo(su.GetVersionValue())
+		if su.State.IsNotOk() {
+			break
+		}
+
+		if !su.AutoExec {
+			break
+		}
+
+		// AutoExec will execute the new binary with the same args as given.
+		su.State = su.AutoRun()
 		if su.State.IsNotOk() {
 			break
 		}
@@ -425,7 +435,7 @@ func (su *TypeSelfUpdate) HelpExamples() {
 		for _, v := range examples {
 			fmt.Printf("# %s\n\t%s %s\n\n",
 				ux.SprintfBlue(v.Info),
-				ux.SprintfCyan("%s %s", su.runtime.CmdName, v.Command),
+				ux.SprintfCyan("%s %s", su.Runtime.CmdName, v.Command),
 				ux.SprintfWhite(strings.Join(v.Args, " ")),
 			)
 		}

@@ -14,6 +14,7 @@ type SelfUpdateGetter interface {
 }
 
 type SelfUpdateArgs struct {
+	owner      *string
 	name       *string
 	version    *string
 	sourceRepo *string
@@ -23,18 +24,20 @@ type SelfUpdateArgs struct {
 }
 
 type TypeSelfUpdate struct {
-	name       *StringValue
-	version    *VersionValue
-	sourceRepo *StringValue
-	binaryRepo *StringValue
-	logging    *FlagValue
+	sourceRepo *UrlValue
+	binaryRepo *UrlValue
+	useRepo    *UrlValue
 
+	OldVersion    *VersionValue
+	TargetBinary  string
+	RuntimeBinary string
+	AutoExec      bool
+
+	logging    *FlagValue
 	config     *selfupdate.Config
 	ref        *selfupdate.Updater
 
-	useRepo    string
-
-	runtime    *toolRuntime.TypeRuntime
+	Runtime    *toolRuntime.TypeRuntime
 	State      *ux.State
 	cmd        *cobra.Command
 }
@@ -66,12 +69,16 @@ func New(rt *toolRuntime.TypeRuntime) *TypeSelfUpdate {
 	rt = rt.EnsureNotNil()
 
 	te := TypeSelfUpdate{
-		name:       toStringValue(rt.CmdName),
-		version:    toVersionValue(rt.CmdVersion),
-		sourceRepo: toStringValue(stripUrlPrefix(rt.CmdSourceRepo)),
-		binaryRepo: toStringValue(stripUrlPrefix(rt.CmdBinaryRepo)),
-		logging:    toBoolValue(rt.Debug),
+		sourceRepo: toUrlValue(rt.CmdSourceRepo),
+		binaryRepo: toUrlValue(rt.CmdBinaryRepo),
+		useRepo:    nil,
 
+		OldVersion:   nil,
+		TargetBinary: rt.Cmd,
+		RuntimeBinary: ResolveFile(rt.Cmd),
+		AutoExec:     false,
+
+		logging:    toBoolValue(rt.Debug),
 		config:     &selfupdate.Config{
 			APIToken:            "",
 			EnterpriseBaseURL:   "",
@@ -80,13 +87,13 @@ func New(rt *toolRuntime.TypeRuntime) *TypeSelfUpdate {
 			Filters:             []string{},
 		},
 
-		useRepo:    "",
-
-		runtime: rt,
+		Runtime: rt,
 		State:   ux.NewState(rt.CmdName, rt.Debug),
+		cmd:     nil,
 	}
 	te.State.SetPackage("")
 	te.State.SetFunctionCaller()
+	te.useRepo = te.binaryRepo
 
 	// Workaround for selfupdate not being flexible enough to support variable asset names
 	// Should enable a template similar to GoReleaser.
@@ -96,7 +103,7 @@ func New(rt *toolRuntime.TypeRuntime) *TypeSelfUpdate {
 	//te.config.Filters = append(te.config.Filters, asset)
 
 	// Ignore the above and just make sure all filenames are lowercase.
-	te.config.Filters = append(te.config.Filters, addFilters(rt.CmdName, runtime.GOOS, runtime.GOARCH)...)
+	te.config.Filters = append(te.config.Filters, addFilters(rt.CmdFile, runtime.GOOS, runtime.GOARCH)...)
 	te.ref, _ = selfupdate.NewUpdater(*te.config)
 	if *te.logging {
 		selfupdate.EnableLog()
@@ -137,49 +144,54 @@ func addFilters(Binary string, Os string, Arch string) []string {
 }
 
 
-func (su *TypeSelfUpdate) IsValid() *ux.State {
+func (su *TypeSelfUpdate) IsValid() bool {
+	var ok bool
 	for range onlyOnce {
-		if su.name.IsNotValid() {
-			su.State.SetWarning("binary name is not defined - selfupdate disabled")
+		if su.useRepo.Owner == "" {
+			su.State.SetWarning("rep owner is not defined - selfupdate disabled")
 			break
 		}
 
-		if su.version.IsNotValid() {
-			su.State.SetWarning("binary version is not defined - selfupdate disabled")
+		if su.useRepo.Name == "" {
+			su.State.SetWarning("repo name is not defined - selfupdate disabled")
 			break
 		}
 
 		// Refer to binary repo definition first.
 		if su.binaryRepo.IsValid() {
-			su.useRepo = su.binaryRepo.ToString()
+			su.useRepo = su.binaryRepo
 			su.State.SetOk()
+			ok = true
 			break
 		}
 
 		// If binary repo is not set, use source repo.
 		if su.sourceRepo.IsValid() {
-			su.useRepo = su.sourceRepo.ToString()
+			su.useRepo = su.sourceRepo
 			su.State.SetOk()
+			ok = true
 			break
 		}
 
 		su.State.SetWarning(errorNoRepo)
 	}
 
-	return su.State
+	return ok
 }
-
+func (su *TypeSelfUpdate) IsNotValid() bool {
+	return !su.IsValid()
+}
 
 func (su *TypeSelfUpdate) getRepo() string {
 	var ret string
 
 	for range onlyOnce {
 		if su.binaryRepo.IsValid() {
-			ret = su.binaryRepo.ToString()
+			ret = su.binaryRepo.String()
 			break
 		}
 		if su.sourceRepo.IsValid() {
-			ret = su.sourceRepo.ToString()
+			ret = su.sourceRepo.String()
 			break
 		}
 	}
