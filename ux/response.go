@@ -2,7 +2,6 @@ package ux
 
 import (
 	//"fmt"
-	"fmt"
 	"reflect"
 )
 
@@ -227,9 +226,12 @@ func (r *TypeResponse) Set(ref interface{}) bool {
 		r.ofType = s.Type()
 		r.data = ref
 
-		fmt.Printf("String: %s\t", r.ofType.String())
-		fmt.Printf("Name: %s\t", r.ofType.Name())
-		fmt.Printf("Kind: %s\n", r.ofType.Kind())
+		// @TODO MICKMAKE
+		//fmt.Printf("String: %s\t", r.ofType.String())
+		//fmt.Printf("Name: %s\t", r.ofType.Name())
+		//fmt.Printf("Kind: %s\n", r.ofType.Kind())
+		// @TODO MICKMAKE
+
 		// If we have a pointer, then call again with the value of that pointer.
 		if r.ofType.Kind().String() == "ptr" {
 			ok = r.Set(s.Addr().Elem().Interface())

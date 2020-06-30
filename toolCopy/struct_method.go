@@ -74,7 +74,7 @@ func _CopyMethodRsync() *TypeCopyMethod {
 			Verbose:       true,
 			Archive:       true,
 			OneFileSystem: true,
-			Progress:      true,
+			Progress:      false,
 			//RsyncProgramm:     path,
 		}
 

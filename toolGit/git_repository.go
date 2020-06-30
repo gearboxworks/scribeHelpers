@@ -34,7 +34,9 @@ func (g *TypeGit) Clone() *ux.State {
 		}
 
 
-		ux.PrintfWhite("Cloning %s into %s\n", g.Url, g.Base.GetPath())
+		if g.State.IsVerboseMode() {
+			ux.PrintfWhite("Cloning %s into %s\n", g.Url, g.Base.GetPath())
+		}
 		g.skipDirCheck = true
 		g.State = g.Exec(gitCommandClone, g.Url, g.Base.GetPath())
 		g.skipDirCheck = false

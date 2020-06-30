@@ -50,7 +50,9 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 
 			if ext == ".scribe" {
 				if at.Scribe.IsNotIgnore() {
-					at.PrintflnNotify("Setting scribe file '%s'", args[0])
+					if at.Verbose {
+						at.PrintflnNotify("Setting scribe file '%s'", args[0])
+					}
 					at.Scribe.Value = args[0]
 					at.Scribe.Arg = SelectFile
 					args = args[1:]
@@ -59,7 +61,9 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 
 			if ext == ".json" {
 				if at.Json.IsNotIgnore() {
-					at.PrintflnNotify("Setting JSON file '%s'", args[0])
+					if at.Verbose {
+						at.PrintflnNotify("Setting JSON file '%s'", args[0])
+					}
 					at.Json.Value = args[0]
 					at.Json.Arg = SelectFile
 					args = args[1:]
@@ -69,7 +73,9 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 
 			if ext == ".tmpl" {
 				if at.Template.IsNotIgnore() {
-					at.PrintflnNotify("Setting template file '%s'", args[0])
+					if at.Verbose {
+						at.PrintflnNotify("Setting template file '%s'", args[0])
+					}
 					at.Template.Value = args[0]
 					at.Template.Arg = SelectFile
 					args = args[1:]
@@ -291,11 +297,17 @@ func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 			at.ForceOverwrite = false
 			at.RemoveOutput = false
 			at.RemoveTemplate = false
+			at.Runtime.Debug = true
 		} else {
+			at.Runtime.Debug = false
 			//at.OverWriteOutput = false
 			//at.RemoveOutput = false
 			//at.RemoveTemplate = false
 		}
+
+
+		// Verbose mode.
+		at.Runtime.Verbose = at.Verbose
 
 
 		// Change to working path first.

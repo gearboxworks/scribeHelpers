@@ -45,6 +45,7 @@ type State struct {
 	_Debug      error
 	ExitCode    int
 	debug       RuntimeDebug
+	verbose     bool
 
 	RunState    string
 
@@ -724,6 +725,36 @@ func (state *State) GetDebug() error {
 	return state._Debug
 }
 
+func (state *State) SetVerboseMode(m bool) {
+	for range onlyOnce {
+		if state == nil {
+			break
+		}
+		state.verbose = m
+	}
+}
+func (state *State) EnableVerboseMode() {
+	for range onlyOnce {
+		if state == nil {
+			break
+		}
+		state.verbose = true
+	}
+}
+func (state *State) DisableVerboseMode() {
+	for range onlyOnce {
+		if state == nil {
+			break
+		}
+		state.verbose = false
+	}
+}
+func (state *State) IsVerboseMode() bool {
+	if state == nil {
+		return false
+	}
+	return state.verbose
+}
 
 func (state *State) IsResponseOfType(t string) bool {
 	return state.response.IsOfType(t)

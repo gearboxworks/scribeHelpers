@@ -107,11 +107,14 @@ For example: #!/usr/bin/env scribe --json gearbox.json run
 		}
 
 
+		var flags *pflag.FlagSet
 		if subCmd {
 			at.cmd = rootCmd
 			cmd.AddCommand(rootCmd)
+			flags = at.cmd.Flags()
 		} else {
 			at.cmd = cmd
+			flags = at.cmd.PersistentFlags()
 		}
 
 		at.cmd.AddCommand(convertCmd)
@@ -136,25 +139,25 @@ For example: #!/usr/bin/env scribe --json gearbox.json run
 			at.WorkingPath.DefaultFile = DefaultWorkingPath
 		}
 
-		at.cmd.Flags().StringVarP(&at.Scribe.Value, FlagScribeFile, "s", at.Scribe.DefaultFile, ux.SprintfBlue("Alternative SCRIBE file."))
-		at.cmd.Flags().StringVarP(&at.Json.Value, FlagJsonFile, "j", at.Json.DefaultFile, ux.SprintfBlue("Alternative JSON file."))
-		at.cmd.Flags().StringVarP(&at.Template.Value, FlagTemplateFile, "t", at.Template.DefaultFile, ux.SprintfBlue("Alternative template file."))
-		at.cmd.Flags().StringVarP(&at.Output.Value, FlagOutputFile, "o", at.Output.DefaultFile, ux.SprintfBlue("Output file."))
-		at.cmd.Flags().StringVarP(&at.WorkingPath.Value, FlagWorkingPath, "p", at.WorkingPath.DefaultFile, ux.SprintfBlue("Set working path."))
+		flags.StringVarP(&at.Scribe.Value, FlagScribeFile, "s", at.Scribe.DefaultFile, ux.SprintfBlue("Alternative SCRIBE file."))
+		flags.StringVarP(&at.Json.Value, FlagJsonFile, "j", at.Json.DefaultFile, ux.SprintfBlue("Alternative JSON file."))
+		flags.StringVarP(&at.Template.Value, FlagTemplateFile, "t", at.Template.DefaultFile, ux.SprintfBlue("Alternative template file."))
+		flags.StringVarP(&at.Output.Value, FlagOutputFile, "o", at.Output.DefaultFile, ux.SprintfBlue("Output file."))
+		flags.StringVarP(&at.WorkingPath.Value, FlagWorkingPath, "p", at.WorkingPath.DefaultFile, ux.SprintfBlue("Set working path."))
 
-		at.cmd.Flags().BoolVarP(&at.Chdir, FlagChdir, "c", false, ux.SprintfBlue("Change to directory containing %s", DefaultJsonFile))
-		at.cmd.Flags().BoolVarP(&at.RemoveTemplate, FlagRemoveTemplate, "", false, ux.SprintfBlue("Remove template file afterwards."))
-		at.cmd.Flags().BoolVarP(&at.ForceOverwrite, FlagForce, "f", false, ux.SprintfBlue("Force overwrite of output files."))
-		at.cmd.Flags().BoolVarP(&at.RemoveOutput, FlagRemoveOutput, "", false, ux.SprintfBlue("Remove output file afterwards."))
-		at.cmd.Flags().BoolVarP(&at.QuietProgress, FlagQuiet, "q", false, ux.SprintfBlue("Silence progress in shell scripts."))
-		at.cmd.Flags().BoolVarP(&at.Verbose, FlagVerbose, "", false, ux.SprintfBlue("Verbose output."))
+		flags.BoolVarP(&at.Chdir, FlagChdir, "c", false, ux.SprintfBlue("Change to directory containing %s", DefaultJsonFile))
+		flags.BoolVarP(&at.RemoveTemplate, FlagRemoveTemplate, "", false, ux.SprintfBlue("Remove template file afterwards."))
+		flags.BoolVarP(&at.ForceOverwrite, FlagForce, "f", false, ux.SprintfBlue("Force overwrite of output files."))
+		flags.BoolVarP(&at.RemoveOutput, FlagRemoveOutput, "", false, ux.SprintfBlue("Remove output file afterwards."))
+		flags.BoolVarP(&at.QuietProgress, FlagQuiet, "q", false, ux.SprintfBlue("Silence progress in shell scripts."))
+		flags.BoolVarP(&at.Verbose, FlagVerbose, "", false, ux.SprintfBlue("Verbose output."))
 
-		at.cmd.Flags().BoolVarP(&at.Debug, FlagDebug ,"d", false, ux.SprintfBlue("DEBUG mode."))
+		flags.BoolVarP(&at.Debug, FlagDebug ,"d", false, ux.SprintfBlue("DEBUG mode."))
 
-		at.cmd.Flags().BoolVarP(&at.HelpAll, FlagHelpAll, "", false, ux.SprintfBlue("Show all help."))
-		at.cmd.Flags().BoolVarP(&at.HelpVariables, FlagHelpVariables, "", false, ux.SprintfBlue("Help on template variables."))
-		at.cmd.Flags().BoolVarP(&at.HelpFunctions, FlagHelpFunctions, "", false, ux.SprintfBlue("Help on template functions."))
-		at.cmd.Flags().BoolVarP(&at.HelpExamples, FlagHelpExamples, "", false, ux.SprintfBlue("Help on template examples."))
+		flags.BoolVarP(&at.HelpAll, FlagHelpAll, "", false, ux.SprintfBlue("Show all help."))
+		flags.BoolVarP(&at.HelpVariables, FlagHelpVariables, "", false, ux.SprintfBlue("Help on template variables."))
+		flags.BoolVarP(&at.HelpFunctions, FlagHelpFunctions, "", false, ux.SprintfBlue("Help on template functions."))
+		flags.BoolVarP(&at.HelpExamples, FlagHelpExamples, "", false, ux.SprintfBlue("Help on template examples."))
 
 		cobra.EnableCommandSorting = false
 	}

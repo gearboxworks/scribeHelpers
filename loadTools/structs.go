@@ -148,3 +148,12 @@ func (at *TypeScribeArgs) PrintflnNotify(format string, args ...interface{}) {
 		ux.PrintflnBlue(format, args...)
 	}
 }
+
+
+func (at *TypeScribeArgs) GetCmd() *cobra.Command {
+	var ret *cobra.Command
+	if state := at.IsNil(); state.IsError() {
+		return ret
+	}
+	return at.cmd
+}

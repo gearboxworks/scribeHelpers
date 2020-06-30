@@ -30,6 +30,7 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 			DisableFlagParsing:    true,
 			DisableFlagsInUseLine: true,
 			Run: func(cmd *cobra.Command, args []string) {
+				su.OldVersion = toVersionValue(su.Runtime.CmdVersion)
 				su.State = su.Version(cmd, args...)
 			},
 		}
@@ -40,6 +41,7 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 			DisableFlagParsing:    true,
 			DisableFlagsInUseLine: true,
 			Run: func(cmd *cobra.Command, args []string) {
+				su.OldVersion = toVersionValue(su.Runtime.CmdVersion)
 				su.State = su.VersionUpdate()
 			},
 		}
@@ -54,6 +56,7 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 			DisableFlagParsing:    true,
 			DisableFlagsInUseLine: true,
 			Run: func(cmd *cobra.Command, args []string) {
+				su.OldVersion = toVersionValue(su.Runtime.CmdVersion)
 				su.State = su.VersionCheck()
 			},
 		}
@@ -64,6 +67,7 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 			DisableFlagParsing:    true,
 			DisableFlagsInUseLine: true,
 			Run: func(cmd *cobra.Command, args []string) {
+				su.OldVersion = toVersionValue(su.Runtime.CmdVersion)
 				su.State = su.VersionList(args...)
 			},
 		}
@@ -74,7 +78,7 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 			DisableFlagParsing:    true,
 			DisableFlagsInUseLine: true,
 			Run: func(cmd *cobra.Command, args []string) {
-				//su.State = VersionInfo(su.Runtime.GetSemVer())
+				su.OldVersion = toVersionValue(su.Runtime.CmdVersion)
 				su.State = su.VersionInfo(args...)
 			},
 		}
@@ -85,6 +89,7 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 			DisableFlagParsing:    true,
 			DisableFlagsInUseLine: true,
 			Run: func(cmd *cobra.Command, args []string) {
+				su.OldVersion = toVersionValue(su.Runtime.CmdVersion)
 				su.State = su.VersionInfo(CmdVersionLatest)
 			},
 		}
@@ -95,6 +100,7 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 			DisableFlagParsing:    true,
 			DisableFlagsInUseLine: true,
 			Run: func(cmd *cobra.Command, args []string) {
+				su.OldVersion = toVersionValue(su.Runtime.CmdVersion)
 				su.State = su.VersionUpdate()
 			},
 		}

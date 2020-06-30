@@ -35,6 +35,7 @@ type TypeRuntime struct {
 	User           User			`json:"user" mapstructure:"user"`
 
 	Debug          bool			`json:"debug" mapstructure:"debug"`
+	Verbose        bool			`json:"verbose" mapstructure:"verbose"`
 	State          *ux.State	`json:"state" mapstructure:"state"`
 }
 

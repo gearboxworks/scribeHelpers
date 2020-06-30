@@ -9,10 +9,7 @@ var Types = map[string]reflect.Type{
 	"Commit": reflect.TypeOf((*Commit)(nil)).Elem(),
 	"GhrGetter": reflect.TypeOf((*GhrGetter)(nil)).Elem(),
 	"GithubError": reflect.TypeOf((*GithubError)(nil)).Elem(),
-	"message": reflect.TypeOf((*message)(nil)).Elem(),
 	"Release": reflect.TypeOf((*Release)(nil)).Elem(),
-	"releaseCreate": reflect.TypeOf((*releaseCreate)(nil)).Elem(),
-	"releases": reflect.TypeOf((*releases)(nil)).Elem(),
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
 	"Tag": reflect.TypeOf((*Tag)(nil)).Elem(),
 	"ToolGhr": reflect.TypeOf((*ToolGhr)(nil)).Elem(),
@@ -23,12 +20,17 @@ var Types = map[string]reflect.Type{
 }
 
 var Functions = map[string]reflect.Value{
+	"AddVersionPrefix": reflect.ValueOf(AddVersionPrefix),
+	"CopyReleases": reflect.ValueOf(CopyReleases),
+	"GetAsset": reflect.ValueOf(GetAsset),
 	"Mark": reflect.ValueOf(Mark),
 	"New": reflect.ValueOf(New),
 	"NewAuth": reflect.ValueOf(NewAuth),
 	"NewFile": reflect.ValueOf(NewFile),
 	"NewRepo": reflect.ValueOf(NewRepo),
 	"ReflectToolGhr": reflect.ValueOf(ReflectToolGhr),
+	"ReleaseSync": reflect.ValueOf(ReleaseSync),
+	"RemoveVersionPrefix": reflect.ValueOf(RemoveVersionPrefix),
 	"Tomessage": reflect.ValueOf(Tomessage),
 }
 
@@ -38,10 +40,9 @@ var Variables = map[string]reflect.Value{
 
 var Consts = map[string]reflect.Value{
 	"AssetUri": reflect.ValueOf(AssetUri),
-	"releaseDateFormat": reflect.ValueOf(releaseDateFormat),
-	"releaseLatestUri": reflect.ValueOf(releaseLatestUri),
-	"releaseListUri": reflect.ValueOf(releaseListUri),
-	"tagsUri": reflect.ValueOf(tagsUri),
+	"DefaultGitHubApiUrl": reflect.ValueOf(DefaultGitHubApiUrl),
+	"DefaultGitHubUrl": reflect.ValueOf(DefaultGitHubUrl),
+	"Latest": reflect.ValueOf(Latest),
 	"ToolPrefix": reflect.ValueOf(ToolPrefix),
 }
 

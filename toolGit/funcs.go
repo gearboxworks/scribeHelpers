@@ -223,14 +223,14 @@ func (g *TypeGit) Commit(paths []string, comment string, args ...interface{}) *u
 		if g.State.IsNotOk() {
 			break
 		}
-		files := g.State.GetResponse().GetStringArray()
+		files := g.State.GetResponse().StringArray
 		ux.PrintflnBlue("Added %d files to repo.", len(*files))
 
 		g.State = g.ChangedFiles()
 		if g.State.IsNotOk() {
 			break
 		}
-		files = g.State.GetResponse().GetStringArray()
+		files = g.State.GetResponse().StringArray
 		if len(*files) > 0 {
 			//if (*files)[0] == "" {
 			//	// SIGH... Need to fix the empty strings of GetResponse()

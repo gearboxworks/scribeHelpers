@@ -20,7 +20,7 @@ type TypePrompt struct {
 
 func UserPrompt(prompt string, args ...interface{}) string {
 	var p TypePrompt
-	p.Set(prompt, args)
+	p.Set(prompt, args...)
 	return p.UserPrompt()
 }
 func (p *TypePrompt) Set(prompt string, args ...interface{}) {

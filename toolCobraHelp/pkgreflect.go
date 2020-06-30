@@ -5,6 +5,7 @@ package toolCobraHelp
 import "reflect"
 
 var Types = map[string]reflect.Type{
+	"Cmds": reflect.TypeOf((*Cmds)(nil)).Elem(),
 	"CobraGetter": reflect.TypeOf((*CobraGetter)(nil)).Elem(),
 	"Example": reflect.TypeOf((*Example)(nil)).Elem(),
 	"Examples": reflect.TypeOf((*Examples)(nil)).Elem(),

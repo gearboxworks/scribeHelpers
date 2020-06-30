@@ -67,21 +67,23 @@ func _CopyRunRsync(ref *TypeCopyMethod, paths *TypeOsCopyPaths, args ...string) 
 		)
 
 		loop := true
-		go func() {
-			ux.Printf("\n")
-			for ;loop; {
-				state := task.State()
-				ux.PrintfGreen(
-					"Copy progress: %.2f / rem. %d / tot. %d / sp. %s \n",
-					state.Progress,
-					state.Remain,
-					state.Total,
-					state.Speed,
-				)
-				time.Sleep(time.Second)
-			}
-			ux.Printf("\n")
-		}()
+		if ref.Options.(grsync.RsyncOptions).Progress {
+			go func() {
+				ux.Printf("\n")
+				for ;loop; {
+					state := task.State()
+					ux.PrintfGreen(
+						"Copy progress: %.2f / rem. %d / tot. %d / sp. %s \n",
+						state.Progress,
+						state.Remain,
+						state.Total,
+						state.Speed,
+					)
+					time.Sleep(time.Second)
+				}
+				ux.Printf("\n")
+			}()
+		}
 
 		err := task.Run()
 		loop = false
