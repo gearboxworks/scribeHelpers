@@ -168,57 +168,57 @@ func PrintfMagenta(format string, args ...interface{}) {
 func PrintflnWhite(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	if colours.EnableColours {
-		inline = fmt.Sprintf("%s\n", aurora.BrightWhite(inline))
+		inline = fmt.Sprintf("%s", aurora.BrightWhite(inline))
 	}
-	_, _ = fmt.Fprint(os.Stdout, inline)
+	_, _ = fmt.Fprint(os.Stdout, inline + "\n")
 }
 
 func PrintflnCyan(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	if colours.EnableColours {
-		inline = fmt.Sprintf("%s\n", aurora.BrightCyan(inline))
+		inline = fmt.Sprintf("%s", aurora.BrightCyan(inline))
 	}
-	_, _ = fmt.Fprint(os.Stdout, inline)
+	_, _ = fmt.Fprint(os.Stdout, inline + "\n")
 }
 
 func PrintflnYellow(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	if colours.EnableColours {
-		inline = fmt.Sprintf("%s\n", aurora.BrightYellow(inline))
+		inline = fmt.Sprintf("%s", aurora.BrightYellow(inline))
 	}
-	_, _ = fmt.Fprint(os.Stdout, inline)
+	_, _ = fmt.Fprint(os.Stdout, inline + "\n")
 }
 
 func PrintflnRed(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	if colours.EnableColours {
-		inline = fmt.Sprintf("%s\n", aurora.BrightRed(inline))
+		inline = fmt.Sprintf("%s", aurora.BrightRed(inline))
 	}
-	_, _ = fmt.Fprint(os.Stdout, inline)
+	_, _ = fmt.Fprint(os.Stdout, inline + "\n")
 }
 
 func PrintflnGreen(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	if colours.EnableColours {
-		inline = fmt.Sprintf("%s\n", aurora.BrightGreen(inline))
+		inline = fmt.Sprintf("%s", aurora.BrightGreen(inline))
 	}
-	_, _ = fmt.Fprint(os.Stdout, inline)
+	_, _ = fmt.Fprint(os.Stdout, inline + "\n")
 }
 
 func PrintflnBlue(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	if colours.EnableColours {
-		inline = fmt.Sprintf("%s\n", aurora.BrightBlue(inline))
+		inline = fmt.Sprintf("%s", aurora.BrightBlue(inline))
 	}
-	_, _ = fmt.Fprint(os.Stdout, inline)
+	_, _ = fmt.Fprint(os.Stdout, inline + "\n")
 }
 
 func PrintflnMagenta(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	if colours.EnableColours {
-		inline = fmt.Sprintf("%s\n", aurora.BrightMagenta(inline))
+		inline = fmt.Sprintf("%s", aurora.BrightMagenta(inline))
 	}
-	_, _ = fmt.Fprint(os.Stdout, inline)
+	_, _ = fmt.Fprint(os.Stdout, inline + "\n")
 }
 
 

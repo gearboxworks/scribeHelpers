@@ -145,7 +145,7 @@ func (state *State) Clear() {
 		state.Output = ""
 		state._Separator = DefaultSeparator
 		state.OutputArray = []string{}
-		state.response = newResponse()
+		state.response = *NewResponse()
 	} else {
 		panic(state)
 	}

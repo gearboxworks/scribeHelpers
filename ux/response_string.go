@@ -17,7 +17,7 @@ import "strings"
 
 
 func (r *TypeResponse) AsString() *string {
-	return r.String
+	return r.TypeString
 }
 
 func (r *TypeResponse) AsByte() *byte {

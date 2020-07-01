@@ -1,83 +1,9 @@
 package ux
 
 import (
-	//"fmt"
 	"reflect"
 )
 
-//
-// Built-in string type:
-// string
-//
-// Built-in boolean type:
-// bool
-//
-// Built-in numeric types:
-// int8
-// uint8 (byte)
-// int16
-// uint16
-// int32 (rune)
-// uint32
-// int64
-// uint64
-// int
-// uint
-// uintptr
-// float32
-// float64
-// complex64
-// complex128
-
-
-type TypeReflect struct {
-	Invalid       bool
-
-	Bool          *bool
-
-	Int           *int
-	Int8          *int8
-	Int16         *int16
-	Int32         *int32
-	Int64         *int64
-
-	Uint          *uint
-	Uint8         *uint8
-	Uint16        *uint16
-	Uint32        *uint32
-	Uint64        *uint64
-
-	Uintptr       *uintptr
-
-	Float32       *float32
-	Float64       *float64
-
-	Complex64     *complex64
-	Complex128    *complex128
-
-	InterfaceArray *[]interface{}
-
-	Func          *func()
-
-	Interface     interface{}
-
-	Map           *map[interface{}]interface{}
-
-	Ptr           *interface{}
-
-	Slice         *[]interface{}
-
-	String        *string
-	StringArray   *[]string
-
-	Byte          *byte
-	ByteArray     *[]byte
-
-	Struct        *struct{}
-
-	//UnsafePointer *UnsafePointer
-	//Chan          *chan()
-}
 
 // type TypeReflect struct {
 //	Invalid bool
@@ -110,6 +36,58 @@ type TypeReflect struct {
 //	UnsafePointer *UnsafePointer
 //}
 
+type TypeReflect struct {
+	Invalid       bool
+
+	Bool          *bool
+
+	Int           *int
+	Int8          *int8
+	Int16         *int16
+	Int32         *int32
+	Int64         *int64
+
+	Uint          *uint
+	Uint8         *uint8
+	Uint16        *uint16
+	Uint32        *uint32
+	Uint64        *uint64
+
+	Uintptr       *uintptr
+
+	Float32       *float32
+	Float64       *float64
+
+	Complex64     *complex64
+	Complex128    *complex128
+
+	InterfaceArray *[]interface{}
+
+	Func          *func()
+	FuncReturn    *func() *TypeResponse
+	FuncVariadic  *func(args ...interface{})
+	FuncVariadicReturn  *func(args ...interface{}) *TypeResponse
+
+	Interface     interface{}
+
+	Map           *map[interface{}]interface{}
+
+	Ptr           *interface{}
+
+	Slice         *[]interface{}
+
+	TypeString    *string
+	StringArray   *[]string
+
+	Byte          *byte
+	ByteArray     *[]byte
+
+	Struct        *struct{}
+
+	//UnsafePointer *UnsafePointer
+	//Chan          *chan()
+}
+
 
 type TypeResponse struct {
 	ofType reflect.Type
@@ -123,8 +101,8 @@ type ResponseGetter interface {
 }
 
 
-func newResponse() TypeResponse {
-	return TypeResponse{ ofType: nil, data: nil }
+func NewResponse() *TypeResponse {
+	return &TypeResponse{ ofType: nil, data: nil, TypeReflect: TypeReflect{} }
 }
 
 
@@ -214,94 +192,472 @@ func (r *TypeResponse) Set(ref interface{}) bool {
 
 	for range onlyOnce {
 		v := reflect.ValueOf(ref)
+		PrintflnGreen("ref - v.Type().Name():%s\tv.Type().String():%s\tv.String():%s\tv.Kind():%s",
+			v.Type().Name(),
+			v.Type().String(),
+			v.String(),
+			v.Kind(),
+		)
+
+		if v.Kind() == reflect.Ptr {
+			r.TypeReflect = TypeReflect{}
+			s := v.Elem()
+			r.ofType = s.Type()
+			r.data = v.Interface()
+
+			// If we have a pointer, then call again with the value of that pointer.
+			if r.ofType.Kind().String() == "ptr" {
+				ok = r.Set(s.Addr().Elem().Interface())
+				break
+			}
+
+			if r.setter(ref) {
+				break
+			}
+		}
 
 		if v.Kind() != reflect.Ptr {
-			PrintflnError("SetResponse requires a pointer type, but is a '%s' kind of type '%s'", v.Kind().String(), v.String())
-			PrintflnError("Example: State.SetResponse(&xyzzy)")
-			panic("ABORTING")
+			r.TypeReflect = TypeReflect{}
+			PrintflnError("SetResponse requires a pointer type, but is a '%s' kind of type '%s'", v.Kind().String(), v.Type().String())
+			//PrintflnError("Example: State.SetResponse(&xyzzy)")
+			//if !r.Set(&ref) {
+			//	panic("ABORTING")
+			//}
+			foo := v.Convert(v.Type())
+			PrintflnError("foo is a '%s' kind of type '%s'", foo.Kind().String(), foo.String())
+
+			//foo2 := v.Addr()
+			//PrintflnError("foo is a '%s' kind of type '%s'", foo2.Kind().String(), foo2.String())
+
+			//refPtr := &ref
+			//v = reflect.ValueOf(refPtr)
+			//PrintflnError("refPtr is a '%s' kind of type '%s'", v.Kind().String(), v.String())
+
+			r.ofType = reflect.TypeOf(ref)
+			r.data = ref
+			//switch r.ofType.String() {
+			//	case TypeBool:
+			//		r.Bool = r.data.(*bool)
+			//
+			//	case TypeInt:
+			//		r.Int = r.data.(*int)
+			//	case TypeInt8:
+			//		r.Int8 = r.data.(*int8)
+			//	case TypeInt16:
+			//		r.Int16 = r.data.(*int16)
+			//	case TypeInt32:
+			//		r.Int32 = r.data.(*int32)
+			//	case TypeInt64:
+			//		r.Int64 = r.data.(*int64)
+			//
+			//	case TypeUint:
+			//		r.Uint = r.data.(*uint)
+			//	//case TypeUint8:
+			//	//	r.Uint8 = r.data.(*uint8)
+			//	case TypeUint16:
+			//		r.Uint16 = r.data.(*uint16)
+			//	case TypeUint32:
+			//		r.Uint32 = r.data.(*uint32)
+			//	case TypeUint64:
+			//		r.Uint64 = r.data.(*uint64)
+			//
+			//	case TypeUintptr:
+			//		r.Uintptr = r.data.(*uintptr)
+			//
+			//	case TypeFloat32:
+			//		r.Float32 = r.data.(*float32)
+			//	case TypeFloat64:
+			//		r.Float64 = r.data.(*float64)
+			//
+			//	case TypeComplex64:
+			//		r.Complex64 = r.data.(*complex64)
+			//	case TypeComplex128:
+			//		r.Complex128 = r.data.(*complex128)
+			//
+			//	case TypeInterfaceArray:
+			//		r.InterfaceArray = r.data.(*[]interface{})
+			//
+			//	case TypeFunc:
+			//		r.Func = r.data.(*func())
+			//
+			//	case TypeMap:
+			//		r.Map = r.data.(*map[interface{}]interface{})
+			//
+			//	case TypeInterface:
+			//		r.Interface = r.data.(*interface{})
+			//
+			//	case TypeString:
+			//		r.TypeString = r.data.(*string)
+			//	case TypeStringArray:
+			//		t := r.data.([]string)
+			//		r.StringArray = &t
+			//
+			//	case TypeByte:
+			//		r.Byte = r.data.(*byte)
+			//	case TypeByteArray:
+			//		r.ByteArray = r.data.(*[]byte)
+			//
+			//	case TypeStruct:
+			//		r.Struct = r.data.(*struct{})
+			//}
+
+			if r.setter(ref) {
+				break
+			}
+
+		}
+
+		if v.Kind() == reflect.Func {
+			r.TypeReflect = TypeReflect{}
+			r.ofType = reflect.TypeOf(ref)
+			r.data = ref
+
+			//fmt.Printf(">>%s<<\t>>%s<<\t>>%s<<\n",
+			//	r.ofType.String(),
+			//	r.ofType.Name(),
+			//	r.ofType.Kind(),
+			//	)
+			ok = false
+			switch r.ofType.String() {
+				case TypeFunc:
+					f := ref.(func())
+					r.Func = &f
+					ok = true
+				case TypeFuncReturn:
+					f := ref.(func() *TypeResponse)
+					r.FuncReturn = &f
+					ok = true
+				case TypeFuncVariadic:
+					f := ref.(func(args ...interface{}))
+					r.FuncVariadic = &f
+					ok = true
+				case TypeFuncVariadicReturn:
+					f := ref.(func(args ...interface{}) *TypeResponse)
+					r.FuncVariadicReturn = &f
+					ok = true
+			}
 			break
 		}
 
-		s := v.Elem()
-		r.ofType = s.Type()
-		r.data = ref
 
+
+		//switch v.Kind() {
+		//	case reflect.Ptr:
+		//		// OK.
+		//	case reflect.Func:
+		//		f := ref.(func())
+		//		r.Func = &f
+		//		ok = true
+		//		break
+		//		//// fptr is a pointer to a function.
+		//		//// Obtain the function value itself (likely nil) as a reflect.Value
+		//		//// so that we can query its type and then set the value.
+		//		//v = reflect.ValueOf(ref).Elem()
+		//		//swap := func(in []reflect.Value) []reflect.Value {
+		//		//	return []reflect.Value{in[1], in[0]}
+		//		//}
+		//		//// Make a function of the right type.
+		//		//v = reflect.MakeFunc(v.Type(), swap)
+		//		//// OK.
+		//	default:
+		//		PrintflnError("SetResponse requires a pointer type, but is a '%s' kind of type '%s'", v.Kind().String(), v.String())
+		//		PrintflnError("Example: State.SetResponse(&xyzzy)")
+		//		panic("ABORTING")
+		//}
 		// @TODO MICKMAKE
 		//fmt.Printf("String: %s\t", r.ofType.String())
 		//fmt.Printf("Name: %s\t", r.ofType.Name())
 		//fmt.Printf("Kind: %s\n", r.ofType.Kind())
 		// @TODO MICKMAKE
+		//switch ref.(type) {
+		//	case bool:
+		//		*r.Bool = ref.(bool)
+		//
+		//	case int:
+		//		*r.Int = ref.(int)
+		//	case int8:
+		//		*r.Int8 = ref.(int8)
+		//	case int16:
+		//		*r.Int16 = ref.(int16)
+		//	case int32:
+		//		*r.Int32 = ref.(int32)
+		//	case int64:
+		//		*r.Int64 = ref.(int64)
+		//
+		//	case uint:
+		//		*r.Uint = ref.(uint)
+		//	//case uint8:
+		//	//	*r.Uint8 = ref.(uint8)
+		//	case uint16:
+		//		*r.Uint16 = ref.(uint16)
+		//	case uint32:
+		//		*r.Uint32 = ref.(uint32)
+		//	case uint64:
+		//		*r.Uint64 = ref.(uint64)
+		//
+		//	case uintptr:
+		//		*r.Uintptr = ref.(uintptr)
+		//
+		//	case float32:
+		//		*r.Float32 = ref.(float32)
+		//	case float64:
+		//		*r.Float64 = ref.(float64)
+		//
+		//	case complex64:
+		//		*r.Complex64 = ref.(complex64)
+		//	case complex128:
+		//		*r.Complex128 = ref.(complex128)
+		//
+		//	case []interface{}:
+		//		*r.Array = ref.([]interface{})
+		//
+		//	case func():
+		//		*r.Func = ref.(func())
+		//
+		//	case map[interface{}]interface{}:
+		//		*r.Map = ref.(map[interface{}]interface{})
+		//
+		//	case interface{}:
+		//		*r.Ptr = ref.(interface{})
+		//
+		//	case string:
+		//		*r.String = ref.(string)
+		//	case []string:
+		//		*r.StringArray = ref.([]string)
+		//
+		//	case byte:
+		//		*r.Byte = ref.(byte)
+		//	case []byte:
+		//		*r.ByteArray = ref.([]byte)
+		//
+		//	case struct{}:
+		//		*r.Struct = ref.(struct{})
+		//}
 
-		// If we have a pointer, then call again with the value of that pointer.
-		if r.ofType.Kind().String() == "ptr" {
-			ok = r.Set(s.Addr().Elem().Interface())
-			break
-		}
+		ok = true
+	}
 
+	return ok
+}
+
+
+// I KNOW there's a better way to do this, but for now. It is what it is.
+// ref can either be a pointer to a type value, or a type value.
+// We can't blindly take the pointer of the type value as we need to know what it is before we do.
+// Chicken and egg issue...
+func (r *TypeResponse) setter(ref interface{}) bool {
+	var ok bool
+
+	for range onlyOnce {
+		v := reflect.ValueOf(ref)
 		r.TypeReflect = TypeReflect{}
-		switch r.ofType.String() {
-			case "bool":
-				r.Bool = ref.(*bool)
+		switch v.Type().String() {
+			// Two different ways of obtaining a pointer to a value.
+			//p := v.Interface().([]string)
+			//r.StringArray = &p
+			//p = r.data.([]string)
+			//r.StringArray = &p
 
-			case "int":
-				r.Int = ref.(*int)
-			case "int8":
-				r.Int8 = ref.(*int8)
-			case "int16":
-				r.Int16 = ref.(*int16)
-			case "int32":
-				r.Int32 = ref.(*int32)
-			case "int64":
-				r.Int64 = ref.(*int64)
+			case TypeBool:
+				p := r.data.(bool)
+				r.data = &p
+				r.Bool = &p
 
-			case "uint":
-				r.Uint = ref.(*uint)
-			//case uint8:
-			//	r.Uint8 = ref.(*uint8)
-			case "uint16":
-				r.Uint16 = ref.(*uint16)
-			case "uint32":
-				r.Uint32 = ref.(*uint32)
-			case "uint64":
-				r.Uint64 = ref.(*uint64)
+			case TypeInt:
+				p := r.data.(int)
+				r.data = &p
+				r.Int = &p
 
-			case "uintptr":
-				r.Uintptr = ref.(*uintptr)
+			case TypeInt8:
+				p := r.data.(int8)
+				r.data = &p
+				r.Int8 = &p
 
-			case "float32":
-				r.Float32 = ref.(*float32)
-			case "float64":
-				r.Float64 = ref.(*float64)
+			case TypeInt16:
+				p := r.data.(int16)
+				r.data = &p
+				r.Int16 = &p
 
-			case "complex64":
-				r.Complex64 = ref.(*complex64)
-			case "complex128":
-				r.Complex128 = ref.(*complex128)
+			case TypeInt32:
+				p := r.data.(int32)
+				r.data = &p
+				r.Int32 = &p
 
-			case "[]interface{}":
-				r.InterfaceArray = ref.(*[]interface{})
+			case TypeInt64:
+				p := r.data.(int64)
+				r.data = &p
+				r.Int64 = &p
 
-			case "func()":
-				r.Func = ref.(*func())
+			case TypeUint:
+				p := r.data.(uint)
+				r.data = &p
+				r.Uint = &p
 
-			case "map[interface{}]interface{}":
-				r.Map = ref.(*map[interface{}]interface{})
+			case TypeUint8:
+				p := r.data.(uint8)
+				r.data = &p
+				r.Uint8 = &p
 
-			case "interface{}":
-				*r.Ptr = ref.(*interface{})
+			case TypeUint16:
+				p := r.data.(uint16)
+				r.data = &p
+				r.Uint16 = &p
 
-			case "string":
-				r.String = ref.(*string)
-			case "[]string":
-				r.StringArray = ref.(*[]string)
+			case TypeUint32:
+				p := r.data.(uint32)
+				r.data = &p
+				r.Uint32 = &p
 
-			case "byte":
-				r.Byte = ref.(*byte)
-			case "[]byte":
-				r.ByteArray = ref.(*[]byte)
+			case TypeUint64:
+				p := r.data.(uint64)
+				r.data = &p
+				r.Uint64 = &p
 
-			case "struct{}":
-				r.Struct = ref.(*struct{})
+			case TypeUintptr:
+				p := r.data.(uintptr)
+				r.data = &p
+				r.Uintptr = &p
+
+			case TypeFloat32:
+				p := r.data.(float32)
+				r.data = &p
+				r.Float32 = &p
+
+			case TypeFloat64:
+				p := r.data.(float64)
+				r.data = &p
+				r.Float64 = &p
+
+			case TypeComplex64:
+				p := r.data.(complex64)
+				r.data = &p
+				r.Complex64 = &p
+
+			case TypeComplex128:
+				p := r.data.(complex128)
+				r.data = &p
+				r.Complex128 = &p
+
+			case TypeInterfaceArray:
+				p := r.data.([]interface{})
+				r.data = &p
+				r.InterfaceArray = &p
+
+			case TypeFunc:
+				p := r.data.(func())
+				r.data = &p
+				r.Func = &p
+
+			case TypeMap:
+				p := r.data.(map[interface{}]interface{})
+				r.data = &p
+				r.Map = &p
+
+			case TypeInterface:
+				p := r.data.(interface{})
+				r.data = &p
+				r.Interface = &p
+
+			case TypeString:
+				p := r.data.(string)
+				r.data = &p
+				r.TypeString = &p
+
+			case TypeStringArray:
+				p := r.data.([]string)
+				r.data = &p
+				r.StringArray = &p
+
+			case TypeByte:
+				p := r.data.(byte)
+				r.data = &p
+				r.Byte = &p
+
+			case TypeByteArray:
+				p := r.data.([]byte)
+				r.data = &p
+				r.ByteArray = &p
+
+			case TypeStruct:
+				p := r.data.(struct{})
+				r.data = &p
+				r.Struct = &p
+
+
+			case "*" + TypeBool:
+				r.Bool = r.data.(*bool)
+
+			case "*" + TypeInt:
+				r.Int = r.data.(*int)
+
+			case "*" + TypeInt8:
+				r.Int8 = r.data.(*int8)
+
+			case "*" + TypeInt16:
+				r.Int16 = r.data.(*int16)
+
+			case "*" + TypeInt32:
+				r.Int32 = r.data.(*int32)
+
+			case "*" + TypeInt64:
+				r.Int64 = r.data.(*int64)
+
+			case "*" + TypeUint:
+				r.Uint = r.data.(*uint)
+
+			case "*" + TypeUint8:
+				r.Uint8 = r.data.(*uint8)
+
+			case "*" + TypeUint16:
+				r.Uint16 = r.data.(*uint16)
+
+			case "*" + TypeUint32:
+				r.Uint32 = r.data.(*uint32)
+
+			case "*" + TypeUint64:
+				r.Uint64 = r.data.(*uint64)
+
+			case "*" + TypeUintptr:
+				r.Uintptr = r.data.(*uintptr)
+
+			case "*" + TypeFloat32:
+				r.Float32 = r.data.(*float32)
+
+			case "*" + TypeFloat64:
+				r.Float64 = r.data.(*float64)
+
+			case "*" + TypeComplex64:
+				r.Complex64 = r.data.(*complex64)
+
+			case "*" + TypeComplex128:
+				r.Complex128 = r.data.(*complex128)
+
+			case "*" + TypeInterfaceArray:
+				r.InterfaceArray = r.data.(*[]interface{})
+
+			case "*" + TypeFunc:
+				r.Func = r.data.(*func())
+
+			case "*" + TypeMap:
+				r.Map = r.data.(*map[interface{}]interface{})
+
+			case "*" + TypeInterface:
+				r.Interface = r.data.(*interface{})
+
+			case "*" + TypeString:
+				r.TypeString = r.data.(*string)
+
+			case "*" + TypeStringArray:
+				r.StringArray = r.data.(*[]string)
+
+			case "*" + TypeByte:
+				r.Byte = r.data.(*byte)
+
+			case "*" + TypeByteArray:
+				r.ByteArray = r.data.(*[]byte)
+
+			case "*" + TypeStruct:
+				r.Struct = r.data.(*struct{})
 		}
 
 		//switch ref.(type) {
@@ -374,6 +730,310 @@ func (r *TypeResponse) Set(ref interface{}) bool {
 
 	return ok
 }
+
+
+//func (r *TypeResponse) Set(ref interface{}) bool {
+//	var ok bool
+//
+//	for range onlyOnce {
+//		v := reflect.ValueOf(ref)
+//
+//		if v.Kind() == reflect.Func {
+//			r.TypeReflect = TypeReflect{}
+//			r.ofType = reflect.TypeOf(ref)
+//			r.data = ref
+//
+//			//fmt.Printf(">>%s<<\t>>%s<<\t>>%s<<\n",
+//			//	r.ofType.String(),
+//			//	r.ofType.Name(),
+//			//	r.ofType.Kind(),
+//			//	)
+//			ok = false
+//			switch r.ofType.String() {
+//			case TypeFunc:
+//				f := ref.(func())
+//				r.Func = &f
+//				ok = true
+//			case TypeFuncReturn:
+//				f := ref.(func() *TypeResponse)
+//				r.FuncReturn = &f
+//				ok = true
+//			case TypeFuncVariadic:
+//				f := ref.(func(args ...interface{}))
+//				r.FuncVariadic = &f
+//				ok = true
+//			case TypeFuncVariadicReturn:
+//				f := ref.(func(args ...interface{}) *TypeResponse)
+//				r.FuncVariadicReturn = &f
+//				ok = true
+//			}
+//			break
+//		}
+//
+//		if v.Kind() != reflect.Ptr {
+//			PrintflnError("SetResponse requires a pointer type, but is a '%s' kind of type '%s'", v.Kind().String(), v.Type().String())
+//			//PrintflnError("Example: State.SetResponse(&xyzzy)")
+//			//if !r.Set(&ref) {
+//			//	panic("ABORTING")
+//			//}
+//			foo := v.Convert(v.Type())
+//			PrintflnError("foo is a '%s' kind of type '%s'", foo.Kind().String(), foo.String())
+//
+//			//foo2 := v.Addr()
+//			//PrintflnError("foo is a '%s' kind of type '%s'", foo2.Kind().String(), foo2.String())
+//
+//			//refPtr := &ref
+//			//v = reflect.ValueOf(refPtr)
+//			//PrintflnError("refPtr is a '%s' kind of type '%s'", v.Kind().String(), v.String())
+//
+//			r.TypeReflect = TypeReflect{}
+//			r.ofType = reflect.TypeOf(ref)
+//			r.data = ref
+//			switch r.ofType.String() {
+//			case TypeBool:
+//				r.Bool = r.data.(*bool)
+//
+//			case TypeInt:
+//				r.Int = r.data.(*int)
+//			case TypeInt8:
+//				r.Int8 = r.data.(*int8)
+//			case TypeInt16:
+//				r.Int16 = r.data.(*int16)
+//			case TypeInt32:
+//				r.Int32 = r.data.(*int32)
+//			case TypeInt64:
+//				r.Int64 = r.data.(*int64)
+//
+//			case TypeUint:
+//				r.Uint = r.data.(*uint)
+//			//case TypeUint8:
+//			//	r.Uint8 = r.data.(*uint8)
+//			case TypeUint16:
+//				r.Uint16 = r.data.(*uint16)
+//			case TypeUint32:
+//				r.Uint32 = r.data.(*uint32)
+//			case TypeUint64:
+//				r.Uint64 = r.data.(*uint64)
+//
+//			case TypeUintptr:
+//				r.Uintptr = r.data.(*uintptr)
+//
+//			case TypeFloat32:
+//				r.Float32 = r.data.(*float32)
+//			case TypeFloat64:
+//				r.Float64 = r.data.(*float64)
+//
+//			case TypeComplex64:
+//				r.Complex64 = r.data.(*complex64)
+//			case TypeComplex128:
+//				r.Complex128 = r.data.(*complex128)
+//
+//			case TypeInterfaceArray:
+//				r.InterfaceArray = r.data.(*[]interface{})
+//
+//			case TypeFunc:
+//				r.Func = r.data.(*func())
+//
+//			case TypeMap:
+//				r.Map = r.data.(*map[interface{}]interface{})
+//
+//			case TypeInterface:
+//				r.Interface = r.data.(*interface{})
+//
+//			case TypeString:
+//				r.TypeString = r.data.(*string)
+//			case TypeStringArray:
+//				t := r.data.([]string)
+//				r.StringArray = &t
+//
+//			case TypeByte:
+//				r.Byte = r.data.(*byte)
+//			case TypeByteArray:
+//				r.ByteArray = r.data.(*[]byte)
+//
+//			case TypeStruct:
+//				r.Struct = r.data.(*struct{})
+//			}
+//
+//		}
+//
+//		//switch v.Kind() {
+//		//	case reflect.Ptr:
+//		//		// OK.
+//		//	case reflect.Func:
+//		//		f := ref.(func())
+//		//		r.Func = &f
+//		//		ok = true
+//		//		break
+//		//		//// fptr is a pointer to a function.
+//		//		//// Obtain the function value itself (likely nil) as a reflect.Value
+//		//		//// so that we can query its type and then set the value.
+//		//		//v = reflect.ValueOf(ref).Elem()
+//		//		//swap := func(in []reflect.Value) []reflect.Value {
+//		//		//	return []reflect.Value{in[1], in[0]}
+//		//		//}
+//		//		//// Make a function of the right type.
+//		//		//v = reflect.MakeFunc(v.Type(), swap)
+//		//		//// OK.
+//		//	default:
+//		//		PrintflnError("SetResponse requires a pointer type, but is a '%s' kind of type '%s'", v.Kind().String(), v.String())
+//		//		PrintflnError("Example: State.SetResponse(&xyzzy)")
+//		//		panic("ABORTING")
+//		//}
+//
+//		s := v.Elem()
+//		r.ofType = s.Type()
+//		r.data = v.Interface()
+//
+//		// @TODO MICKMAKE
+//		//fmt.Printf("String: %s\t", r.ofType.String())
+//		//fmt.Printf("Name: %s\t", r.ofType.Name())
+//		//fmt.Printf("Kind: %s\n", r.ofType.Kind())
+//		// @TODO MICKMAKE
+//
+//		// If we have a pointer, then call again with the value of that pointer.
+//		if r.ofType.Kind().String() == "ptr" {
+//			ok = r.Set(s.Addr().Elem().Interface())
+//			break
+//		}
+//
+//		//PrintflnError("Checking type '%s'", r.ofType.String())
+//		r.TypeReflect = TypeReflect{}
+//		switch r.ofType.String() {
+//		case TypeBool:
+//			r.Bool = r.data.(*bool)
+//
+//		case TypeInt:
+//			r.Int = r.data.(*int)
+//		case TypeInt8:
+//			r.Int8 = r.data.(*int8)
+//		case TypeInt16:
+//			r.Int16 = r.data.(*int16)
+//		case TypeInt32:
+//			r.Int32 = r.data.(*int32)
+//		case TypeInt64:
+//			r.Int64 = r.data.(*int64)
+//
+//		case TypeUint:
+//			r.Uint = r.data.(*uint)
+//		//case TypeUint8:
+//		//	r.Uint8 = r.data.(*uint8)
+//		case TypeUint16:
+//			r.Uint16 = r.data.(*uint16)
+//		case TypeUint32:
+//			r.Uint32 = r.data.(*uint32)
+//		case TypeUint64:
+//			r.Uint64 = r.data.(*uint64)
+//
+//		case TypeUintptr:
+//			r.Uintptr = r.data.(*uintptr)
+//
+//		case TypeFloat32:
+//			r.Float32 = r.data.(*float32)
+//		case TypeFloat64:
+//			r.Float64 = r.data.(*float64)
+//
+//		case TypeComplex64:
+//			r.Complex64 = r.data.(*complex64)
+//		case TypeComplex128:
+//			r.Complex128 = r.data.(*complex128)
+//
+//		case TypeInterfaceArray:
+//			r.InterfaceArray = r.data.(*[]interface{})
+//
+//		case TypeFunc:
+//			r.Func = r.data.(*func())
+//
+//		case TypeMap:
+//			r.Map = r.data.(*map[interface{}]interface{})
+//
+//		case TypeInterface:
+//			r.Interface = r.data.(*interface{})
+//
+//		case TypeString:
+//			r.TypeString = r.data.(*string)
+//		case TypeStringArray:
+//			r.StringArray = r.data.(*[]string)
+//
+//		case TypeByte:
+//			r.Byte = r.data.(*byte)
+//		case TypeByteArray:
+//			r.ByteArray = r.data.(*[]byte)
+//
+//		case TypeStruct:
+//			r.Struct = r.data.(*struct{})
+//		}
+//
+//		//switch ref.(type) {
+//		//	case bool:
+//		//		*r.Bool = ref.(bool)
+//		//
+//		//	case int:
+//		//		*r.Int = ref.(int)
+//		//	case int8:
+//		//		*r.Int8 = ref.(int8)
+//		//	case int16:
+//		//		*r.Int16 = ref.(int16)
+//		//	case int32:
+//		//		*r.Int32 = ref.(int32)
+//		//	case int64:
+//		//		*r.Int64 = ref.(int64)
+//		//
+//		//	case uint:
+//		//		*r.Uint = ref.(uint)
+//		//	//case uint8:
+//		//	//	*r.Uint8 = ref.(uint8)
+//		//	case uint16:
+//		//		*r.Uint16 = ref.(uint16)
+//		//	case uint32:
+//		//		*r.Uint32 = ref.(uint32)
+//		//	case uint64:
+//		//		*r.Uint64 = ref.(uint64)
+//		//
+//		//	case uintptr:
+//		//		*r.Uintptr = ref.(uintptr)
+//		//
+//		//	case float32:
+//		//		*r.Float32 = ref.(float32)
+//		//	case float64:
+//		//		*r.Float64 = ref.(float64)
+//		//
+//		//	case complex64:
+//		//		*r.Complex64 = ref.(complex64)
+//		//	case complex128:
+//		//		*r.Complex128 = ref.(complex128)
+//		//
+//		//	case []interface{}:
+//		//		*r.Array = ref.([]interface{})
+//		//
+//		//	case func():
+//		//		*r.Func = ref.(func())
+//		//
+//		//	case map[interface{}]interface{}:
+//		//		*r.Map = ref.(map[interface{}]interface{})
+//		//
+//		//	case interface{}:
+//		//		*r.Ptr = ref.(interface{})
+//		//
+//		//	case string:
+//		//		*r.String = ref.(string)
+//		//	case []string:
+//		//		*r.StringArray = ref.([]string)
+//		//
+//		//	case byte:
+//		//		*r.Byte = ref.(byte)
+//		//	case []byte:
+//		//		*r.ByteArray = ref.([]byte)
+//		//
+//		//	case struct{}:
+//		//		*r.Struct = ref.(struct{})
+//		//}
+//
+//		ok = true
+//	}
+//
+//	return ok
+//}
 
 
 func (r *TypeResponse) GetType() reflect.Type {

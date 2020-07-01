@@ -43,6 +43,7 @@ func ReflectBool(ref interface{}) *bool {
 	return b
 }
 
+
 func ReflectBoolArg(ref interface{}) bool {
 	var s bool
 
@@ -74,10 +75,6 @@ func ReflectBoolArg(ref interface{}) bool {
 
 func (r *TypeResponse) AsArray() *[]interface{} {
 	return r.InterfaceArray
-}
-
-func (r *TypeResponse) AsFunc() *func() {
-	return r.Func
 }
 
 func (r *TypeResponse) AsInterface() interface{} {
