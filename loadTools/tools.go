@@ -192,7 +192,7 @@ func responseToFuncMap(r *ux.TypeResponse) *template.FuncMap {
 		if !r.IsOfType("template.FuncMap") {
 			break
 		}
-		tfm = r.GetData().(*template.FuncMap)
+		tfm = r.Pointer().(*template.FuncMap)
 	}
 
 	return tfm

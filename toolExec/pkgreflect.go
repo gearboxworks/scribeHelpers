@@ -15,7 +15,6 @@ var Functions = map[string]reflect.Value{
 	"New": reflect.ValueOf(New),
 	"NewMultiExec": reflect.ValueOf(NewMultiExec),
 	"ReflectExecCommand": reflect.ValueOf(ReflectExecCommand),
-	"TestToolExecCommand": reflect.ValueOf(TestToolExecCommand),
 	"ToolExec": reflect.ValueOf(ToolExec),
 	"ToolExecBash": reflect.ValueOf(ToolExecBash),
 	"ToolExecCmd": reflect.ValueOf(ToolExecCmd),

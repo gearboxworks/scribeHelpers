@@ -53,9 +53,9 @@ const (
 	TypeInterfaceArray	= "[]interface {}"
 
 	TypeFunc				= "func()"
-	TypeFuncReturn			= "func() ux.TypeResponse"
+	TypeFuncReturn			= "func() *ux.TypeResponse"
 	TypeFuncVariadic		= "func(...interface {})"
-	TypeFuncVariadicReturn	= "func(...interface {}) ux.TypeResponse"
+	TypeFuncVariadicReturn	= "func(...interface {}) *ux.TypeResponse"
 
 	TypeInterface		= "interface {}"
 

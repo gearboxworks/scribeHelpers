@@ -165,7 +165,7 @@ func responseToObjectTag(r *ux.TypeResponse) *object.Tag {
 		if !r.IsOfType("object.Tag") {
 			break
 		}
-		o = r.GetData().(*object.Tag)
+		o = r.Pointer().(*object.Tag)
 	}
 
 	return o

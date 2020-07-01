@@ -8,7 +8,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/newclarity/scribeHelpers/loadTools"
 	"github.com/newclarity/scribeHelpers/toolCopy"
 	"github.com/newclarity/scribeHelpers/toolDocker"
@@ -265,17 +264,17 @@ func Test_NewState() {
 
 
 	ux.PrintflnWhite("################################################################################")
-	ux.PrintflnBlue("# Testing Test.SetResponse(Test_FuncReturn)")
-	Test.SetResponse(Test_FuncReturn)
-	response = Test.GetResponse()
-	Test_RunFuncResponse(response, ux.TypeFuncReturn, ux.TypeString)
-
-
-	ux.PrintflnWhite("################################################################################")
 	ux.PrintflnBlue("# Testing Test.SetResponse(Test_FuncVariadic)")
 	Test.SetResponse(Test_FuncVariadic)
 	response = Test.GetResponse()
 	Test_RunFuncResponse(response, ux.TypeFuncVariadic, "", "arg1", "arg2")
+
+
+	ux.PrintflnWhite("################################################################################")
+	ux.PrintflnBlue("# Testing Test.SetResponse(Test_FuncReturn)")
+	Test.SetResponse(Test_FuncReturn)
+	response = Test.GetResponse()
+	Test_RunFuncResponse(response, ux.TypeFuncReturn, ux.TypeString)
 
 
 	ux.PrintflnWhite("################################################################################")
@@ -290,21 +289,27 @@ func Test_NewState() {
 	Test.SetResponse(Test_Func)
 	response = Test.GetResponse()
 	response = response.AsFuncCall("arg1", "arg2")
-	Test_RunFuncResponse(response, ux.TypeFuncVariadicReturn, ux.TypeStringArray)
 
 
 	PrintTestStop(test)
 }
 
+
 func Test_PrintResponse(response *ux.TypeResponse, typeCheck string) {
 	for range onlyOnce {
+		if !response.Valid {
+			ux.PrintfError("Response is nil.")
+			break
+		}
+
 		responseType := response.GetType()
-		responseData := response.GetData()
+		responsePointer := response.Pointer()
+		responseValue := response.Value()
 
 		if response.IsOfType(typeCheck) {
 			ux.PrintfOk("Type OK\n")
 		} else {
-			ux.PrintfError("Type NOT CORRECT: '%v'\n", responseType)
+			ux.PrintfError("Type NOT CORRECT: '%v' != '%v'\n", responseType, typeCheck)
 		}
 
 		ux.PrintflnGreen("response.GetType() - Name:%s\tString:%s\tKind:%s",
@@ -319,47 +324,50 @@ func Test_PrintResponse(response *ux.TypeResponse, typeCheck string) {
 		)
 
 		ux.PrintflnGreen("Data returned:")
-		ux.PrintflnYellow("%v", responseData)
+		ux.PrintflnYellow("responsePointer: %v", responsePointer)
+		ux.PrintflnYellow("responseValue: %v", responseValue)
 	}
 }
 
-func Test_RunFuncResponse(response *ux.TypeResponse, typeCheck string, returnCheck string, args ...string) {
+
+func Test_RunFuncResponse(response *ux.TypeResponse, typeCheck string, returnCheck string, args ...interface{}) {
 	for range onlyOnce {
 		Test_PrintResponse(response, typeCheck)
 		ux.PrintflnBlue("# Function response test of type '%s' with return of type '%s'", typeCheck, returnCheck)
 
-		switch response.GetType().String() {
-			case ux.TypeFunc:
+		switch {
+			case response.IsOfType(ux.TypeFunc):
 				callerFunc := response.AsFunc()
 				ux.PrintflnBlue("Execute AsFunc(): %v", callerFunc)
 				callerFunc()
 
-			case ux.TypeFuncReturn:
+			case response.IsOfType(ux.TypeFuncReturn):
 				callerFunc := response.AsFuncReturn()
 				ux.PrintflnBlue("Execute AsFuncReturn(): %v", callerFunc)
 				callerResponse := callerFunc()
 				Test_PrintResponse(callerResponse, returnCheck)
 
-			case ux.TypeFuncVariadic:
+			case response.IsOfType(ux.TypeFuncVariadic):
 				callerFunc := response.AsFuncVariadic()
 				ux.PrintflnBlue("Execute AsFuncVariadic(): %v", callerFunc)
-				callerFunc()
+				callerFunc(args...)
 
-			case ux.TypeFuncVariadicReturn:
+			case response.IsOfType(ux.TypeFuncVariadicReturn):
 				callerFunc := response.AsFuncVariadicReturn()
 				ux.PrintflnBlue("Execute AsFuncVariadicReturn(): %v", callerFunc)
-				callerResponse := callerFunc()
+				callerResponse := callerFunc(args...)
 				Test_PrintResponse(callerResponse, returnCheck)
 
 			default:
 				return
 		}
 
+		ux.PrintflnBlue("Execute response.AsFuncCall():")
 		callResponse := response.AsFuncCall(args)
 		ux.PrintflnBlue("# Function returned")
 		Test_PrintResponse(callResponse, returnCheck)
 
-		spew.Dump(response)
+		//spew.Dump(response)
 	}
 }
 
@@ -368,15 +376,6 @@ func Test_Func() {
 	ux.PrintflnGreen("Called Test_Func()")
 
 	return
-}
-
-func Test_FuncReturn() *ux.TypeResponse {
-	ux.PrintflnGreen("Called Test_FuncReturn()")
-
-	ret := ux.NewResponse()
-	str := "Called Test_FuncReturn()"
-	ret.Set(str)
-	return ret
 }
 
 func Test_FuncVariadic(args ...interface{}) {
@@ -389,17 +388,27 @@ func Test_FuncVariadic(args ...interface{}) {
 	ux.PrintflnGreen(str)
 }
 
+func Test_FuncReturn() *ux.TypeResponse {
+	ux.PrintflnGreen("Called Test_FuncReturn()")
+
+	ret := ux.NewResponse()
+	str := "Called Test_FuncReturn()"
+	ret.Set(str)
+	return ret
+}
+
 func Test_FuncVariadicReturn(args ...interface{}) *ux.TypeResponse {
 	ux.PrintflnGreen("Called Test_FuncVariadicReturn()")
 
 	ret := ux.NewResponse()
 	var str string
-	str += "Called Test_FuncCall2("
+	str += "Called Test_FuncVariadicReturn("
 	for _, a := range args {
 		str += fmt.Sprintf("%s, ", a)
 	}
 	str += ")"
-	ret.Set(str)
+
+	ret.Set([]string{str})
 	return ret
 }
 

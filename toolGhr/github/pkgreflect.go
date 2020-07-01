@@ -12,7 +12,6 @@ var Functions = map[string]reflect.Value{
 	"DoAuthRequest": reflect.ValueOf(DoAuthRequest),
 	"GetFileSize": reflect.ValueOf(GetFileSize),
 	"NewClient": reflect.ValueOf(NewClient),
-	"TestGetFileSize": reflect.ValueOf(TestGetFileSize),
 }
 
 var Variables = map[string]reflect.Value{
