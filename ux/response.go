@@ -431,12 +431,12 @@ func (r *TypeResponse) Set(ref interface{}) bool {
 	for range onlyOnce {
 		v := reflect.ValueOf(ref)
 
-		PrintflnGreen("ref - v.Type().Name():%s\tv.Type().String():%s\tv.String():%s\tv.Kind():%s",
-			v.Type().Name(),
-			v.Type().String(),
-			v.String(),
-			v.Kind(),
-		)
+		//PrintflnGreen("ref - v.Type().Name():%s\tv.Type().String():%s\tv.String():%s\tv.Kind():%s",
+		//	v.Type().Name(),
+		//	v.Type().String(),
+		//	v.String(),
+		//	v.Kind(),
+		//)
 
 		// We expect a pointer type to be given, but we can also handle a value type, (see below).
 		if v.Kind() == reflect.Ptr {

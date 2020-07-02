@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"github.com/newclarity/scribeHelpers/ux"
 	"os"
+	"os/user"
 	"path/filepath"
+	"strings"
 )
 
 
 func (p *TypeOsPath) StatPath() *ux.State {
 	for range onlyOnce {
 		p.State.SetFunction()
-		p.State.Clear()
+		p.State.SetOk()
 
 		if p._Path == "" {
 			p.State.SetError("path is empty")
@@ -24,6 +26,18 @@ func (p *TypeOsPath) StatPath() *ux.State {
 			p._Exists = true
 			p.State.SetOk("path is remote")
 			break
+		}
+
+		if strings.HasPrefix(p._Path, "~/") {
+			u, err := user.Current()
+			if err != nil {
+				p.State.SetError(err)
+				p._Valid = false
+				p._Exists = false
+				break
+			}
+			p._Path = strings.TrimPrefix(p._Path, "~/")
+			p._Path = filepath.Join(u.HomeDir, p._Path)
 		}
 
 		var stat os.FileInfo

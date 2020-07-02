@@ -55,6 +55,7 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 					}
 					at.Scribe.Value = args[0]
 					at.Scribe.Arg = SelectFile
+					at.Runtime.ArgFiles.Add(args[0])
 					args = args[1:]
 				}
 			}
@@ -66,6 +67,7 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 					}
 					at.Json.Value = args[0]
 					at.Json.Arg = SelectFile
+					at.Runtime.ArgFiles.Add(args[0])
 					args = args[1:]
 				}
 				continue
@@ -78,6 +80,7 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 					}
 					at.Template.Value = args[0]
 					at.Template.Arg = SelectFile
+					at.Runtime.ArgFiles.Add(args[0])
 					args = args[1:]
 				}
 			}
@@ -85,17 +88,8 @@ func (at *TypeScribeArgs) CheckArgs(cmd string, args ...string) *ux.State {
 	}
 
 	for range onlyOnce {
-		err := at.Runtime.SetArgs(cmd)
-		if err != nil {
-			at.State.SetError(err)
-			break
-		}
-
-		err = at.Runtime.AddArgs(args...)
-		if err != nil {
-			at.State.SetError(err)
-			break
-		}
+		at.Runtime.Args.Set(cmd)
+		at.Runtime.Args.Add(args...)
 	}
 
 	return at.State
@@ -108,10 +102,6 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 		for range onlyOnce {
 			// Validate scribe file OR string.
 			at.State = at.Scribe.SetInputFile(at.Scribe.Value)
-			//if at.State.IsNotOk() {
-			//	break
-			//}
-			// scribe:OK
 			if at.Scribe.IsSet() {
 				// Add {{ and }} to scribe file.
 				ca := at.Scribe.GetContentArray()
@@ -131,16 +121,10 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 
 			// Validate json file OR string.
 			at.State = at.Json.SetInputFile(at.Json.Value)
-			//if at.State.IsNotOk() {
-			//	break
-			//}
 			at.PrintflnNotify("Using JSON file '%s' of %d bytes.", at.Json.GetPath(), at.Json.GetContentLength())
 
 			// Validate template file OR string.
 			at.State = at.Template.SetInputFile(at.Template.Value)
-			//if at.State.IsNotOk() {
-			//	break
-			//}
 			if at.RemoveTemplate {
 				at.PrintflnNotify("Will remove template file '%s' afterwards.", at.Template.GetPath())
 				at.Template.SetRemoveable()
@@ -322,6 +306,12 @@ func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 		at.State = at.ProcessInputFiles()
 		if at.State.IsNotOk() {
 			break
+		}
+
+		if at.Scribe.IsSet() {
+			at.Runtime.WorkingDir = at.Scribe.GetDirnameAbs()
+		} else if at.Json.IsSet() {
+			at.Runtime.WorkingDir = at.Json.GetDirnameAbs()
 		}
 
 

@@ -9,6 +9,7 @@ import (
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
+	"net/url"
 )
 
 
@@ -17,7 +18,7 @@ type TypeExecCommand toolExec.TypeExecCommand
 
 
 type TypeGit struct {
-	Url          string
+	Url          *url.URL
 	Base         *toolPath.TypeOsPath
 
 	GitConfig    *gitcmd.Config
@@ -37,7 +38,7 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGit {
 	runtime = runtime.EnsureNotNil()
 
 	p := TypeGit{
-		Url:          "",
+		Url:          &url.URL{},
 		Base:         toolPath.New(runtime),
 		GitConfig:    nil,
 		GitOptions:   nil,
@@ -174,7 +175,7 @@ func responseToObjectTag(r *ux.TypeResponse) *object.Tag {
 
 type (
 	Dir          = string
-	Url          = string
+	Url          = *url.URL
 	Filepath     = string
 	Filepaths    []Filepath
 	ReadableName = string

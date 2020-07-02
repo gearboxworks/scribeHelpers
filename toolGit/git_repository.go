@@ -3,6 +3,8 @@ package toolGit
 import (
 	"github.com/newclarity/scribeHelpers/ux"
 	"gopkg.in/src-d/go-git.v4"
+	"net/url"
+	"strings"
 )
 
 
@@ -21,7 +23,7 @@ func (g *TypeGit) Clone() *ux.State {
 			break
 		}
 
-		if g.Url == "" {
+		if g.Url.String() == "" {
 			g.State.SetError("Git repo URL is empty")
 			break
 		}
@@ -38,7 +40,7 @@ func (g *TypeGit) Clone() *ux.State {
 			ux.PrintfWhite("Cloning %s into %s\n", g.Url, g.Base.GetPath())
 		}
 		g.skipDirCheck = true
-		g.State = g.Exec(gitCommandClone, g.Url, g.Base.GetPath())
+		g.State = g.Exec(gitCommandClone, g.Url.String(), g.Base.GetPath())
 		g.skipDirCheck = false
 	}
 
@@ -79,7 +81,10 @@ func (g *TypeGit) Open() *ux.State {
 		}
 
 		c, _ := g.repository.Config()
-		g.Url = c.Remotes["origin"].URLs[0]
+		g.State = g.SetUrl(c.Remotes["origin"].URLs[0])
+		if g.State.IsNotOk() {
+			break
+		}
 
 		g.State.SetOk("Opened directory %s.\nRemote origin is set to %s\n", g.Base.GetPath(), g.Url)
 		ok := true
@@ -104,15 +109,10 @@ func (g *TypeGit) SetPath(path ...string) *ux.State {
 			break
 		}
 
-		//p := toolPath.ReflectAbsPath(path...)
-		//if p == nil {
-		//	g.State.SetError("path repo is nil")
-		//	break
-		//}
-		//if *p == "" {
-		//	g.State.SetError("path repo is nil")
-		//	break
-		//}
+		if path == nil {
+			g.State.SetError("path is empty")
+			break
+		}
 
 		g.Base.SetPath(path...)
 		//if ! g.Base.SetPath(path...) {
@@ -127,7 +127,7 @@ func (g *TypeGit) SetPath(path ...string) *ux.State {
 		//}
 
 		if g.Base.NotExists() {
-			g.State.Clear()
+			g.State.SetOk()	// We may want to clone after we set the path.
 			break
 		}
 		if g.Base.IsAFile() {
@@ -167,23 +167,60 @@ func (g *TypeGit) GetUrl() (string, *ux.State) {
 			break
 		}
 
-		g.Url = g.State.Output
+		g.SetUrl(g.State.Output)
 		//g.Url = g.State.Output
 		//g.State.SetResponse(&g.State.Output)
 	}
 
-	return g.Url, g.State
+	return g.Url.String(), g.State
 }
 
 
 // Usage:
 //		{{- $cmd := $git.SetUrl }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *TypeGit) SetUrl(u Url) *ux.State {
+func (g *TypeGit) SetUrl(u string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
 	g.State.SetFunction()
-	g.Url = u
+	var err error
+	g.Url, err = url.Parse(addPrefix(u))
+	if err != nil {
+		g.State.SetError(err)
+	}
 	return g.State
+}
+
+
+func addPrefix(u string) string {
+	for range onlyOnce {
+		if strings.HasPrefix(u, "http") {
+			// We have a full URL - no change.
+			break
+		}
+
+		if strings.HasPrefix(u, "github.com") {
+			// We have a github.com specific string.
+			u = "https://" + u
+			break
+		}
+
+		ua := strings.Split(u, "/")
+		if len(ua) == 0 {
+			// Dunno, leave as is.
+			break
+		}
+
+		if strings.Contains(ua[0], ".") {
+			// We have a host defined in the first segment.
+			u = "https://" + u
+			break
+		}
+
+		// We probably just have a "owner/repo_name" style URL.
+		u = "https://github.com/" + u
+	}
+
+	return u
 }

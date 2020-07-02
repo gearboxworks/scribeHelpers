@@ -3,6 +3,8 @@ package toolGit
 import (
 	"github.com/newclarity/scribeHelpers/toolPath"
 	"github.com/newclarity/scribeHelpers/ux"
+	"strconv"
+	"strings"
 )
 
 
@@ -108,12 +110,22 @@ func (g *TypeGit) Exec(cmd string, args ...string) *ux.State {
 		g.State.OutputTrim()
 		g.State.SetError(err)
 
-		if g.State.IsError() {
-			g.State.SetExitCode(1) // Fake an exit code.
+		if err == nil {
+			g.State.SetOk()
 			break
 		}
 
-		g.State.SetOk("")
+		checkExit := err.Error()
+		//fmt.Printf(":%s:\n", checkExit)
+		if strings.HasPrefix(checkExit, "exit status ") {
+			checkExit = strings.TrimPrefix(checkExit, "exit status ")
+			exitCode, err := strconv.Atoi(checkExit)
+			if err != nil {
+				g.State.SetExitCode(1) // Fake an exit code.
+				break
+			}
+			g.State.SetExitCode(exitCode)
+		}
 	}
 
 	return g.State

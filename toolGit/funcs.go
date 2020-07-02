@@ -208,6 +208,9 @@ func (g *TypeGit) Commit(paths []string, comment string, args ...interface{}) *u
 	g.State.SetFunction()
 
 	for range onlyOnce {
+		if paths == nil {
+			paths = []string{"."}
+		}
 		if len(paths) == 0 {
 			paths = []string{"."}
 		}

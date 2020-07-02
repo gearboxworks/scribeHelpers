@@ -42,70 +42,86 @@ func (r *TypeRuntime) GetEnvMap() *Environment {
 }
 
 
-func (r *TypeRuntime) GetArg(index int) string {
-	var ret string
-
-	for range onlyOnce {
-		if len(r.Args) > index {
-			ret = r.Args[index]
-		}
-	}
-
-	return ret
+func (r *TypeRuntime) SetArgs(a ...string) {
+	r.Args.Set(a...)
+	//var err error
+	//
+	//for range onlyOnce {
+	//	r.Args = a
+	//}
+	//
+	//return err
 }
 
 
-func (r *TypeRuntime) SetArgs(a ...string) error {
-	var err error
-
-	for range onlyOnce {
-		r.Args = a
-	}
-
-	return err
+func (r *TypeRuntime) AddArgs(a ...string) {
+	r.Args.Append(a...)
+	//var err error
+	//
+	//for range onlyOnce {
+	//	r.Args = append(r.Args, a...)
+	//}
+	//
+	//return err
 }
 
 
 func (r *TypeRuntime) GetArgs() []string {
-	return r.Args
+	return r.Args.GetAll()
 }
 
 
-func (r *TypeRuntime) AddArgs(a ...string) error {
-	var err error
+func (r *TypeRuntime) GetArg(index int) string {
+	return r.Args.Get(index)
+}
 
-	for range onlyOnce {
-		r.Args = append(r.Args, a...)
-	}
+func (r *TypeRuntime) GetArgRange(lower int, upper int) []string {
+	return r.Args.Range(lower, upper)
+}
 
-	return err
+func (r *TypeRuntime) SprintfArgRange(lower int, upper int) string {
+	return r.Args.SprintfRange(lower, upper)
+}
+
+func (r *TypeRuntime) SprintfArgsFrom(lower int) string {
+	return r.Args.SprintfFrom(lower)
+}
+
+func (r *TypeRuntime) GetNargs(begin int, size int) []string {
+	return r.Args.GetFromSize(begin, size)
+}
+
+func (r *TypeRuntime) SprintfNargs(lower int, upper int) string {
+	return r.Args.SprintfFromSize(lower, upper)
 }
 
 
-func (r *TypeRuntime) SetFullArgs(a ...string) error {
-	var err error
+func (r *TypeRuntime) SetFullArgs(a ...string) {
+	r.FullArgs.Set(a...)
+	//var err error
+	//
+	//for range onlyOnce {
+	//	r.FullArgs = a
+	//}
+	//
+	//return err
+}
 
-	for range onlyOnce {
-		r.FullArgs = a
-	}
 
-	return err
+func (r *TypeRuntime) AddFullArgs(a ...string) {
+	r.FullArgs.Append(a...)
+	//var err error
+	//
+	//for range onlyOnce {
+	//	r.FullArgs = append(r.FullArgs, a...)
+	//}
+	//
+	//return err
 }
 
 
 func (r *TypeRuntime) GetFullArgs() []string {
-	return r.FullArgs
-}
-
-
-func (r *TypeRuntime) AddFullArgs(a ...string) error {
-	var err error
-
-	for range onlyOnce {
-		r.FullArgs = append(r.FullArgs, a...)
-	}
-
-	return err
+	return r.FullArgs.GetAll()
 }
 
 

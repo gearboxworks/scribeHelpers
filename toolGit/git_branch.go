@@ -83,17 +83,8 @@ func (g *TypeGit) GetTags() ([]string, *ux.State) {
 		if g.State.IsError() {
 			break
 		}
-		g.State.OutputArrayTrim()
 
-		//var tags []string
-		//tags = make([]string, 0)
-		//for _, t := range g.State.GetOutputArray() {
-		//	if t[:5] != " tag:" {
-		//		continue
-		//	}
-		//	tags = append(tags, t[6:])
-		//}
-		//g.State.SetResponse(tags)
+		g.State.OutputArrayTrim()
 		ret = g.State.GetOutputArray()
 		g.State.SetResponse(&ret)
 	}

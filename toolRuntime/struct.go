@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -22,8 +23,12 @@ type TypeRuntime struct {
 	CmdDir         string		`json:"cmd_dir" mapstructure:"cmd_dir"`
 	CmdFile        string		`json:"cmd_file" mapstructure:"cmd_file"`
 
+	WorkingDir     string		`json:"working_dir" mapstructure:"working_dir"`
+	CacheDir       string		`json:"cache_dir" mapstructure:"cache_dir"`
+
 	FullArgs       ExecArgs		`json:"full_args" mapstructure:"full_args"`
 	Args           ExecArgs		`json:"args" mapstructure:"args"`
+	ArgFiles       ExecArgs		`json:"arg_files" mapstructure:"arg_files"`
 
 	Env            ExecEnv		`json:"env" mapstructure:"env"`
 	EnvMap         Environment	`json:"env_map" mapstructure:"env_map"`
@@ -76,13 +81,21 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 		ret = &TypeRuntime{
 			CmdName:    binary,
 			CmdVersion: version,
+
 			Cmd:        "",
 			CmdDir:     "",
 			CmdFile:    "",
-			FullArgs:   os.Args[1:],
-			Args:       os.Args,
+
+			WorkingDir: ".",
+			CacheDir:   ".",
+
+			FullArgs:   os.Args,
+			Args:       os.Args[1:],
+			ArgFiles:   []string{},
+
 			Env:        os.Environ(),
 			EnvMap:     make(Environment),
+
 			TimeStamp:  time.Now(),
 
 			GoRuntime: GoRuntime{
@@ -95,6 +108,7 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 			},
 
 			Debug:      debugFlag,
+			Verbose:    false,
 			State:      ux.NewState(binary, debugFlag),
 		}
 
@@ -129,6 +143,22 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 			ret.State.SetError(err)
 			break
 		}
+
+		ret.WorkingDir, err = os.Getwd()
+		if err != nil {
+			ret.State.SetError(err)
+			break
+		}
+
+		ret.CacheDir, err = os.UserCacheDir()
+		if err != nil {
+			if runtime.GOOS == "windows" {
+				ret.CacheDir = "C:\\tmp"
+			} else {
+				ret.CacheDir = "/tmp"
+			}
+		}
+		ret.CacheDir = filepath.Join(ret.CacheDir, ret.CmdName)
 
 		ret.State.SetPackage("")
 		ret.State.SetFunction()

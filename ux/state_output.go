@@ -127,9 +127,11 @@ func (state *State) OutputTrim() {
 
 func (state *State) OutputArrayTrim() {
 	for range onlyOnce {
+		var saved []string
 		for _, s := range state.OutputArray {
-			state.OutputArray = append(state.OutputArray, strings.Split(s, state._Separator)...)
+			saved = append(saved, strings.Split(s, state._Separator)...)
 		}
+		state.OutputArray = saved
 		state.Output = strings.Join(state.OutputArray, state._Separator)
 	}
 }

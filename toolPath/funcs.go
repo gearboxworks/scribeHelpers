@@ -101,7 +101,7 @@ func (p *TypeOsPath) _AppendLocalPath(path ...string) bool {
 func (p *TypeOsPath) _AppendRelativeLocalPath(path ...string) bool {
 	for range onlyOnce {
 		p._Valid = false
-		p._Path = filepath.Join(path...)
+		p._Path = filepath.Join(p._Path, filepath.Join(path...))
 		if p._Path == "" {
 			p.State.SetError("src path empty")
 			break
@@ -123,8 +123,6 @@ func (p *TypeOsPath) _AppendRelativeLocalPath(path ...string) bool {
 func (p *TypeOsPath) _AppendRemotePath(path ...string) bool {
 	for range onlyOnce {
 		p._Valid = false
-		// @TODO - May have to change this logic to:
-		// @TODO - p._Path = strings.Join(path, "")
 		p._Path = filepath.Join(path...)
 		if p._Path == "" {
 			p.State.SetError("src path empty")

@@ -109,6 +109,11 @@ func (p *TypeOsPath) GetContentArray() []string {
 }
 
 
+func (p *TypeOsPath) GetContentByteArray() []byte {
+	return []byte(strings.Join(p._Array, p._Separator))
+}
+
+
 func (p *TypeOsPath) SetSeparator(separator string) {
 	for range onlyOnce {
 		p._Separator = separator
