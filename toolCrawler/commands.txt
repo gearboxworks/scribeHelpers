@@ -1,0 +1,33 @@
+
+crawl src_url
+- If src_url.NotExists()
+	- Creates src_url/site dir
+	- Creates src_url/something.scribe (basic crawl logic that can be altered)
+	- Creates src_url/something.json (crawl config)
+	- Creates src_url/something.sqlite (pages DB)
+	- Crawl first page into src_url/site
+	- Analyze first page
+		- Recursive crawl on pages
+	- Updates src_url/something.json
+	- Updates src_url/something.sqlite
+	- Show errors
+- If src_url.Exists()
+	- Do the same.
+
+config options
+- stay in domain	- default true
+- child_depth		- default no recurse limit
+- parent_height		- default no recurse limit
+- patterns (map)
+	- url_regex
+	- action
+
+type Pattern map[UrlRegex]Ruleset
+type UrlRegex string
+
+type Ruleset struct {
+	Match []MatchPattern
+	DontMatch []MatchPattern
+}
+type MatchPattern string
+
