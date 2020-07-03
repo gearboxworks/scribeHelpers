@@ -2,26 +2,8 @@ package toolGit
 
 import (
 	"github.com/newclarity/scribeHelpers/toolPath"
-	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/tsuyoshiwada/go-gitcmd"
 )
-
-
-type ToolGit TypeGit
-func (g *ToolGit) Reflect() *TypeGit {
-	return (*TypeGit)(g)
-}
-func (g *TypeGit) Reflect() *ToolGit {
-	return (*ToolGit)(g)
-}
-
-func (g *ToolGit) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(g); state.IsError() {
-		return state
-	}
-	g.State = g.State.EnsureNotNil()
-	return g.State
-}
 
 
 // Usage:

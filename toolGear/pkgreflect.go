@@ -7,7 +7,7 @@ import "reflect"
 var Types = map[string]reflect.Type{
 	"Container": reflect.TypeOf((*Container)(nil)).Elem(),
 	"Containers": reflect.TypeOf((*Containers)(nil)).Elem(),
-	"DockerGear": reflect.TypeOf((*DockerGear)(nil)).Elem(),
+	"TypeDockerGear": reflect.TypeOf((*TypeDockerGear)(nil)).Elem(),
 	"ExecCommand": reflect.TypeOf((*ExecCommand)(nil)).Elem(),
 	"Gear": reflect.TypeOf((*Gear)(nil)).Elem(),
 	"GitHubRepo": reflect.TypeOf((*GitHubRepo)(nil)).Elem(),

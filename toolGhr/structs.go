@@ -18,15 +18,6 @@ type GhrGetter interface {
 //}
 
 
-type State ux.State
-func (s *State) Reflect() *ux.State {
-	return (*ux.State)(s)
-}
-func ReflectToolGhr(e *TypeGhr) *ToolGhr {
-	return (*ToolGhr)(e)
-}
-
-
 type TypeGhr struct {
 	Repo     *TypeRepo
 
@@ -90,6 +81,9 @@ type TypeGhr struct {
 	//Tag      string `goptions:"-t, --tag, description='Git tag to query (optional)'"`
 	//JSON     bool   `goptions:"-j, --json, description='Emit info as JSON instead of text'"`
 }
+func (ghr *TypeGhr) IsNil() *ux.State {
+	return ux.IfNilReturnError(ghr)
+}
 
 func New(runtime *toolRuntime.TypeRuntime) *TypeGhr {
 	var ghr TypeGhr
@@ -109,14 +103,6 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGhr {
 	ghr.State.SetPackage("")
 	ghr.State.SetFunctionCaller()
 	return &ghr
-}
-
-func (ghr *TypeGhr) IsNil() *ux.State {
-	if State := ux.IfNilReturnError(ghr); State.IsError() {
-		return State
-	}
-	ghr.State = ghr.State.EnsureNotNil()
-	return ghr.State
 }
 
 func (ghr *TypeGhr) isValid() *ux.State {

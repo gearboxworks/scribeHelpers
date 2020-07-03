@@ -41,27 +41,8 @@ type TypeSelfUpdate struct {
 	State      *ux.State
 	cmd        *cobra.Command
 }
-
-
-type state ux.State
-func (p *state) Reflect() *ux.State {
-	return (*ux.State)(p)
-}
-func ReflectToolSelfUpdate(p *TypeSelfUpdate) *ToolSelfUpdate {
-	return (*ToolSelfUpdate)(p)
-}
-
-type ToolSelfUpdate TypeSelfUpdate
-func (su *ToolSelfUpdate) Reflect() *TypeSelfUpdate {
-	return (*TypeSelfUpdate)(su)
-}
-
 func (su *TypeSelfUpdate) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(su); state.IsError() {
-		return state
-	}
-	su.State = su.State.EnsureNotNil()
-	return su.State
+	return ux.IfNilReturnError(su)
 }
 
 

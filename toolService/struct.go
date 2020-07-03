@@ -17,14 +17,8 @@ type TypeService struct {
 	Debug bool
 	State *ux.State
 }
-
-
-type State ux.State
-func (p *State) Reflect() *ux.State {
-	return (*ux.State)(p)
-}
-func ReflectToolService(p *TypeService) *ToolService {
-	return (*ToolService)(p)
+func (s *TypeService) IsNil() *ux.State {
+	return ux.IfNilReturnError(s)
 }
 
 
@@ -42,16 +36,6 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeService {
 	s.State.SetFunctionCaller()
 	return &s
 }
-
-
-func (s *TypeService) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(s); state.IsError() {
-		return state
-	}
-	s.State = s.State.EnsureNotNil()
-	return s.State
-}
-
 
 func (s *TypeService) EnsureNotNil() *TypeService {
 	if s == nil {

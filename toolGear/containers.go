@@ -16,7 +16,7 @@ import (
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
-func (gear *DockerGear) ContainerList(f string) (int, *ux.State) {
+func (gear *TypeDockerGear) ContainerList(f string) (int, *ux.State) {
 	var count int
 	if state := gear.IsNil(); state.IsError() {
 		return 0, state
@@ -139,7 +139,7 @@ func (gear *DockerGear) ContainerList(f string) (int, *ux.State) {
 	return count, gear.State
 }
 
-func (gear *DockerGear) ContainerSprintf(f string) string {
+func (gear *TypeDockerGear) ContainerSprintf(f string) string {
 	var ret string
 	if state := gear.IsNil(); state.IsError() {
 		ret = ux.SprintfRed("No Gearbox containers found.\n")
@@ -264,7 +264,7 @@ func (gear *DockerGear) ContainerSprintf(f string) string {
 	return ret
 }
 
-func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool, *ux.State) {
+func (gear *TypeDockerGear) FindContainer(gearName string, gearVersion string) (bool, *ux.State) {
 	var ok bool
 	if state := gear.IsNil(); state.IsError() {
 		return false, state

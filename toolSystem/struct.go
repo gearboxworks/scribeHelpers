@@ -15,14 +15,8 @@ type TypeSystem struct {
 
 	State *ux.State
 }
-
-
-type State ux.State
-func (p *State) Reflect() *ux.State {
-	return (*ux.State)(p)
-}
-func ReflectToolSystem(p *TypeSystem) *ToolSystem {
-	return (*ToolSystem)(p)
+func (s *TypeSystem) IsNil() *ux.State {
+	return ux.IfNilReturnError(s)
 }
 
 
@@ -39,13 +33,4 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeSystem {
 	s.State.SetFunctionCaller()
 
 	return &s
-}
-
-
-func (s *TypeSystem) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(s); state.IsError() {
-		return state
-	}
-	s.State = s.State.EnsureNotNil()
-	return s.State
 }

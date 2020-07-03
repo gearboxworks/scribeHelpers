@@ -32,6 +32,9 @@ type TypeGit struct {
 	runtime      *toolRuntime.TypeRuntime
 	State        *ux.State
 }
+func (g *TypeGit) IsNil() *ux.State {
+	return ux.IfNilReturnError(g)
+}
 
 
 func New(runtime *toolRuntime.TypeRuntime) *TypeGit {
@@ -52,18 +55,6 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGit {
 	p.State.SetPackage("")
 	p.State.SetFunctionCaller()
 	return &p
-}
-
-
-type State ux.State
-func (s *State) Reflect() *ux.State {
-	return (*ux.State)(s)
-}
-//func ReflectState(p *ux.State) *ux.State {
-//	return (*State)(p)
-//}
-func ReflectToolGit(g *TypeGit) *ToolGit {
-	return (*ToolGit)(g)
 }
 
 
@@ -88,15 +79,6 @@ func (g *TypeGit) IsOk() bool {
 }
 func (g *TypeGit) IsNotOk() bool {
 	return !g.IsOk()
-}
-
-
-func (g *TypeGit) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(g); state.IsError() {
-		return state
-	}
-	g.State = g.State.EnsureNotNil()
-	return g.State
 }
 
 

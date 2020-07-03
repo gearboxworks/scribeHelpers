@@ -39,6 +39,11 @@ type GoFile struct {
 	runtime *toolRuntime.TypeRuntime
 	State   *ux.State
 }
+func (gf *GoFile) IsNil() *ux.State {
+	return ux.IfNilReturnError(gf)
+}
+
+
 type GoFiles struct {
 	files []*GoFile
 	Found *GoFile

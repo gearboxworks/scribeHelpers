@@ -25,7 +25,7 @@ type Image struct {
 	Summary    *types.ImageSummary
 	Details    types.ImageInspect
 
-	_Parent    *Docker
+	_Parent    *TypeDocker
 	Runtime    *toolRuntime.TypeRuntime
 	State      *ux.State
 }

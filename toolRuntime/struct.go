@@ -43,7 +43,9 @@ type TypeRuntime struct {
 	Verbose        bool			`json:"verbose" mapstructure:"verbose"`
 	State          *ux.State	`json:"state" mapstructure:"state"`
 }
-
+func (r *TypeRuntime) IsNil() *ux.State {
+	return ux.IfNilReturnError(r)
+}
 
 type ExecArgs []string
 type ExecEnv []string
@@ -57,15 +59,12 @@ type GoRuntime struct {
 	NumCpus int
 }
 
-
 type User struct {
 	*user.User
 }
 
-
 // Instead of creating every time, let's cache the initial result in a global variable.
 var globalRuntime *TypeRuntime
-
 
 func New(binary string, version string, debugFlag bool) *TypeRuntime {
 	var ret *TypeRuntime
@@ -170,7 +169,6 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 	return ret
 }
 
-
 func (r *TypeRuntime) SetRepos(source string, binary string) *ux.State {
 	if state := ux.IfNilReturnError(r); state.IsError() {
 		return state
@@ -180,16 +178,6 @@ func (r *TypeRuntime) SetRepos(source string, binary string) *ux.State {
 
 	return r.State
 }
-
-
-func (r *TypeRuntime) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(r); state.IsError() {
-		return state
-	}
-	r.State = r.State.EnsureNotNil()
-	return r.State
-}
-
 
 func (r *TypeRuntime) EnsureNotNil() *TypeRuntime {
 	if r == nil {

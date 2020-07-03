@@ -17,6 +17,9 @@ type TypeExample struct {
 	runtime *toolRuntime.TypeRuntime
 	State   *ux.State
 }
+func (e *TypeExample) IsNil() *ux.State {
+	return ux.IfNilReturnError(e)
+}
 
 
 func New(runtime *toolRuntime.TypeRuntime) *TypeExample {
@@ -33,21 +36,3 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeExample {
 	te.State.SetFunctionCaller()
 	return &te
 }
-
-
-type State ux.State
-func (s *State) Reflect() *ux.State {
-	return (*ux.State)(s)
-}
-func ReflectToolExample(e *TypeExample) *ToolExample {
-	return (*ToolExample)(e)
-}
-
-func (e *TypeExample) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(e); state.IsError() {
-		return state
-	}
-	e.State = e.State.EnsureNotNil()
-	return e.State
-}
-

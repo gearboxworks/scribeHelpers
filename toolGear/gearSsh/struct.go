@@ -41,6 +41,10 @@ type Ssh struct {
 	State      *ux.State
 	Debug      bool
 }
+func (s *Ssh) IsNil() *ux.State {
+	return ux.IfNilReturnError(s)
+}
+
 type SshClientArgs Ssh
 
 type Environment map[string]string
@@ -70,15 +74,6 @@ func NewSshClient(args ...SshClientArgs) *Ssh {
 	*sshClient = Ssh(_args)
 
 	return sshClient
-}
-
-
-func (s *Ssh) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(s); state.IsError() {
-		return state
-	}
-	s.State = s.State.EnsureNotNil()
-	return s.State
 }
 
 

@@ -10,7 +10,7 @@ import (
 )
 
 
-type DockerGear struct {
+type TypeDockerGear struct {
 	Image     *Image
 	Container *Container
 
@@ -22,6 +22,9 @@ type DockerGear struct {
 	Runtime   *toolRuntime.TypeRuntime
 	State     *ux.State
 }
+func (gear *TypeDockerGear) IsNil() *ux.State {
+	return ux.IfNilReturnError(gear)
+}
 
 
 type TypeMatchImage struct {
@@ -32,8 +35,8 @@ type TypeMatchImage struct {
 type TypeMatchContainer TypeMatchImage
 
 
-func New(runtime *toolRuntime.TypeRuntime) *DockerGear {
-	var gear DockerGear
+func New(runtime *toolRuntime.TypeRuntime) *TypeDockerGear {
+	var gear TypeDockerGear
 	runtime = runtime.EnsureNotNil()
 
 	for range onlyOnce {
@@ -71,16 +74,7 @@ func New(runtime *toolRuntime.TypeRuntime) *DockerGear {
 }
 
 
-func (gear *DockerGear) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(gear); state.IsError() {
-		return state
-	}
-	gear.State = gear.State.EnsureNotNil()
-	return gear.State
-}
-
-
-func (gear *DockerGear) IsValid() *ux.State {
+func (gear *TypeDockerGear) IsValid() *ux.State {
 	if state := ux.IfNilReturnError(gear); state.IsError() {
 		return state
 	}
@@ -98,17 +92,17 @@ func (gear *DockerGear) IsValid() *ux.State {
 }
 
 
-func (gear *DockerGear) SetSshStatusLine(s bool) {
+func (gear *TypeDockerGear) SetSshStatusLine(s bool) {
 	gear.Ssh.StatusLine.Enable = s
 }
 
 
-func (gear *DockerGear) SetSshShell(s bool) {
+func (gear *TypeDockerGear) SetSshShell(s bool) {
 	gear.Ssh.Shell = s
 }
 
 
-func (gear *DockerGear) AddVolume(local string, remote string) bool {
+func (gear *TypeDockerGear) AddVolume(local string, remote string) bool {
 	if gear.Container.VolumeMounts == nil {
 		gear.Container.VolumeMounts = make(VolumeMounts)
 	}
@@ -116,12 +110,12 @@ func (gear *DockerGear) AddVolume(local string, remote string) bool {
 }
 
 
-func (gear *DockerGear) ContainerCreate(gearName string, gearVersion string) *ux.State {
+func (gear *TypeDockerGear) ContainerCreate(gearName string, gearVersion string) *ux.State {
 	return gear.Container.ContainerCreate(gearName, gearVersion)
 }
 
 
-func (gear *DockerGear) List(name string) *ux.State {
+func (gear *TypeDockerGear) List(name string) *ux.State {
 	if state := ux.IfNilReturnError(gear); state.IsError() {
 		return state
 	}
@@ -144,7 +138,7 @@ func (gear *DockerGear) List(name string) *ux.State {
 }
 
 
-func (gear *DockerGear) ParseGearConfig(cs string) *ux.State {
+func (gear *TypeDockerGear) ParseGearConfig(cs string) *ux.State {
 	if state := ux.IfNilReturnError(gear); state.IsError() {
 		return state
 	}

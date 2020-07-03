@@ -15,7 +15,7 @@ import (
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
-func (d *Docker) ContainerList(f string) (int, *ux.State) {
+func (d *TypeDocker) ContainerList(f string) (int, *ux.State) {
 	var count int
 	if state := d.IsNil(); state.IsError() {
 		return 0, state
@@ -34,7 +34,7 @@ func (d *Docker) ContainerList(f string) (int, *ux.State) {
 			break
 		}
 
-		ux.PrintfCyan("Installed Docker containers: ")
+		ux.PrintfCyan("Installed TypeDocker containers: ")
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{
@@ -116,7 +116,7 @@ func (d *Docker) ContainerList(f string) (int, *ux.State) {
 }
 
 
-func (d *Docker) FindContainer(org string, name string, version string) (bool, *ux.State) {
+func (d *TypeDocker) FindContainer(org string, name string, version string) (bool, *ux.State) {
 	var ok bool
 	if state := d.IsNil(); state.IsError() {
 		return false, state

@@ -31,6 +31,9 @@ type TypeExecCommand struct {
 	Runtime    *toolRuntime.TypeRuntime
 	State      *ux.State
 }
+func (e *TypeExecCommand) IsNil() *ux.State {
+	return ux.IfNilReturnError(e)
+}
 
 
 func New(runtime *toolRuntime.TypeRuntime) *TypeExecCommand {
@@ -73,15 +76,6 @@ func ReflectExecCommand(ref ...interface{}) *TypeExecCommand {
 	}
 
 	return ec
-}
-
-
-func (e *TypeExecCommand) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(e); state.IsError() {
-		return state
-	}
-	e.State = e.State.EnsureNotNil()
-	return e.State
 }
 
 

@@ -14,7 +14,7 @@ import (
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
-func (d *Docker) NetworkList(f string) *ux.State {
+func (d *TypeDocker) NetworkList(f string) *ux.State {
 	if state := d.IsNil(); state.IsError() {
 		return state
 	}
@@ -33,7 +33,7 @@ func (d *Docker) NetworkList(f string) *ux.State {
 			break
 		}
 
-		ux.PrintflnCyan("\nConfigured Docker networks:")
+		ux.PrintflnCyan("\nConfigured TypeDocker networks:")
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{
@@ -62,7 +62,7 @@ func (d *Docker) NetworkList(f string) *ux.State {
 }
 
 
-func (d *Docker) FindNetwork(netName string) *ux.State {
+func (d *TypeDocker) FindNetwork(netName string) *ux.State {
 	if state := d.IsNil(); state.IsError() {
 		return state
 	}
@@ -98,7 +98,7 @@ func (d *Docker) FindNetwork(netName string) *ux.State {
 }
 
 
-func (d *Docker) NetworkCreate(netName string) *ux.State {
+func (d *TypeDocker) NetworkCreate(netName string) *ux.State {
 	if state := d.IsNil(); state.IsError() {
 		return state
 	}

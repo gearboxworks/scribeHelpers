@@ -6,23 +6,26 @@ import (
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
-type ExampleGetter interface {
+type CrawlerGetter interface {
 }
 
 
-type TypeExample struct {
+type TypeCrawler struct {
 	name    string
 	path    *toolPath.TypeOsPath
 
 	runtime *toolRuntime.TypeRuntime
 	State   *ux.State
 }
+func (e *TypeCrawler) IsNil() *ux.State {
+	return ux.IfNilReturnError(e)
+}
 
 
-func New(runtime *toolRuntime.TypeRuntime) *TypeExample {
+func New(runtime *toolRuntime.TypeRuntime) *TypeCrawler {
 	runtime = runtime.EnsureNotNil()
 
-	te := TypeExample{
+	te := TypeCrawler{
 		name:    "",
 		path:    toolPath.New(runtime),
 
@@ -32,22 +35,5 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeExample {
 	te.State.SetPackage("")
 	te.State.SetFunctionCaller()
 	return &te
-}
-
-
-type State ux.State
-func (s *State) Reflect() *ux.State {
-	return (*ux.State)(s)
-}
-func ReflectToolExample(e *TypeExample) *ToolExample {
-	return (*ToolExample)(e)
-}
-
-func (e *TypeExample) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(e); state.IsError() {
-		return state
-	}
-	e.State = e.State.EnsureNotNil()
-	return e.State
 }
 

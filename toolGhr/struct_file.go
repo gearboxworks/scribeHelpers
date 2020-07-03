@@ -19,6 +19,9 @@ type TypeFile struct {
 	runtime  *toolRuntime.TypeRuntime
 	state    *ux.State
 }
+func (f *TypeFile) IsNil() *ux.State {
+	return ux.IfNilReturnError(f)
+}
 
 func NewFile(runtime *toolRuntime.TypeRuntime) *TypeFile {
 	var f TypeFile
@@ -38,14 +41,6 @@ func NewFile(runtime *toolRuntime.TypeRuntime) *TypeFile {
 	f.state.SetPackage("")
 	f.state.SetFunctionCaller()
 	return &f
-}
-
-func (f *TypeFile) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(f); state.IsError() {
-		return state
-	}
-	f.state = f.state.EnsureNotNil()
-	return f.state
 }
 
 func (f *TypeFile) isValid() *ux.State {

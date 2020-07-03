@@ -18,6 +18,9 @@ type TypeGoReleaser struct {
 	runtime *toolRuntime.TypeRuntime
 	State   *ux.State
 }
+func (gr *TypeGoReleaser) IsNil() *ux.State {
+	return ux.IfNilReturnError(gr)
+}
 
 
 func New(runtime *toolRuntime.TypeRuntime) *TypeGoReleaser {
@@ -42,24 +45,6 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGoReleaser {
 
 	return &te
 }
-
-
-type State ux.State
-func (s *State) Reflect() *ux.State {
-	return (*ux.State)(s)
-}
-func ReflectToolGoReleaser(e *TypeGoReleaser) *ToolGoReleaser {
-	return (*ToolGoReleaser)(e)
-}
-
-func (gr *TypeGoReleaser) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(gr); state.IsError() {
-		return state
-	}
-	gr.State = gr.State.EnsureNotNil()
-	return gr.State
-}
-
 
 func (gr *TypeGoReleaser) IsRunnable() bool {
 	return gr.exec.IsRunnable()

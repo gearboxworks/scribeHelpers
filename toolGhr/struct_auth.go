@@ -15,6 +15,9 @@ type TypeAuth struct {
 	runtime  *toolRuntime.TypeRuntime
 	state    *ux.State
 }
+func (auth *TypeAuth) IsNil() *ux.State {
+	return ux.IfNilReturnError(auth)
+}
 
 func NewAuth(runtime *toolRuntime.TypeRuntime) *TypeAuth {
 	var auth TypeAuth
@@ -36,14 +39,6 @@ func NewAuth(runtime *toolRuntime.TypeRuntime) *TypeAuth {
 	auth.state.SetPackage("")
 	auth.state.SetFunctionCaller()
 	return &auth
-}
-
-func (auth *TypeAuth) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(auth); state.IsError() {
-		return state
-	}
-	auth.state = auth.state.EnsureNotNil()
-	return auth.state
 }
 
 func (auth *TypeAuth) isValid() *ux.State {

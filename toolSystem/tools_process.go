@@ -6,38 +6,6 @@ import (
 )
 
 
-type ToolProcesses TypeProcesses
-func (p *ToolProcesses) Reflect() *TypeProcesses {
-	return (*TypeProcesses)(p)
-}
-func (p *TypeProcesses) Reflect() *ToolProcesses {
-	return (*ToolProcesses)(p)
-}
-func (p *ToolProcesses) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(p); state.IsError() {
-		return state
-	}
-	p.State = p.State.EnsureNotNil()
-	return p.State
-}
-
-
-type ToolProcess TypeProcess
-func (p *ToolProcess) Reflect() *TypeProcess {
-	return (*TypeProcess)(p)
-}
-func (p *TypeProcess) Reflect() *ToolProcess {
-	return (*ToolProcess)(p)
-}
-func (p *ToolProcess) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(p); state.IsError() {
-		return state
-	}
-	p.State = p.State.EnsureNotNil()
-	return p.State
-}
-
-
 // Usage:
 //		{{ $procs := FindByName }}
 func (p *ToolProcesses) FindByName(name interface{}) *ux.State {

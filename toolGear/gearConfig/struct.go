@@ -25,6 +25,11 @@ type GearConfig struct {
 	Runtime    *toolRuntime.TypeRuntime
 	State      *ux.State
 }
+func (gc *GearConfig) IsNil() *ux.State {
+	return ux.IfNilReturnError(gc)
+}
+
+
 type GearConfigs map[string]GearConfig
 
 
@@ -45,15 +50,6 @@ func New(runtime *toolRuntime.TypeRuntime) *GearConfig {
 	gc.State.SetPackage("")
 	gc.State.SetFunctionCaller()
 	return &gc
-}
-
-
-func (gc *GearConfig) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(gc); state.IsError() {
-		return state
-	}
-	gc.State = gc.State.EnsureNotNil()
-	return gc.State
 }
 
 

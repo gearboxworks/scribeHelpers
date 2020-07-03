@@ -51,6 +51,9 @@ type TypeScribeArgs struct {
 	cmd            *cobra.Command
 	//cmdHelp        *toolCobraHelp.TypeCommands
 }
+func (at *TypeScribeArgs) IsNil() *ux.State {
+	return ux.IfNilReturnError(at)
+}
 
 
 func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
@@ -103,15 +106,6 @@ func New(binary string, version string, debugFlag bool) *TypeScribeArgs {
 	}
 
 	return &p
-}
-
-
-func (at *TypeScribeArgs) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(at); state.IsError() {
-		return state
-	}
-	at.State = at.State.EnsureNotNil()
-	return at.State
 }
 
 

@@ -23,7 +23,7 @@ type Container struct {
 
 	Summary *types.Container
 	Details *types.ContainerJSON
-	_Parent *Docker
+	_Parent *TypeDocker
 
 	Runtime *toolRuntime.TypeRuntime
 	State   *ux.State
@@ -201,7 +201,7 @@ func (c *Container) Start() *ux.State {
 		//select {
 		//	case err := <-errCh:
 		//		if err != nil {
-		//			c.State.SetError("Docker client error: %s", err)
+		//			c.State.SetError("TypeDocker client error: %s", err)
 		//			// fmt.Printf("SC: %s\n", response.Error)
 		//			// return false, err
 		//		}
@@ -229,7 +229,7 @@ func (c *Container) Start() *ux.State {
 
 
 // Run a container
-// This first example shows how to run a container using the Docker API.
+// This first example shows how to run a container using the TypeDocker API.
 // On the command line, you would use the docker run command, but this is just as easy to do from your own apps too.
 // This is the equivalent of typing docker run alpine echo hello world at the command prompt:
 func (c *Container) ContainerCreate(org string, name string, version string, fsmount string) *ux.State {

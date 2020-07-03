@@ -6,22 +6,6 @@ import (
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
-type ToolDockerGear DockerGear
-func (c *ToolDockerGear) Reflect() *DockerGear {
-	return (*DockerGear)(c)
-}
-func (gear *DockerGear) Reflect() *ToolDockerGear {
-	return (*ToolDockerGear)(gear)
-}
-
-func (c *ToolDockerGear) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(c); state.IsError() {
-		return state
-	}
-	c.State = c.State.EnsureNotNil()
-	return c.State
-}
-
 
 // Usage:
 //		{{ $copy := CopyFiles }}

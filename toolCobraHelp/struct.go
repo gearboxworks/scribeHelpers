@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+
 type CobraGetter interface {
 }
 
@@ -14,6 +15,9 @@ type TypeCommands struct {
 
 	runtime  *toolRuntime.TypeRuntime
 	State    *ux.State
+}
+func (tc *TypeCommands) IsNil() *ux.State {
+	return ux.IfNilReturnError(tc)
 }
 
 type Cmds map[string][]*cobra.Command
@@ -32,21 +36,3 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeCommands {
 	te.State.SetFunctionCaller()
 	return &te
 }
-
-
-type State ux.State
-func (s *State) Reflect() *ux.State {
-	return (*ux.State)(s)
-}
-func ReflectToolCobra(e *TypeCommands) *ToolCobra {
-	return (*ToolCobra)(e)
-}
-
-func (tc *TypeCommands) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(tc); state.IsError() {
-		return state
-	}
-	tc.State = tc.State.EnsureNotNil()
-	return tc.State
-}
-

@@ -12,7 +12,7 @@ import (
 )
 
 
-func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) *ux.State {
+func (gear *TypeDockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
@@ -120,7 +120,7 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 }
 
 
-func (gear *DockerGear) SetMountPath(mp string) *ux.State {
+func (gear *TypeDockerGear) SetMountPath(mp string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
@@ -170,7 +170,7 @@ func (gear *DockerGear) SetMountPath(mp string) *ux.State {
 }
 
 
-func (gear *DockerGear) AddMount(local string, remote string) bool {
+func (gear *TypeDockerGear) AddMount(local string, remote string) bool {
 	if gear.Container.SshfsMounts == nil {
 		gear.Container.SshfsMounts = make(SshfsMounts)
 	}

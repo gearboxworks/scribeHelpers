@@ -8,7 +8,7 @@ import (
 )
 
 
-type Docker struct {
+type TypeDocker struct {
 	Image     *Image
 	Container *Container
 	Client    *client.Client
@@ -16,10 +16,13 @@ type Docker struct {
 	Runtime   *toolRuntime.TypeRuntime
 	State     *ux.State
 }
+func (d *TypeDocker) IsNil() *ux.State {
+	return ux.IfNilReturnError(d)
+}
 
 
-func New(runtime *toolRuntime.TypeRuntime) *Docker {
-	var gear Docker
+func New(runtime *toolRuntime.TypeRuntime) *TypeDocker {
+	var gear TypeDocker
 	runtime = runtime.EnsureNotNil()
 
 	for range onlyOnce {
@@ -37,7 +40,7 @@ func New(runtime *toolRuntime.TypeRuntime) *Docker {
 		gear.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 		//cli.DockerClient, err = client.NewEnvClient()
 		if err != nil {
-			gear.State.SetError("Docker client error: %s", err)
+			gear.State.SetError("TypeDocker client error: %s", err)
 			break
 		}
 
@@ -48,7 +51,7 @@ func New(runtime *toolRuntime.TypeRuntime) *Docker {
 		//var result types.Ping
 		_, err = gear.Client.Ping(ctx)
 		if err != nil {
-			gear.State.SetError("Docker client error: %s", err)
+			gear.State.SetError("TypeDocker client error: %s", err)
 			break
 		}
 		//fmt.Printf("PING: %v", result)
@@ -61,15 +64,7 @@ func New(runtime *toolRuntime.TypeRuntime) *Docker {
 }
 
 
-func (d *Docker) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(d); state.IsError() {
-		return state
-	}
-	d.State = d.State.EnsureNotNil()
-	return d.State
-}
-
-func (d *Docker) IsValid() *ux.State {
+func (d *TypeDocker) IsValid() *ux.State {
 	if state := ux.IfNilReturnError(d); state.IsError() {
 		return state
 	}

@@ -1,27 +1,6 @@
 // High level helper functions available within templates - general file related.
 package toolPath
 
-import (
-	"github.com/newclarity/scribeHelpers/ux"
-)
-
-
-type ToolOsPath TypeOsPath
-func (g *ToolOsPath) Reflect() *TypeOsPath {
-	return (*TypeOsPath)(g)
-}
-func (p *TypeOsPath) Reflect() *ToolOsPath {
-	return (*ToolOsPath)(p)
-}
-
-func (c *ToolOsPath) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(c); state.IsError() {
-		return state
-	}
-	c.State = c.State.EnsureNotNil()
-	return c.State
-}
-
 
 // Usage:
 //		{{ $str := ReadFile "filename.txt" }}

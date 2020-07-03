@@ -29,7 +29,7 @@ type Container struct {
 	Details      *types.ContainerJSON
 	GearConfig   *gearConfig.GearConfig
 
-	_Parent      *DockerGear
+	_Parent      *TypeDockerGear
 	runtime      *toolRuntime.TypeRuntime
 	State        *ux.State
 }

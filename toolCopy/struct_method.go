@@ -19,8 +19,7 @@ const (
 
 
 // GoLang enums - much better than plain old C type enums!
-type TypeCopyMethod struct
-{
+type TypeCopyMethod struct {
 	Name        string
 	Path        string
 	AllowRemote bool
@@ -31,6 +30,10 @@ type TypeCopyMethod struct
 	paths       *TypeOsCopyPaths
 	state       *ux.State
 }
+func (c *TypeCopyMethod) IsNil() *ux.State {
+	return ux.IfNilReturnError(c)
+}
+
 type TypeCopyMethods struct {
 	Selected *TypeCopyMethod
 	All      []*TypeCopyMethod

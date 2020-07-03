@@ -56,13 +56,6 @@ type State struct {
 	//Response    interface{}
 }
 
-type RuntimeDebug struct {
-	Enabled  bool
-	File     string
-	Line     int
-	Function string
-}
-
 
 const DefaultSeparator = "\n"
 
@@ -99,34 +92,63 @@ func EnsureStateNotNil(p *State) *State {
 	return p
 }
 
-func IfNilReturnError(ref interface{}) *State {
-	if ref == nil {
+func IsInterfaceNil(ref interface{}) bool {
+	if ref == nil || (reflect.ValueOf(ref).Kind() == reflect.Ptr && reflect.ValueOf(ref).IsNil()) {
+		return true
+	}
+	return false
+}
+
+func IfNilReturnError(ref interface{}, name ...string) *State {
+	if IsInterfaceNil(ref) {
 		s := NewState("", true)
 		s._Fatal = errors.New("SW ERROR")
 		s.ExitCode = 255
+		PanicDump()
 		return s
 	}
 
-	state := SearchStructureForUxState(ref)
+	state := SearchStructureForUxState(ref, name...)
 	if state == nil {
-		state = NewState("", false)
+		// If the structure doesn't contain *ux.State
+		state = NewState(strings.Join(name, " "), false)
 	}
 	state.SetOk()
+
 	return state
-	//return ref.(*State)
 }
 
 // Search a given structure for the State object and return it's pointer.
-func SearchStructureForUxState(m interface{}) *State {
+func SearchStructureForUxState(ref interface{}, name ...string) *State {
 	var state *State
 
-	s := reflect.ValueOf(m).Elem()
-	typeOfT := s.Type()
-	//fmt.Println("t=", m)
-	for i := 0; i < s.NumField(); i++ {
-		if typeOfT.Field(i).Name == "State" {
-			state = s.Field(i).Interface().(*State)
+	for range onlyOnce {
+		v := reflect.ValueOf(ref)
+		var e reflect.Value
+
+		// We're doing these checks to ensure ease of future expansion.
+		if v.Kind() == reflect.Ptr {
+			e = v.Elem()
+		} else if v.Kind() == reflect.Struct {
+			// We can't handle a non-pointer, otherwise we get this...
+			// reflect.flag.mustBeAssignable using unaddressable value
+			//e = v
+			Panic(PanicErrorNotGivenAPointer, v.String())
+		} else {
 			break
+		}
+
+		typeOfT := e.Type()
+		for i := 0; i < e.NumField(); i++ {
+			if typeOfT.Field(i).Name == "State" {
+				state = e.Field(i).Interface().(*State)
+				if state == nil {
+					// Make sure *ux.State isn't nil.
+					state = NewState(strings.Join(name, " "), false)
+					e.Field(i).Set(reflect.ValueOf(state))
+				}
+				break
+			}
 		}
 	}
 
@@ -134,21 +156,21 @@ func SearchStructureForUxState(m interface{}) *State {
 }
 
 func (state *State) Clear() {
-	if state != nil {
-		state._Debug = nil
-		state._Fatal = nil
-		state._Error = nil
-		state._Warning = nil
-		state._Ok = errors.New("")
-		state.ExitCode = 0
-
-		state.Output = ""
-		state._Separator = DefaultSeparator
-		state.OutputArray = []string{}
-		state.response = *NewResponse()
-	} else {
-		panic(state)
+	if state == nil {
+		StatePanic(state)
+		return
 	}
+	state._Debug = nil
+	state._Fatal = nil
+	state._Error = nil
+	state._Warning = nil
+	state._Ok = errors.New("")
+	state.ExitCode = 0
+
+	state.Output = ""
+	state._Separator = DefaultSeparator
+	state.OutputArray = []string{}
+	state.response = *NewResponse()
 }
 
 
@@ -386,7 +408,7 @@ func (state *State) GetExitCode() int {
 func (state *State) SetError(error ...interface{}) {
 	for range onlyOnce {
 		if state == nil {
-			panic(state)
+			StatePanic(state)
 			break
 		}
 		state.debug.fetchRuntimeDebug(2)
@@ -422,7 +444,7 @@ func (state *State) GetError() error {
 func (state *State) SetWarning(warning ...interface{}) {
 	for range onlyOnce {
 		if state == nil {
-			panic(state)
+			StatePanic(state)
 			break
 		}
 		state.debug.fetchRuntimeDebug(2)
@@ -458,7 +480,7 @@ func (state *State) GetWarning() error {
 func (state *State) SetOk(msg ...interface{}) {
 	for range onlyOnce {
 		if state == nil {
-			panic(state)
+			StatePanic(state)
 			break
 		}
 		state.debug.fetchRuntimeDebug(2)
@@ -638,35 +660,6 @@ func _Sprintf(msg ...interface{}) string {
 	}
 
 	return ret
-}
-
-
-func (p *RuntimeDebug) fetchRuntimeDebug(level int) {
-	for range onlyOnce {
-		if p == nil {
-			break
-		}
-		if level == 0 {
-			level = 1
-		}
-
-		// Discover package name.
-		var ok bool
-		var pc uintptr
-		pc, p.File, p.Line, ok = runtime.Caller(level)
-		if ok {
-			details := runtime.FuncForPC(pc)
-			p.Function = details.Name()
-			//f, l := details.FileLine(pc)
-			//fmt.Printf("%s:%d - %s:%d\n",
-			//	p.TypeFile,
-			//	p.Line,
-			//	f,
-			//	l,
-			//	)
-		}
-		//fmt.Printf("DEBUG => %s:%d [%s]\n", p.TypeFile, p.Line, p.Function)
-	}
 }
 
 func (state *State) DebugEnable() {

@@ -52,17 +52,17 @@ func NewArgFile(rt *toolRuntime.TypeRuntime) *TypeArgFile {
 }
 
 
-func (at *TypeArgFile) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(at); state.IsError() {
-		return state
-	}
-	at.State = at.State.EnsureNotNil()
-	return at.State
-}
+//func (at *TypeArgFile) IsNil() *ux.State {
+//	if state := ux.IfNilReturnError(at); state.IsError() {
+//		return state
+//	}
+//	at.State = at.State.EnsureNotNil()
+//	return at.State
+//}
 
 
 func (at *ScribeFile) SetDefaults(file string, str string) *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	at.SetDefaultFile(file)
@@ -70,7 +70,7 @@ func (at *ScribeFile) SetDefaults(file string, str string) *ux.State {
 	return at.State
 }
 func (at *ScribeFile) SetDefaultFile(file string) *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	if file == "" {
@@ -85,7 +85,7 @@ func (at *ScribeFile) SetDefaultFile(file string) *ux.State {
 	return at.State
 }
 func (at *ScribeFile) SetDefaultString(str string) *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	if str == "" {
@@ -102,7 +102,7 @@ func (at *ScribeFile) SetDefaultString(str string) *ux.State {
 
 
 func (at *JsonFile) SetDefaults(file string, str string) *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	at.SetDefaultFile(file)
@@ -110,7 +110,7 @@ func (at *JsonFile) SetDefaults(file string, str string) *ux.State {
 	return at.State
 }
 func (at *JsonFile) SetDefaultFile(file string) *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	if file == "" {
@@ -125,7 +125,7 @@ func (at *JsonFile) SetDefaultFile(file string) *ux.State {
 	return at.State
 }
 func (at *JsonFile) SetDefaultString(str string) *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	if str == "" {
@@ -142,7 +142,7 @@ func (at *JsonFile) SetDefaultString(str string) *ux.State {
 
 
 func (at *TemplateFile) SetDefaults(file string, str string) *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	at.SetDefaultFile(file)
@@ -150,7 +150,7 @@ func (at *TemplateFile) SetDefaults(file string, str string) *ux.State {
 	return at.State
 }
 func (at *TemplateFile) SetDefaultFile(file string) *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	if file == "" {
@@ -165,7 +165,7 @@ func (at *TemplateFile) SetDefaultFile(file string) *ux.State {
 	return at.State
 }
 func (at *TemplateFile) SetDefaultString(str string) *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	if str == "" {
@@ -277,7 +277,7 @@ func (at *TypeArgFile) IsStdin() bool {
 
 
 func (at *TypeArgFile) Ignore() *ux.State {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return state
 	}
 	return at.SetInputFile(SelectIgnore)
@@ -285,7 +285,7 @@ func (at *TypeArgFile) Ignore() *ux.State {
 
 
 func (at *TypeArgFile) IsIgnore() bool {
-	if state := at.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(at); state.IsError() {
 		return true
 	}
 	if at.Arg == SelectIgnore {

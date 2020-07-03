@@ -18,8 +18,6 @@ import (
 type OsCopyGetter interface {
 }
 
-//type TypeOsPath toolPath.TypeOsPath
-
 type TypeOsCopy struct {
 	Method *TypeCopyMethods				`json:"method" mapstructure:"method"`
 
@@ -29,6 +27,9 @@ type TypeOsCopy struct {
 	Debug  bool							`json:"debug" mapstructure:"debug"`
 	State  *ux.State					`json:"state" mapstructure:"state"`
 }
+func (c *TypeOsCopy) IsNil() *ux.State {
+	return ux.IfNilReturnError(c)
+}
 
 type TypeOsCopyPaths struct {
 	Source       *toolPath.TypeOsPath	`json:"source" mapstructure:"source"`
@@ -36,18 +37,6 @@ type TypeOsCopyPaths struct {
 
 	Exclude PathArray					`json:"exclude" mapstructure:"exclude"`
 	Include PathArray					`json:"include" mapstructure:"include"`
-}
-
-
-type State ux.State
-func (s *State) Reflect() *ux.State {
-	return (*ux.State)(s)
-}
-//func ReflectState(p *ux.State) *ux.State {
-//	return (*State)(p)
-//}
-func ReflectToolOsCopy(p *TypeOsCopy) *ToolOsCopy {
-	return (*ToolOsCopy)(p)
 }
 
 
@@ -72,15 +61,6 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeOsCopy {
 	c.State.SetPackage("")
 	c.State.SetFunctionCaller()
 	return c
-}
-
-
-func (c *TypeOsCopy) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(c); state.IsError() {
-		return state
-	}
-	c.State = c.State.EnsureNotNil()
-	return c.State
 }
 
 

@@ -12,7 +12,7 @@ import (
 
 type Gear struct {
 	Repo         *GitHubRepo
-	Docker       *DockerGear
+	Docker       *TypeDockerGear
 	GearConfig   *gearConfig.GearConfig
 
 	Runtime      *toolRuntime.TypeRuntime

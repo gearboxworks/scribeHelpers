@@ -15,6 +15,9 @@ type TypeGitHub struct {
 	Debug  bool
 	State *ux.State
 }
+func (gh *TypeGitHub) IsNil() *ux.State {
+	return ux.IfNilReturnError(gh)
+}
 
 
 func New(runtime *toolRuntime.TypeRuntime) *TypeGitHub {
@@ -31,15 +34,6 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGitHub {
 	gh.State.SetPackage("")
 	gh.State.SetFunctionCaller()
 	return gh
-}
-
-
-func (gh *TypeGitHub) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(gh); state.IsError() {
-		return state
-	}
-	gh.State = gh.State.EnsureNotNil()
-	return gh.State
 }
 
 

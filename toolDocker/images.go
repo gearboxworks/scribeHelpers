@@ -16,7 +16,7 @@ import (
 // List all images
 // List the images on your Engine, similar to docker image ls:
 // func ImageList(f types.ImageListOptions) error {
-func (d *Docker) ImageList(f string) (int, *ux.State) {
+func (d *TypeDocker) ImageList(f string) (int, *ux.State) {
 	var count int
 	if state := d.IsNil(); state.IsError() {
 		return 0, state
@@ -38,7 +38,7 @@ func (d *Docker) ImageList(f string) (int, *ux.State) {
 			break
 		}
 
-		ux.PrintfCyan("Downloaded Docker images: ")
+		ux.PrintfCyan("Downloaded TypeDocker images: ")
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{"Image", "Size"})
@@ -74,7 +74,7 @@ func (d *Docker) ImageList(f string) (int, *ux.State) {
 }
 
 
-func (d *Docker) FindImage(org string, name string, version string) (bool, *ux.State) {
+func (d *TypeDocker) FindImage(org string, name string, version string) (bool, *ux.State) {
 	var ok bool
 	if state := d.IsNil(); state.IsError() {
 		return false, state
@@ -151,7 +151,7 @@ func (d *Docker) FindImage(org string, name string, version string) (bool, *ux.S
 
 
 // Search for an image in remote registry.
-func (d *Docker) Search(org string, name string, version string) *ux.State {
+func (d *TypeDocker) Search(org string, name string, version string) *ux.State {
 	if state := d.IsNil(); state.IsError() {
 		return state
 	}

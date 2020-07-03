@@ -5,23 +5,6 @@ import (
 )
 
 
-type ToolExecCommand TypeExecCommand
-func (e *ToolExecCommand) Reflect() *TypeExecCommand {
-	return (*TypeExecCommand)(e)
-}
-func (e *TypeExecCommand) Reflect() *ToolExecCommand {
-	return (*ToolExecCommand)(e)
-}
-
-func (e *ToolExecCommand) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(e); state.IsError() {
-		return state
-	}
-	e.State = e.State.EnsureNotNil()
-	return e.State
-}
-
-
 // Usage:
 //		{{ $output := ExecCommand "ps %s" "-eaf" ... }}
 func ToolExecCmd(cmd ...interface{}) *ux.State {

@@ -27,14 +27,8 @@ type TypeGo struct {
 	runtime *toolRuntime.TypeRuntime
 	State   *ux.State
 }
-
-
-type State ux.State
-func (s *State) Reflect() *ux.State {
-	return (*ux.State)(s)
-}
-func ReflectToolGo(e *TypeGo) *ToolGo {
-	return (*ToolGo)(e)
+func (g *TypeGo) IsNil() *ux.State {
+	return ux.IfNilReturnError(g)
 }
 
 
@@ -54,16 +48,6 @@ func New(rt *toolRuntime.TypeRuntime) *TypeGo {
 	g.State.SetFunctionCaller()
 	return g
 }
-
-
-func (g *TypeGo) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(g); state.IsError() {
-		return state
-	}
-	g.State = g.State.EnsureNotNil()
-	return g.State
-}
-
 
 func (g *TypeGo) SetPath(path ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
@@ -162,7 +146,6 @@ func (g *TypeGo) String() string {
 	return ret
 }
 
-
 func (g *TypeGo) GetPackageName(path ...string) string {
 	if state := g.IsNil(); state.IsError() {
 		return state.SprintError()
@@ -202,7 +185,6 @@ func (g *TypeGo) GetPackageName(path ...string) string {
 
 	return ret
 }
-
 
 func (gf *GoFiles) GetMeta() *GoMeta {
 	var ret *GoMeta

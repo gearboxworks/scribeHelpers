@@ -61,7 +61,7 @@ func (p *TypeProcess) GetOpenFiles() *TypeOpenFiles {
 		of, err := p.proc.OpenFiles()
 		if err != nil {
 			p.State.SetError(err)
-			p.State.SetOk()			// Effectively ignore error.
+			p.State.SetOk() // Effectively ignore error.
 		}
 
 		for _, f := range of {

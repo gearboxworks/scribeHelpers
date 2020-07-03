@@ -11,17 +11,6 @@ import (
 )
 
 
-type ToolOsCopy TypeOsCopy
-
-func (c *ToolOsCopy) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(c); state.IsError() {
-		return state
-	}
-	c.State = c.State.EnsureNotNil()
-	return c.State
-}
-
-
 // Alias of Rsync || Tar || whatever - basically determine what tool to use based on availability.
 // @TODO - To be implemented.
 // Usage:

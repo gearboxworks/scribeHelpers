@@ -12,7 +12,7 @@ func (r *TypeResponse) AsFunc() func() {
 	return *r.Func
 }
 func nilFunc() {
-	panic("This is a nil function")
+	panic(PanicErrorGivenANilFunction)
 }
 
 
@@ -23,7 +23,7 @@ func (r *TypeResponse) AsFuncReturn() func() *TypeResponse {
 	return *(r.FuncReturn)
 }
 func nilFuncReturn() *TypeResponse {
-	panic("This is a nil function")
+	panic(PanicErrorGivenANilFunction)
 }
 
 
@@ -34,7 +34,7 @@ func (r *TypeResponse) AsFuncVariadic() func(args ...interface{}) {
 	return *r.FuncVariadic
 }
 func nilFuncVariadic(args ...interface{}) {
-	panic("This is a nil function")
+	panic(PanicErrorGivenANilFunction)
 }
 
 
@@ -45,7 +45,7 @@ func (r *TypeResponse) AsFuncVariadicReturn() func(args ...interface{}) *TypeRes
 	return *(r.FuncVariadicReturn)
 }
 func nilFuncVariadicReturn(args ...interface{}) *TypeResponse {
-	panic("This is a nil function")
+	panic(PanicErrorGivenANilFunction)
 }
 
 

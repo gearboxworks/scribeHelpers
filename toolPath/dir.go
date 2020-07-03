@@ -102,7 +102,7 @@ func (p *TypeOsPath) IsCwd() bool {
 func (p *TypeOsPath) Mkdir() *ux.State {
 	for range onlyOnce {
 		p.State.SetFunction()
-		p.State.Clear()
+		p.State.SetOk()
 
 		if !p.IsValid() {
 			break
@@ -123,14 +123,14 @@ func (p *TypeOsPath) Mkdir() *ux.State {
 			err = os.Mkdir(p._Path, p._Mode)
 		}
 
-		p.State.SetError(err)
-		if p.State.IsError() {
+		if err != nil {
+			p.State.SetError(err)
 			break
 		}
 
 		ok = true
 		p.State.SetResponse(&ok)
-		p.State.Clear()
+		//p.State.Clear()
 		p.State.SetOk("mkdir OK")
 	}
 

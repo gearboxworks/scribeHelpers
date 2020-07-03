@@ -38,17 +38,20 @@ func NewPaths(runtime *toolRuntime.TypeRuntime) *TypeOsPaths {
 }
 
 
-func (p *TypeOsPaths) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(p); state.IsError() {
-		return state
-	}
-	p.State = p.State.EnsureNotNil()
-	return p.State
-}
+//func (p *TypeOsPaths) IsNil() *ux.State {
+//	if state := ux.IfNilReturnError(p); state.IsError() {
+//		return state
+//	}
+//	p.State = p.State.EnsureNotNil()
+//	return p.State
+//}
+// 	if state := ux.IfNilReturnError(at); state.IsError() {
+//		return state
+//	}
 
 
 func (p *TypeOsPaths) SetBasePath(path ...string) *ux.State {
-	if state := p.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
 
@@ -71,14 +74,14 @@ func (p *TypeOsPaths) SetBasePath(path ...string) *ux.State {
 
 
 func (p *TypeOsPaths) SetRecursive() *ux.State {
-	if state := p.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
 	p.recurse = true
 	return p.State
 }
 func (p *TypeOsPaths) SetNonRecursive() *ux.State {
-	if state := p.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
 	p.recurse = false
@@ -87,7 +90,7 @@ func (p *TypeOsPaths) SetNonRecursive() *ux.State {
 
 
 func (p *TypeOsPaths) Find(path ...string) *ux.State {
-	if state := p.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
 
@@ -116,7 +119,7 @@ func (p *TypeOsPaths) Find(path ...string) *ux.State {
 
 
 func (p *TypeOsPaths) FindRegex(re string, path ...string) *ux.State {
-	if state := p.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
 
@@ -153,7 +156,7 @@ func (p *TypeOsPaths) FindRegex(re string, path ...string) *ux.State {
 
 
 func (p *TypeOsPaths) FindByExt(ext string, path ...string) *ux.State {
-	if state := p.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
 
@@ -201,7 +204,7 @@ type ffiles struct {
 
 func (p *TypeOsPaths) find() []ffiles {
 	var files []ffiles
-	if state := p.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(p); state.IsError() {
 		return files
 	}
 
@@ -331,7 +334,7 @@ func (p *TypeOsPaths) find() []ffiles {
 
 
 func (p *TypeOsPaths) appendPath(path ...string) *ux.State {
-	if state := p.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(p); state.IsError() {
 		return state
 	}
 

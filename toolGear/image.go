@@ -25,7 +25,7 @@ type Image struct {
 	Details    types.ImageInspect
 	GearConfig *gearConfig.GearConfig
 
-	_Parent    *DockerGear
+	_Parent    *TypeDockerGear
 	runtime    *toolRuntime.TypeRuntime
 	State      *ux.State
 }

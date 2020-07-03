@@ -290,7 +290,7 @@ func templateBrightGreen() string {
 }
 
 func templateBrightYellow() string {
-	return strings.TrimSuffix(aurora.BgBrightCyan("").String(), clear)
+	return strings.TrimSuffix(aurora.BrightYellow("").String(), clear)
 }
 
 func templateBrightBlue() string {

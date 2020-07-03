@@ -36,14 +36,8 @@ type TypeOsPath struct {
 
 	State         *ux.State
 }
-
-
-type State ux.State
-func (p *State) Reflect() *ux.State {
-	return (*ux.State)(p)
-}
-func ReflectToolOsPath(p *TypeOsPath) *ToolOsPath {
-	return (*ToolOsPath)(p)
+func (p *TypeOsPath) IsNil() *ux.State {
+	return ux.IfNilReturnError(p)
 }
 
 
@@ -75,14 +69,18 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeOsPath {
 }
 
 
-func (p *TypeOsPath) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(p); state.IsError() {
-		return state
-	}
-	p.State = p.State.EnsureNotNil()
-	return p.State
-}
+//func (p *TypeOsPath) IsNil() *ux.State {
+//	if state := ux.IfNilReturnError(p); state.IsError() {
+//		return state
+//	}
+//	p.State = p.State.EnsureNotNil()
+//	return p.State
+//}
 
+// Replaced with:
+// 	if state := ux.IfNilReturnError(at); state.IsError() {
+//		return state
+//	}
 
 func (p *TypeOsPath) EnsureNotNil() *TypeOsPath {
 	if p == nil {

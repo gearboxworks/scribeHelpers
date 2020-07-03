@@ -37,6 +37,9 @@ type TypeRepo struct {
 	runtime      *toolRuntime.TypeRuntime
 	state        *ux.State
 }
+func (repo *TypeRepo) IsNil() *ux.State {
+	return ux.IfNilReturnError(repo)
+}
 
 
 //type TypeCreateRel struct {
@@ -88,14 +91,6 @@ func NewRepo(runtime *toolRuntime.TypeRuntime) *TypeRepo {
 	}
 
 	return &repo
-}
-
-func (repo *TypeRepo) IsNil() *ux.State {
-	if state := ux.IfNilReturnError(repo); state.IsError() {
-		return state
-	}
-	repo.state = repo.state.EnsureNotNil()
-	return repo.state
 }
 
 func (repo *TypeRepo) isValid() *ux.State {

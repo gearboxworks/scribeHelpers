@@ -7,7 +7,7 @@ import "reflect"
 var Types = map[string]reflect.Type{
 	"Container": reflect.TypeOf((*Container)(nil)).Elem(),
 	"Containers": reflect.TypeOf((*Containers)(nil)).Elem(),
-	"Docker": reflect.TypeOf((*Docker)(nil)).Elem(),
+	"TypeDocker": reflect.TypeOf((*TypeDocker)(nil)).Elem(),
 	"Image": reflect.TypeOf((*Image)(nil)).Elem(),
 	"PullEvent": reflect.TypeOf((*PullEvent)(nil)).Elem(),
 	"TypeMatchContainer": reflect.TypeOf((*TypeMatchContainer)(nil)).Elem(),

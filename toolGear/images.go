@@ -17,7 +17,7 @@ import (
 // List all images
 // List the images on your Engine, similar to docker image ls:
 // func ImageList(f types.ImageListOptions) error {
-func (gear *DockerGear) ImageList(f string) (int, *ux.State) {
+func (gear *TypeDockerGear) ImageList(f string) (int, *ux.State) {
 	var count int
 	if state := gear.IsNil(); state.IsError() {
 		return 0, state
@@ -95,7 +95,7 @@ func (gear *DockerGear) ImageList(f string) (int, *ux.State) {
 }
 
 
-func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
+func (gear *TypeDockerGear) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
 	var ok bool
 	if state := gear.IsNil(); state.IsError() {
 		return false, state
@@ -176,7 +176,7 @@ func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, *u
 
 
 // Search for an image in remote registry.
-func (gear *DockerGear) Search(gearName string, gearVersion string) *ux.State {
+func (gear *TypeDockerGear) Search(gearName string, gearVersion string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}

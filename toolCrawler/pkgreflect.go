@@ -5,15 +5,15 @@ package toolCrawler
 import "reflect"
 
 var Types = map[string]reflect.Type{
-	"ExampleGetter": reflect.TypeOf((*ExampleGetter)(nil)).Elem(),
+	"CrawlerGetter": reflect.TypeOf((*CrawlerGetter)(nil)).Elem(),
 	"State": reflect.TypeOf((*State)(nil)).Elem(),
-	"ToolExample": reflect.TypeOf((*ToolExample)(nil)).Elem(),
-	"TypeExample": reflect.TypeOf((*TypeExample)(nil)).Elem(),
+	"ToolCrawler": reflect.TypeOf((*ToolCrawler)(nil)).Elem(),
+	"TypeCrawler": reflect.TypeOf((*TypeCrawler)(nil)).Elem(),
 }
 
 var Functions = map[string]reflect.Value{
 	"New": reflect.ValueOf(New),
-	"ReflectToolExample": reflect.ValueOf(ReflectToolExample),
+	"ReflectToolCrawler": reflect.ValueOf(ReflectToolCrawler),
 }
 
 var Variables = map[string]reflect.Value{

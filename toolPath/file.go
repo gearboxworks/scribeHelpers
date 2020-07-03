@@ -130,7 +130,7 @@ func (p *TypeOsPath) GetSeparator() string {
 func (p *TypeOsPath) Foo() *ux.State {
 	for range onlyOnce {
 		p.State.SetFunction()
-		p.State.Clear()
+		p.State.SetOk()
 
 		if !p.IsValid() {
 			p.State.SetWarning("path is invalid")
@@ -191,7 +191,7 @@ func (p *TypeOsPath) Foo() *ux.State {
 func (p *TypeOsPath) ReadFile() *ux.State {
 	for range onlyOnce {
 		p.State.SetFunction()
-		p.State.Clear()
+		p.State.SetOk()
 
 		if !p.IsValid() {
 			p.State.SetWarning("path is invalid")
@@ -230,7 +230,7 @@ func (p *TypeOsPath) ReadFile() *ux.State {
 func (p *TypeOsPath) WriteFile() *ux.State {
 	for range onlyOnce {
 		p.State.SetFunction()
-		p.State.Clear()
+		p.State.SetOk()
 
 		if !p.IsValid() {
 			p.State.SetWarning("path is invalid")
@@ -249,7 +249,7 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 				break
 			}
 			if p.NotExists() {
-				p.State.Clear()
+				p.State.SetOk()
 				break
 			}
 			if p._CanOverwrite {
@@ -260,7 +260,7 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 				p.State.SetWarning("not overwriting file '%s'", p._Path)
 				break
 			}
-			p.State.Clear()
+			p.State.SetOk()
 		}
 		if p.State.IsNotOk() {
 			break
@@ -287,7 +287,7 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 func (p *TypeOsPath) OpenFile() *ux.State {
 	for range onlyOnce {
 		p.State.SetFunction()
-		p.State.Clear()
+		p.State.SetOk()
 
 		if !p.IsValid() {
 			p.State.SetWarning("path is invalid")
@@ -301,7 +301,7 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 				break
 			}
 			if p.NotExists() {
-				p.State.Clear()
+				p.State.SetOk()
 				break
 			}
 			if p._CanOverwrite {
@@ -312,7 +312,7 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 				p.State.SetWarning("not overwriting file '%s'", p._Path)
 				break
 			}
-			p.State.Clear()
+			p.State.SetOk()
 		}
 		if p.State.IsNotOk() {
 			break
@@ -343,7 +343,7 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 func (p *TypeOsPath) OpenFileHandle() *ux.State {
 	for range onlyOnce {
 		p.State.SetFunction()
-		p.State.Clear()
+		p.State.SetOk()
 
 		if !p.IsValid() {
 			p.State.SetWarning("path is invalid")
@@ -356,7 +356,7 @@ func (p *TypeOsPath) OpenFileHandle() *ux.State {
 			break
 		}
 		if p.NotExists() {
-			p.State.Clear()
+			p.State.SetOk()
 			break
 		}
 
@@ -380,7 +380,7 @@ func (p *TypeOsPath) SetFileHandle(fh *os.File) *ux.State {
 	for range onlyOnce {
 		p.FileHandle = fh
 		p.SetPath(p.FileHandle.Name())
-		p.State.Clear()
+		p.State.SetOk()
 	}
 
 	return p.State
@@ -390,7 +390,7 @@ func (p *TypeOsPath) SetFileHandle(fh *os.File) *ux.State {
 func (p *TypeOsPath) GetFileHandle() (*os.File, *ux.State) {
 	for range onlyOnce {
 		p.State.SetFunction()
-		p.State.Clear()
+		p.State.SetOk()
 
 		if !p.IsValid() {
 			p.State.SetWarning("path is invalid")
@@ -407,7 +407,7 @@ func (p *TypeOsPath) GetFileHandle() (*os.File, *ux.State) {
 func (p *TypeOsPath) CloseFile() *ux.State {
 	for range onlyOnce {
 		p.State.SetFunction()
-		p.State.Clear()
+		p.State.SetOk()
 
 		var err error
 		err = p.FileHandle.Sync()
