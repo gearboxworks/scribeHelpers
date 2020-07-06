@@ -112,7 +112,7 @@ func (g *TypeGo) Parse(mode ...Mode) *ux.State {
 		}
 
 		for _, f := range g.Go.files {
-			//g.Go[i].Parse(f.Path.GetPath(), mode[0])
+			//g.Go[i].Parse(f.Base.GetPath(), mode[0])
 			g.State = f.Parse(mode[0])
 			if f.meta.Valid {
 				g.Go.Found = f
@@ -191,7 +191,7 @@ func (gf *GoFiles) GetMeta() *GoMeta {
 
 	for range onlyOnce {
 		for _, f := range gf.files {
-			//ux.PrintflnBlue("# %s", f.Path.GetPath())
+			//ux.PrintflnBlue("# %s", f.Base.GetPath())
 			//ux.PrintflnCyan("%v", f.Ast.Name)
 			ret = f.GetMeta()
 			if ret != nil {

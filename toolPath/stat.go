@@ -15,7 +15,7 @@ func (p *TypeOsPath) StatPath() *ux.State {
 		p.State.SetFunction()
 		p.State.SetOk()
 
-		if p._Path == "" {
+		if p.Path == "" {
 			p.State.SetError("path is empty")
 			break
 		}
@@ -28,7 +28,7 @@ func (p *TypeOsPath) StatPath() *ux.State {
 			break
 		}
 
-		if strings.HasPrefix(p._Path, "~/") {
+		if strings.HasPrefix(p.Path, "~/") {
 			u, err := user.Current()
 			if err != nil {
 				p.State.SetError(err)
@@ -36,13 +36,13 @@ func (p *TypeOsPath) StatPath() *ux.State {
 				p._Exists = false
 				break
 			}
-			p._Path = strings.TrimPrefix(p._Path, "~/")
-			p._Path = filepath.Join(u.HomeDir, p._Path)
+			p.Path = strings.TrimPrefix(p.Path, "~/")
+			p.Path = filepath.Join(u.HomeDir, p.Path)
 		}
 
 		var stat os.FileInfo
 		var err error
-		stat, err = os.Stat(p._Path)
+		stat, err = os.Stat(p.Path)
 		if os.IsNotExist(err) {
 			p.State.SetError("path does not exist - %s", err)
 			p._Exists = false
@@ -63,15 +63,15 @@ func (p *TypeOsPath) StatPath() *ux.State {
 		if stat.IsDir() {
 			p._IsDir = true
 			p._IsFile = false
-			p._Dirname = fmt.Sprintf("%s%c", p._Path, filepath.Separator)
-			p._Path = p._Dirname
+			p._Dirname = fmt.Sprintf("%s%c", p.Path, filepath.Separator)
+			p.Path = p._Dirname
 			p._Filename = ""
 
 		} else {
 			p._IsDir = false
 			p._IsFile = true
-			p._Dirname = fmt.Sprintf("%s%c", filepath.Dir(p._Path), filepath.Separator)
-			p._Filename = filepath.Base(p._Path)
+			p._Dirname = fmt.Sprintf("%s%c", filepath.Dir(p.Path), filepath.Separator)
+			p._Filename = filepath.Base(p.Path)
 		}
 
 		p.State.SetOk("stat OK")
@@ -96,7 +96,7 @@ func (p *TypeOsPath) Chmod(m os.FileMode) *ux.State {
 		}
 
 		var err error
-		err = os.Chmod(p._Path, m)
+		err = os.Chmod(p.Path, m)
 		p.State.SetError(err)
 		if p.State.IsError() {
 			break
@@ -115,8 +115,8 @@ func (p *TypeOsPath) Chmod(m os.FileMode) *ux.State {
 
 
 func (p *TypeOsPath) ChangeExtension(ext string) {
-	s := filepath.Ext(p._Path)
-	p._Path = p._Path[:len(p._Path) - len(s)] + ext
+	s := filepath.Ext(p.Path)
+	p.Path = p.Path[:len(p.Path) - len(s)] + ext
 }
 
 

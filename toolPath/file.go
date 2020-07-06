@@ -142,11 +142,11 @@ func (p *TypeOsPath) Foo() *ux.State {
 			break
 		}
 		if !p._Exists {
-			p.State.SetError("file '%s' not found", p._Path)
+			p.State.SetError("file '%s' not found", p.Path)
 			break
 		}
 		if p._IsDir {
-			p.State.SetError("path '%s' is a directory", p._Path)
+			p.State.SetError("path '%s' is a directory", p.Path)
 			break
 		}
 
@@ -174,14 +174,14 @@ func (p *TypeOsPath) Foo() *ux.State {
 
 		var d []byte
 		var err error
-		d, err = ioutil.ReadFile(p._Path)
+		d, err = ioutil.ReadFile(p.Path)
 		if err != nil {
 			p.State.SetError(err)
 			break
 		}
 
 		p.LoadContents(d)
-		p.State.SetOk("file '%s' read OK", p._Path)
+		p.State.SetOk("file '%s' read OK", p.Path)
 	}
 
 	return p.State
@@ -203,24 +203,24 @@ func (p *TypeOsPath) ReadFile() *ux.State {
 			break
 		}
 		if !p._Exists {
-			p.State.SetError("file '%s' not found", p._Path)
+			p.State.SetError("file '%s' not found", p.Path)
 			break
 		}
 		if p._IsDir {
-			p.State.SetError("path '%s' is a directory", p._Path)
+			p.State.SetError("path '%s' is a directory", p.Path)
 			break
 		}
 
 		var d []byte
 		var err error
-		d, err = ioutil.ReadFile(p._Path)
+		d, err = ioutil.ReadFile(p.Path)
 		if err != nil {
 			p.State.SetError(err)
 			break
 		}
 
 		p.LoadContents(d)
-		p.State.SetOk("file '%s' read OK", p._Path)
+		p.State.SetOk("file '%s' read OK", p.Path)
 	}
 
 	return p.State
@@ -245,7 +245,7 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 		for range onlyOnce {
 			p.StatPath()
 			if p._IsDir {
-				p.State.SetError("path '%s' is a directory", p._Path)
+				p.State.SetError("path '%s' is a directory", p.Path)
 				break
 			}
 			if p.NotExists() {
@@ -256,8 +256,8 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 				break
 			}
 
-			if !toolPrompt.ToolUserPromptBool("Overwrite file '%s'? (Y|N) ", p._Path) {
-				p.State.SetWarning("not overwriting file '%s'", p._Path)
+			if !toolPrompt.ToolUserPromptBool("Overwrite file '%s'? (Y|N) ", p.Path) {
+				p.State.SetWarning("not overwriting file '%s'", p.Path)
 				break
 			}
 			p.State.SetOk()
@@ -271,13 +271,13 @@ func (p *TypeOsPath) WriteFile() *ux.State {
 			p._Mode = 0644
 		}
 
-		err := ioutil.WriteFile(p._Path, []byte(p._String), p._Mode)
+		err := ioutil.WriteFile(p.Path, []byte(p._String), p._Mode)
 		if err != nil {
 			p.State.SetError(err)
 			break
 		}
 
-		p.State.SetOk("file '%s' written OK", p._Path)
+		p.State.SetOk("file '%s' written OK", p.Path)
 	}
 
 	return p.State
@@ -297,7 +297,7 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 		for range onlyOnce {
 			p.StatPath()
 			if p._IsDir {
-				p.State.SetError("path '%s' is a directory", p._Path)
+				p.State.SetError("path '%s' is a directory", p.Path)
 				break
 			}
 			if p.NotExists() {
@@ -308,8 +308,8 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 				break
 			}
 
-			if !toolPrompt.ToolUserPromptBool("Overwrite file '%s'? (Y|N) ", p._Path) {
-				p.State.SetWarning("not overwriting file '%s'", p._Path)
+			if !toolPrompt.ToolUserPromptBool("Overwrite file '%s'? (Y|N) ", p.Path) {
+				p.State.SetWarning("not overwriting file '%s'", p.Path)
 				break
 			}
 			p.State.SetOk()
@@ -325,15 +325,15 @@ func (p *TypeOsPath) OpenFile() *ux.State {
 
 
 		var err error
-		p.FileHandle, err = os.Create(p._Path)
+		p.FileHandle, err = os.Create(p.Path)
 		if err != nil {
-			p.State.SetError("Cannot open file '%s' for writing - %s", p._Path, err)
+			p.State.SetError("Cannot open file '%s' for writing - %s", p.Path, err)
 			break
 		}
 
 		p.State.SetResponse(p.FileHandle)
 
-		p.State.SetOk("TypeFile '%s' opened OK", p._Path)
+		p.State.SetOk("TypeFile '%s' opened OK", p.Path)
 	}
 
 	return p.State
@@ -352,7 +352,7 @@ func (p *TypeOsPath) OpenFileHandle() *ux.State {
 
 		p.StatPath()
 		if p._IsDir {
-			p.State.SetError("path '%s' is a directory", p._Path)
+			p.State.SetError("path '%s' is a directory", p.Path)
 			break
 		}
 		if p.NotExists() {
@@ -362,14 +362,14 @@ func (p *TypeOsPath) OpenFileHandle() *ux.State {
 
 
 		var err error
-		p.FileHandle, err = os.Open(p._Path)
+		p.FileHandle, err = os.Open(p.Path)
 		if err != nil {
-			p.State.SetError("Cannot open file '%s' for writing - %s", p._Path, err)
+			p.State.SetError("Cannot open file '%s' for writing - %s", p.Path, err)
 			break
 		}
 
 		p.State.SetResponse(p.FileHandle)
-		p.State.SetOk("TypeFile '%s' opened OK", p._Path)
+		p.State.SetOk("TypeFile '%s' opened OK", p.Path)
 	}
 
 	return p.State
@@ -412,15 +412,15 @@ func (p *TypeOsPath) CloseFile() *ux.State {
 		var err error
 		err = p.FileHandle.Sync()
 		if err != nil {
-			p.State.SetWarning("Error when syncing file '%s' - ", p._Path, err)
+			p.State.SetWarning("Error when syncing file '%s' - ", p.Path, err)
 		}
 
 		err = p.FileHandle.Close()
 		if err != nil {
-			p.State.SetWarning("Error when closing file '%s' - ", p._Path, err)
+			p.State.SetWarning("Error when closing file '%s' - ", p.Path, err)
 		}
 
-		p.State.SetOk("TypeFile '%s' closed OK", p._Path)
+		p.State.SetOk("TypeFile '%s' closed OK", p.Path)
 	}
 
 	return p.State

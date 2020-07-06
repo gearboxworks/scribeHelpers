@@ -91,7 +91,7 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeGhr {
 
 	for range onlyOnce {
 		ghr = TypeGhr{
-			//Path:     toolPath.New(runtime),
+			//Base:     toolPath.New(runtime),
 
 			Repo: NewRepo(runtime),
 			//File: NewFile(runtime),

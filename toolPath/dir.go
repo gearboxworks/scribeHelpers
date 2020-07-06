@@ -36,7 +36,7 @@ func (p *TypeOsPath) Chdir() *ux.State {
 		// @TODO - If we change dir and it's relative, we will lose the path.
 		// @TODO - This can be both good or bad.
 
-		err := os.Chdir(p._Path)
+		err := os.Chdir(p.Path)
 		p.State.SetError(err)
 		if p.State.IsError() {
 			break
@@ -88,7 +88,7 @@ func (p *TypeOsPath) IsCwd() bool {
 			break
 		}
 
-		if cwd != p._Path {
+		if cwd != p.Path {
 			break
 		}
 
@@ -120,7 +120,7 @@ func (p *TypeOsPath) Mkdir() *ux.State {
 		if p._Dirname != "" {
 			err = os.Mkdir(p._Dirname, p._Mode)
 		} else {
-			err = os.Mkdir(p._Path, p._Mode)
+			err = os.Mkdir(p.Path, p._Mode)
 		}
 
 		if err != nil {

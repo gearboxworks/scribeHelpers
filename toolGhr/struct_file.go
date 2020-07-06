@@ -157,8 +157,8 @@ func (f *TypeFile) OpenWrite() *ux.State {
 			f.Name = f.Path.GetFilename()
 		}
 
-		//f.state = f.Path.StatPath()
-		//if f.Path.NotExists() {
+		//f.state = f.Base.StatPath()
+		//if f.Base.NotExists() {
 		//	break
 		//}
 

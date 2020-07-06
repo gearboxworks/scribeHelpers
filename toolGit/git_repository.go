@@ -127,7 +127,7 @@ func (g *TypeGit) SetPath(path ...string) *ux.State {
 		//}
 
 		if g.Base.NotExists() {
-			g.State.SetOk()	// We may want to clone after we set the path.
+			g.State.SetOk() // We may want to clone after we set the path.
 			break
 		}
 		if g.Base.IsAFile() {
@@ -153,11 +153,12 @@ func (g *TypeGit) GetPath() string {
 
 
 // Usage:
-//		{{- $cmd := $git.GetUrl }}
+//		{{- $cmd := $git.FetchUrl }}
 //		{{- if $cmd.IsOk }}{{ $cmd.data }}{{- end }}
-func (g *TypeGit) GetUrl() (string, *ux.State) {
+//func (g *TypeGit) FetchUrl() (string, *ux.State) {
+func (g *TypeGit) FetchUrl() *ux.State {
 	if state := g.IsNil(); state.IsError() {
-		return "", state
+		return state
 	}
 	g.State.SetFunction()
 
@@ -172,20 +173,32 @@ func (g *TypeGit) GetUrl() (string, *ux.State) {
 		//g.State.SetResponse(&g.State.Output)
 	}
 
-	return g.Url.String(), g.State
+	return g.State
+}
+
+
+// Usage:
+//		{{- $cmd := $git.GetUrl }}
+//		{{- if $cmd.IsOk }}{{ $cmd.data }}{{- end }}
+//func (g *TypeGit) GetUrl() (string, *ux.State) {
+func (g *TypeGit) GetUrl() string {
+	if state := g.IsNil(); state.IsError() {
+		return ""
+	}
+	return g.Url.String()
 }
 
 
 // Usage:
 //		{{- $cmd := $git.SetUrl }}
 //		{{- if $cmd.IsError }}{{ $cmd.PrintError }}{{- end }}
-func (g *TypeGit) SetUrl(u string) *ux.State {
+func (g *TypeGit) SetUrl(u ...string) *ux.State {
 	if state := g.IsNil(); state.IsError() {
 		return state
 	}
 	g.State.SetFunction()
 	var err error
-	g.Url, err = url.Parse(addPrefix(u))
+	g.Url, err = url.Parse(addPrefix(u...))
 	if err != nil {
 		g.State.SetError(err)
 	}
@@ -193,20 +206,23 @@ func (g *TypeGit) SetUrl(u string) *ux.State {
 }
 
 
-func addPrefix(u string) string {
+func addPrefix(urlString ...string) string {
+	var ret string
 	for range onlyOnce {
-		if strings.HasPrefix(u, "http") {
+		ret = strings.Join(urlString, "/")
+
+		if strings.HasPrefix(ret, "http") {
 			// We have a full URL - no change.
 			break
 		}
 
-		if strings.HasPrefix(u, "github.com") {
+		if strings.HasPrefix(ret, "github.com") {
 			// We have a github.com specific string.
-			u = "https://" + u
+			ret = "https://" + ret
 			break
 		}
 
-		ua := strings.Split(u, "/")
+		ua := strings.Split(ret, "/")
 		if len(ua) == 0 {
 			// Dunno, leave as is.
 			break
@@ -214,13 +230,13 @@ func addPrefix(u string) string {
 
 		if strings.Contains(ua[0], ".") {
 			// We have a host defined in the first segment.
-			u = "https://" + u
+			ret = "https://" + ret
 			break
 		}
 
 		// We probably just have a "owner/repo_name" style URL.
-		u = "https://github.com/" + u
+		ret = "https://github.com/" + ret
 	}
 
-	return u
+	return ret
 }

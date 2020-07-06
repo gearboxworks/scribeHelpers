@@ -11,16 +11,16 @@ import (
 
 
 func (p *TypeOsPath) GetPath() string {
-	return p._Path
+	return p.Path
 }
 func (p *TypeOsPath) GetPathAbs() string {
 	var s string
 
 	for range onlyOnce {
 		var err error
-		s, err = filepath.Abs(p._Path)
+		s, err = filepath.Abs(p.Path)
 		if err != nil {
-			s = p._Path
+			s = p.Path
 			break
 		}
 	}
@@ -35,13 +35,13 @@ func (p *TypeOsPath) GetPathRel() string {
 
 		s, err = os.Getwd()
 		if err != nil {
-			s = p._Path
+			s = p.Path
 			break
 		}
 
-		s, err = filepath.Rel(s, p._Path)
+		s, err = filepath.Rel(s, p.Path)
 		if err != nil {
-			s = p._Path
+			s = p.Path
 			break
 		}
 	}
@@ -49,14 +49,14 @@ func (p *TypeOsPath) GetPathRel() string {
 	return s
 }
 func (p *TypeOsPath) SetPath(path ...string) bool {
-	p._Path = ""
+	p.Path = ""
 	return p.AppendPath(path...)
 }
 func (p *TypeOsPath) AppendPath(path ...string) bool {
 	var ok bool
 
 	for range onlyOnce {
-		if p._IsRemotePath(p._Path) {
+		if p._IsRemotePath(p.Path) {
 			ok = p._AppendRemotePath(path...)
 			break
 		}
@@ -79,8 +79,8 @@ func (p *TypeOsPath) AppendPath(path ...string) bool {
 func (p *TypeOsPath) _AppendLocalPath(path ...string) bool {
 	for range onlyOnce {
 		p._Valid = false
-		p._Path = _GetAbsPath(path...)
-		if p._Path == "" {
+		p.Path = _GetAbsPath(path...)
+		if p.Path == "" {
 			p.State.SetError("src path empty")
 			break
 		}
@@ -101,8 +101,8 @@ func (p *TypeOsPath) _AppendLocalPath(path ...string) bool {
 func (p *TypeOsPath) _AppendRelativeLocalPath(path ...string) bool {
 	for range onlyOnce {
 		p._Valid = false
-		p._Path = filepath.Join(p._Path, filepath.Join(path...))
-		if p._Path == "" {
+		p.Path = filepath.Join(p.Path, filepath.Join(path...))
+		if p.Path == "" {
 			p.State.SetError("src path empty")
 			break
 		}
@@ -123,8 +123,8 @@ func (p *TypeOsPath) _AppendRelativeLocalPath(path ...string) bool {
 func (p *TypeOsPath) _AppendRemotePath(path ...string) bool {
 	for range onlyOnce {
 		p._Valid = false
-		p._Path = filepath.Join(path...)
-		if p._Path == "" {
+		p.Path = filepath.Join(path...)
+		if p.Path == "" {
 			p.State.SetError("src path empty")
 			break
 		}
@@ -143,7 +143,7 @@ func (p *TypeOsPath) _IsRelativeLocalPath(path ...string) bool {
 
 
 func (p *TypeOsPath) IsAbs() bool {
-	return filepath.IsAbs(p._Path)
+	return filepath.IsAbs(p.Path)
 }
 func (p *TypeOsPath) IsRelative() bool {
 	return !p.IsAbs()
@@ -362,7 +362,7 @@ func (p *TypeOsPath) IsValid() bool {
 		//	break
 		//}
 
-		if p._Path == "" {
+		if p.Path == "" {
 			p.State.SetError("path not set")
 			break
 		}

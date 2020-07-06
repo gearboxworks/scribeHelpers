@@ -77,7 +77,7 @@ func (state *State) EnsureNotNil() *State {
 		if state == nil {
 			state = NewState("", false)
 		}
-		state.Clear()
+		state.SetOk()
 	}
 	return state
 }
@@ -93,10 +93,61 @@ func EnsureStateNotNil(p *State) *State {
 }
 
 func IsInterfaceNil(ref interface{}) bool {
-	if ref == nil || (reflect.ValueOf(ref).Kind() == reflect.Ptr && reflect.ValueOf(ref).IsNil()) {
-		return true
+	var ok bool
+	for range onlyOnce {
+		if ref == nil {
+			ok = true
+			break
+		}
+
+		if reflect.ValueOf(ref).Kind() != reflect.Ptr {
+			break
+		}
+
+		rv := reflect.ValueOf(ref)
+		r := rv.IsNil()
+		if r {
+			ok = true
+			break
+		}
+		if rv.Interface() == nil {
+			ok = true
+			break
+		}
+
+		e := rv.Elem()
+		//PrintflnCyan("PTR==%s", e.Kind().String())
+		if e.Kind().String() == "ptr" {
+			//PrintflnCyan("POINTER TO POINTER")
+			ok = IsInterfaceNil(e.Addr().Elem().Interface())
+			break
+		}
+
+		// @TODO - Something fishy going on here.
+		// When we have been given a pointer, we need to be able to discover if it's nil.
+		// DEBUG
+		//l := reflect.ValueOf(ref).Kind()
+		//l := e.Kind()
+		//fmt.Printf("HERE -> %s %s\n",
+		//	rv.Kind().String(),
+		//	rv.Elem().Kind().String(),
+		//	)
+		//
+		//switch v := ref.(type) {
+		//	case nil:
+		//		fmt.Printf("YES! %s %v %v %v %v %v\n", l, v, rv.IsValid(), rv.IsNil(), rv.IsZero(), e.Len())
+		//	case interface{}:
+		//		fmt.Printf("%s %v %v %v %v %v\n", l, v, rv.IsValid(), rv.IsNil(), rv.IsZero(), e.Len())
+		//		test := v.(interface{})
+		//		if test == nil {
+		//			fmt.Printf("YES! %s %v %v %v %v %v\n", l, v, rv.IsValid(), rv.IsNil(), rv.IsZero(), e.Len())
+		//		}
+		//	default:
+		//		fmt.Printf("%s %v %v %v %v %v\n", l, v, rv.IsValid(), rv.IsNil(), rv.IsZero(), e.Len())
+		//}
+		//fmt.Printf("")
 	}
-	return false
+	return ok
 }
 
 func IfNilReturnError(ref interface{}, name ...string) *State {
@@ -129,6 +180,11 @@ func SearchStructureForUxState(ref interface{}, name ...string) *State {
 		// We're doing these checks to ensure ease of future expansion.
 		if v.Kind() == reflect.Ptr {
 			e = v.Elem()
+			if e.Kind().String() == "ptr" {
+				PrintflnCyan("POINTER TO POINTER")
+				state = SearchStructureForUxState(e.Addr().Elem().Interface(), name...)
+				break
+			}
 		} else if v.Kind() == reflect.Struct {
 			// We can't handle a non-pointer, otherwise we get this...
 			// reflect.flag.mustBeAssignable using unaddressable value

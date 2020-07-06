@@ -13,10 +13,10 @@ import (
 type TypeOsPaths struct {
 	Paths   []*TypeOsPath
 	Base    *TypeOsPath
-	recurse bool
 
-	Runtime *toolRuntime.TypeRuntime
-	State   *ux.State
+	recurse bool                     `json:"-"`
+	Runtime *toolRuntime.TypeRuntime `json:"-"`
+	State   *ux.State                `json:"-"`
 }
 
 
@@ -67,6 +67,25 @@ func (p *TypeOsPaths) SetBasePath(path ...string) *ux.State {
 		if p.State.IsNotOk() {
 			break
 		}
+	}
+
+	return p.State
+}
+
+
+func (p *TypeOsPaths) AddRelPath(path ...string) *ux.State {
+	if state := ux.IfNilReturnError(p); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		p2 := New(nil)
+		p2.SetPath(path...)
+		p.State = p2.StatPath()
+		if p.State.IsNotOk() {
+			break
+		}
+		p.Paths = append(p.Paths, p2)
 	}
 
 	return p.State

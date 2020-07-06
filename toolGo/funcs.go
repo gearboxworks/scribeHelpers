@@ -39,7 +39,7 @@ func ParseGoFiles(path ...string) *TypeGo {
 		}
 
 		//for _, file := range dir.Go {
-		//	ux.PrintfBlue("\nChecking file '%s' ...\n", file.Path)
+		//	ux.PrintfBlue("\nChecking file '%s' ...\n", file.Base)
 		//	fmt.Printf(file.String())
 		//}
 		//fmt.Printf("\n")

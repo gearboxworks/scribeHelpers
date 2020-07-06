@@ -3,16 +3,16 @@ package toolGit
 import "github.com/newclarity/scribeHelpers/ux"
 
 type ToolGit TypeGit
-func (c *ToolGit) IsNil() *ux.State {
-	return ux.IfNilReturnError(c)
+func (g *ToolGit) IsNil() *ux.State {
+	return ux.IfNilReturnError(g)
 }
 
-func (c *ToolGit) Reflect() *TypeGit {
-	return (*TypeGit)(c)
+func (g *ToolGit) Reflect() *TypeGit {
+	return (*TypeGit)(g)
 }
 
-func (c *TypeGit) Reflect() *ToolGit {
-	return (*ToolGit)(c)
+func (g *TypeGit) Reflect() *ToolGit {
+	return (*ToolGit)(g)
 }
 
 

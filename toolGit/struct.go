@@ -18,19 +18,19 @@ type TypeExecCommand toolExec.TypeExecCommand
 
 
 type TypeGit struct {
-	Url          *url.URL
-	Base         *toolPath.TypeOsPath
+	Url  *url.URL                         `json:"url"`
+	Base *toolPath.TypeOsPath             `json:"path"`
 
-	GitConfig    *gitcmd.Config
-	GitOptions   []string
+	GitConfig    *gitcmd.Config           `json:"-"`
+	GitOptions   []string                 `json:"options"`
 
-	skipDirCheck bool
+	skipDirCheck bool	                  `json:"-"`
 
-	client       gitcmd.Client
-	repository   *git.Repository
+	client       gitcmd.Client	          `json:"-"`
+	repository   *git.Repository	      `json:"-"`
 
-	runtime      *toolRuntime.TypeRuntime
-	State        *ux.State
+	runtime      *toolRuntime.TypeRuntime `json:"-"`
+	State        *ux.State	              `json:"-"`
 }
 func (g *TypeGit) IsNil() *ux.State {
 	return ux.IfNilReturnError(g)

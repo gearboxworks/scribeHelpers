@@ -223,7 +223,7 @@ func (gf *GoFile) getGenDecl(spec ast.Spec) bool {
 	var ok bool
 	switch spec := spec.(type) {
 		case *ast.ImportSpec:
-			//ux.PrintflnBlue("Import", spec.Path.Value)
+			//ux.PrintflnBlue("Import", spec.Base.Value)
 		case *ast.TypeSpec:
 			//ux.PrintflnBlue("Type", spec.Name.String())
 		case *ast.ValueSpec:

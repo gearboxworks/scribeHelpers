@@ -447,7 +447,7 @@ func (r *TypeResponse) Set(ref interface{}) bool {
 
 			// If we have a pointer to a pointer, then call again with the value of that pointer.
 			if r.ofType.Kind().String() == "ptr" {
-				PrintflnCyan("POINTER TO POINTER")
+				//PrintflnCyan("POINTER TO POINTER")
 				r.Valid = r.Set(s.Addr().Elem().Interface())
 				break
 			}

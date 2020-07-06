@@ -13,28 +13,28 @@ type OsPathGetter interface {
 
 
 type TypeOsPath struct {
-	_Path         string
-	_Filename     string
-	_Dirname      string
-	_IsDir        bool
-	_IsFile       bool
-	_Exists       bool
-	_ModTime      time.Time
-	_Name         string
-	_Mode         os.FileMode
-	_Size         int64
+	Path      string `json:"path"`
+	_Filename string
+	_Dirname  string
+	_IsDir    bool
+	_IsFile   bool
+	_Exists   bool
+	_ModTime  time.Time
+	_Name     string
+	_Mode     os.FileMode
+	_Size     int64
 
 	_String       string
 	_Array        []string
 	_Separator    string
-	FileHandle    *os.File
+	FileHandle    *os.File `json:"-"`
 
 	_Valid        bool
 	_CanOverwrite bool
 	_CanRemove    bool
 	_Remote       bool
 
-	State         *ux.State
+	State         *ux.State    `json:"-"`
 }
 func (p *TypeOsPath) IsNil() *ux.State {
 	return ux.IfNilReturnError(p)
@@ -45,17 +45,17 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeOsPath {
 	runtime = runtime.EnsureNotNil()
 
 	p := &TypeOsPath{
-		_Path:         "",
-		_Filename:     "",
-		_Dirname:      "",
-		_IsDir:        false,
-		_IsFile:       false,
-		_Exists:       false,
-		_ModTime:      time.Time{},
-		_Mode:         0,
-		_Size:         0,
-		_String:       "",
-		_Array:        nil,
+		Path:      "",
+		_Filename: "",
+		_Dirname:  "",
+		_IsDir:    false,
+		_IsFile:   false,
+		_Exists:   false,
+		_ModTime:  time.Time{},
+		_Mode:     0,
+		_Size:     0,
+		_String:   "",
+		_Array:    nil,
 		_Separator:    DefaultSeparator,
 		_Valid:        false,
 		_CanRemove:    false,
