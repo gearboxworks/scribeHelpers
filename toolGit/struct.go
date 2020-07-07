@@ -18,11 +18,11 @@ type TypeExecCommand toolExec.TypeExecCommand
 
 
 type TypeGit struct {
-	Url  *url.URL                         `json:"url"`
-	Base *toolPath.TypeOsPath             `json:"path"`
+	Url  *url.URL                         `json:"url" mapstructure:"url,omitempty"`
+	Base *toolPath.TypeOsPath             `json:"path" mapstructure:"path,omitempty"`
 
 	GitConfig    *gitcmd.Config           `json:"-"`
-	GitOptions   []string                 `json:"options"`
+	GitOptions   []string                 `json:"options,omitempty" mapstructure:"options,omitempty"`
 
 	skipDirCheck bool	                  `json:"-"`
 

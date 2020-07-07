@@ -13,7 +13,7 @@ type OsPathGetter interface {
 
 
 type TypeOsPath struct {
-	Path      string `json:"path"`
+	Path      string `json:"path,omitempty" mapstructure:"path,omitempty"`
 	_Filename string
 	_Dirname  string
 	_IsDir    bool

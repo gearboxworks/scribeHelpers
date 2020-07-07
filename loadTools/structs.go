@@ -16,14 +16,18 @@ type TypeScribeArgs struct {
 	ConfigDir      string		`json:"config_dir" mapstructure:"config_dir"`
 	ConfigFile     string		`json:"config_file" mapstructure:"config_file"`
 
-	Scribe         *ScribeFile
-	Json           *JsonFile
-	Template       *TemplateFile
-	TemplateRef    *template.Template
+	//ConfigFile  *TypeArgFile       `json:"config_file" mapstructure:"config_file"`
 
-	Output         *TypeArgFile
+	Scribe      *ScribeFile        `json:"scribe_file" mapstructure:"config_file"`
 
-	WorkingPath    *TypeArgFile
+	Json        *JsonFile          `json:"data_file" mapstructure:"data_file"`
+
+	Template    *TemplateFile      `json:"template_file" mapstructure:"template_file"`
+	TemplateRef *template.Template `json:"-"`
+
+	Output      *TypeArgFile       `json:"output" mapstructure:"output"`
+
+	WorkingPath *TypeArgFile       `json:"working_path" mapstructure:"working_path"`
 
 	ExecShell      bool // Cmd: "run"
 	Chdir          bool // Flag: --chdir
@@ -41,14 +45,14 @@ type TypeScribeArgs struct {
 	HelpVariables  bool
 	HelpExamples   bool
 
-	JsonStruct     *jsonStruct
+	JsonStruct     *jsonStruct      `json:"data" mapstructure:"data"`
 
-	Tools          template.FuncMap
+	Tools          template.FuncMap `json:"-"`
 
-	Runtime        *toolRuntime.TypeRuntime
-	State          *ux.State
-	valid          bool
-	cmd            *cobra.Command
+	Runtime *toolRuntime.TypeRuntime `json:"-"`
+	State   *ux.State                `json:"-"`
+	valid   bool                     `json:"-"`
+	cmd     *cobra.Command           `json:"-"`
 	//cmdHelp        *toolCobraHelp.TypeCommands
 }
 func (at *TypeScribeArgs) IsNil() *ux.State {

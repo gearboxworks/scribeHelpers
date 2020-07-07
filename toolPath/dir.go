@@ -108,21 +108,24 @@ func (p *TypeOsPath) Mkdir() *ux.State {
 			break
 		}
 
-
 		if p._Mode == 0 {
 			p._Mode = 0755
 		}
 
 		ok := false
 		p.State.SetResponse(&ok)
+
 		var err error
-
-		if p._Dirname != "" {
-			err = os.Mkdir(p._Dirname, p._Mode)
-		} else {
-			err = os.Mkdir(p.Path, p._Mode)
+		for range onlyOnce {
+			if p._Dirname != "" {
+				err = os.Mkdir(p._Dirname, p._Mode)
+				break
+			}
+			if p.Path != "" {
+				err = os.Mkdir(p.Path, p._Mode)
+				break
+			}
 		}
-
 		if err != nil {
 			p.State.SetError(err)
 			break

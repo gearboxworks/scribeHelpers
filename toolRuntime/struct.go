@@ -24,7 +24,9 @@ type TypeRuntime struct {
 	CmdFile        string		`json:"cmd_file" mapstructure:"cmd_file"`
 
 	WorkingDir     string		`json:"working_dir" mapstructure:"working_dir"`
+	ConfigDir      string		`json:"config_dir" mapstructure:"config_dir"`
 	CacheDir       string		`json:"cache_dir" mapstructure:"cache_dir"`
+	TempDir        string		`json:"temp_dir" mapstructure:"temp_dir"`
 
 	FullArgs       ExecArgs		`json:"full_args" mapstructure:"full_args"`
 	Args           ExecArgs		`json:"args" mapstructure:"args"`
@@ -86,7 +88,9 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 			CmdFile:    "",
 
 			WorkingDir: ".",
+			ConfigDir:  ".",
 			CacheDir:   ".",
+			TempDir:    ".",
 
 			FullArgs:   os.Args,
 			Args:       os.Args[1:],
@@ -149,15 +153,35 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 			break
 		}
 
+		ret.ConfigDir, err = os.UserConfigDir()
+		if err != nil {
+			if runtime.GOOS == "windows" {
+				ret.ConfigDir = "."
+			} else {
+				ret.ConfigDir = "."
+			}
+		}
+		//ret.ConfigDir = filepath.Join(ret.ConfigDir, ret.CmdName)
+
 		ret.CacheDir, err = os.UserCacheDir()
 		if err != nil {
 			if runtime.GOOS == "windows" {
-				ret.CacheDir = "C:\\tmp"
+				ret.CacheDir = "."
 			} else {
-				ret.CacheDir = "/tmp"
+				ret.CacheDir = "."
 			}
 		}
 		ret.CacheDir = filepath.Join(ret.CacheDir, ret.CmdName)
+
+		ret.TempDir = os.TempDir()
+		if ret.TempDir == "" {
+			if runtime.GOOS == "windows" {
+				ret.TempDir = "C:\\tmp"
+			} else {
+				ret.TempDir = "/tmp"
+			}
+		}
+		//ret.TempDir = filepath.Join(ret.TempDir, ret.CmdName)
 
 		ret.State.SetPackage("")
 		ret.State.SetFunction()

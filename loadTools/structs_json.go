@@ -10,24 +10,26 @@ import (
 
 
 type jsonStruct struct {
-	Exec            *toolRuntime.TypeRuntime
+	Exec            *toolRuntime.TypeRuntime	`json:"Exec" mapstructure:"Exec"`
 
-	TemplateFile    FileInfo
-	JsonFile        FileInfo
-	OutFile         FileInfo
+	TemplateFile    FileInfo	`json:"TemplateFile" mapstructure:"TemplateFile"`
+	JsonFile        FileInfo	`json:"JsonFile" mapstructure:"JsonFile"`
+	OutFile         FileInfo	`json:"OutFile" mapstructure:"OutFile"`
 	//Env             toolSystem.Environment
-	Env             *toolRuntime.Environment
+	Env             *toolRuntime.Environment	`json:"Env" mapstructure:"Env"`
 
-	JsonString      string
-	CreationEpoch   int64
-	CreationDate    string
-	CreationInfo    string
-	CreationWarning string
+	JsonString      string	`json:"JsonString" mapstructure:"JsonString"`
+	CreationEpoch   int64	`json:"CreationEpoch" mapstructure:"CreationEpoch"`
+	CreationDate    string	`json:"CreationDate" mapstructure:"CreationDate"`
+	CreationInfo    string	`json:"CreationInfo" mapstructure:"CreationInfo"`
+	CreationWarning string	`json:"CreationWarning" mapstructure:"CreationWarning"`
 
-	Json            map[string]interface{}
+	Json            map[string]interface{}	`json:"Json" mapstructure:"Json"`
 
-	state           *ux.State
+	state           *ux.State	`json:"-"`
 }
+
+type JsonMap map[string]interface{}
 
 
 func NewJsonStruct(binary string, version string, debugFlag bool) *jsonStruct {
@@ -154,7 +156,15 @@ type FileInfo struct {
 
 func (fi *FileInfo) SetFileInfo(path *toolPath.TypeOsPath) {
 	fi.Dir = path.GetDirname()
+	if fi.Dir == "" {
+		fi.Dir = "."
+	}
+
 	fi.Name = path.GetFilename()
+	if fi.Name == "" {
+		fi.Name = path.Path
+	}
+
 	fi.CreationDate = path.GetModTimeString()
 	fi.CreationEpoch = path.GetModTimeEpoch()
 	fi.State = path.State

@@ -2,6 +2,8 @@ package toolGit
 
 import (
 	"encoding/json"
+	"errors"
+	"reflect"
 )
 
 
@@ -69,4 +71,23 @@ func (g *TypeGit) UnmarshalJSON(data []byte) error {
 	}
 
 	return err
+}
+
+
+func MapStructureDecodeHook(from reflect.Type, to reflect.Type, ref interface{}) (interface{}, error) {
+	var err error
+	for range onlyOnce {
+		switch ref.(type) {
+			case string:
+				if to.String() == "*toolPath.TypeOsPath" {
+					r := New(nil)
+					r.SetPath(ref.(string))
+					r.State.SetOk()
+					ref = r
+				}
+			default:
+				err = errors.New("path is not a string")
+		}
+	}
+	return ref, err
 }
