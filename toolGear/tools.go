@@ -9,30 +9,30 @@ import (
 
 // Usage:
 //		{{ $copy := CopyFiles }}
-func ToolNewGear() *ToolDockerGear {
-	ret := New(nil)
+func ToolNewGear() *Gear {
+	ret := NewGear(nil)
 
 	for range onlyOnce {
 		//ret.State.SetOk()
 	}
 
-	return (*ToolDockerGear)(ret)
+	return (*Gear)(ret)
 }
 
 
-func (c *ToolDockerGear) List() string {
-	var ret string
-	for range onlyOnce {
-		c.State = c.Reflect().List("")
-		if c.State.IsError() {
-			break
-		}
-	}
-	return ret
-}
+//func (c *TypeGears) List() string {
+//	var ret string
+//	for range onlyOnce {
+//		c.State = c.Reflect().List("")
+//		if c.State.IsError() {
+//			break
+//		}
+//	}
+//	return ret
+//}
 
 
-func (c *ToolDockerGear) ParseGearConfig(cs interface{}) string {
+func (c *TypeGear) ParseGearConfig(cs interface{}) string {
 	var ret string
 	for range onlyOnce {
 		err := mapstructure.Decode(cs, &c.gearConfig)
@@ -74,6 +74,6 @@ func (c *ToolDockerGear) ParseGearConfig(cs interface{}) string {
 }
 
 
-func (c *ToolDockerGear) PrintGearConfig() string {
-	return fmt.Sprintf("%v", c.gearConfig)
+func (c *Gear) PrintGearConfig() string {
+	return fmt.Sprintf("%v", c.GearConfig)
 }

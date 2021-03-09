@@ -163,3 +163,73 @@ func (gc *GearConfig) String() string {
 
 	return ret
 }
+
+
+func (gc *GearConfig) GetClass() string {
+	if gc == nil {
+		return ""
+	}
+	return gc.Meta.Class
+}
+
+func (gc *GearConfig) GetName() string {
+	if gc == nil {
+		return ""
+	}
+	return gc.Meta.Name
+}
+
+func (gc *GearConfig) GetPorts() *GearPorts {
+	if gc == nil {
+		return &GearPorts{}
+	}
+	return &gc.Build.Ports
+}
+
+func (gc *GearConfig) GetCommand(cmd []string) []string {
+	var retCmd []string
+
+	for range onlyOnce {
+		var cmdExec string
+		switch {
+			case len(cmd) == 0:
+				cmdExec = DefaultCommandName
+
+			case cmd[0] == "":
+				cmdExec = DefaultCommandName
+
+			case cmd[0] == gc.Meta.Name:
+				cmdExec = DefaultCommandName
+
+			case cmd[0] != "":
+				cmdExec = cmd[0]
+
+			default:
+				//cmdExec = cmd[0]
+				cmdExec = DefaultCommandName
+		}
+
+		c := gc.MatchCommand(cmdExec)
+		if c == nil {
+			retCmd = []string{}
+			break
+		}
+
+		retCmd = append([]string{*c}, cmd[1:]...)
+	}
+
+	return retCmd
+}
+
+func (gc *GearConfig) MatchCommand(cmd string) *string {
+	var c *string
+
+	for range onlyOnce {
+		if c2, ok := gc.Run.Commands[cmd]; ok {
+			c = &c2
+			break
+		}
+	}
+
+	return c
+}

@@ -57,6 +57,21 @@ func (p *Provider) SetProvider(provider string) *ux.State {
 func (p *Provider) SetHost(host string, port string) *ux.State {
 	switch p.Name {
 		case ProviderDocker:
+			dh := os.Getenv("DOCKER_HOST")
+			if dh != "" {
+				url, err := url.Parse(dh)
+				if err != nil {
+					p.State.SetError(err)
+				}
+				if url.Host != "" {
+					p.Host = url.Hostname()
+				}
+				if url.Port() != "" {
+					p.Port = url.Port()
+				}
+				break
+			}
+
 			if host == "" {
 				p.State.SetOk()	// Don't error - default is local host via socket.
 				break

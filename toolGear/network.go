@@ -1,9 +1,7 @@
 package toolGear
 
 import (
-	"context"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
 	"github.com/jedib0t/go-pretty/table"
 	//"launch/defaults"
@@ -14,22 +12,14 @@ import (
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
-func (gear *TypeDockerGear) NetworkList(f string) *ux.State {
+func (gear *Gears) NetworkList(name string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		//noinspection GoDeferInLoop
-		defer cancel()
-
-		df := filters.NewArgs()
-		df.Add("name", f)
-
-		nets, err := gear.Client.NetworkList(ctx, types.NetworkListOptions{Filters: df})
-		if err != nil {
-			gear.State.SetError("error listing networks")
+		gear.State = gear.Docker.NetworkList(name)
+		if gear.State.IsNotOk() {
 			break
 		}
 
@@ -42,7 +32,7 @@ func (gear *TypeDockerGear) NetworkList(f string) *ux.State {
 			"Subnet",
 		})
 
-		for _, c := range nets {
+		for _, c := range gear.Docker.Networks {
 			n := ""
 			if len(c.IPAM.Config) > 0 {
 				n = c.IPAM.Config[0].Subnet
@@ -62,32 +52,37 @@ func (gear *TypeDockerGear) NetworkList(f string) *ux.State {
 }
 
 
-func (gear *TypeDockerGear) FindNetwork(netName string) *ux.State {
+func (gear *Gears) FindNetwork(name string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
-		if netName == "" {
-			gear.State.SetError("empty gear name")
+		if name == "" {
+			gear.State.SetError("empty container name")
 			break
 		}
 
-		df := filters.NewArgs()
-		df.Add("name", netName)
+		//df := filters.NewArgs()
+		//df.Add("name", netName)
+		//
+		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		////noinspection GoDeferInLoop
+		//defer cancel()
+		//
+		//nets, err := gear.Docker.Client.NetworkList(ctx, types.NetworkListOptions{Filters: df})
+		//if err != nil {
+		//	gear.State.SetError("gear image search error: %s", err)
+		//	break
+		//}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		//noinspection GoDeferInLoop
-		defer cancel()
-
-		nets, err := gear.Client.NetworkList(ctx, types.NetworkListOptions{Filters: df})
-		if err != nil {
-			gear.State.SetError("gear image search error: %s", err)
+		gear.State = gear.Docker.NetworkList(name)
+		if gear.State.IsNotOk() {
 			break
 		}
 
-		for _, c := range nets {
-			if c.Name == netName {
+		for _, c := range gear.Docker.Networks {
+			if c.Name == name {
 				gear.State.SetOk("found")
 				break
 			}
@@ -98,7 +93,7 @@ func (gear *TypeDockerGear) FindNetwork(netName string) *ux.State {
 }
 
 
-func (gear *TypeDockerGear) NetworkCreate(netName string) *ux.State {
+func (gear *Gears) NetworkCreate(netName string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
@@ -112,7 +107,7 @@ func (gear *TypeDockerGear) NetworkCreate(netName string) *ux.State {
 			break
 		}
 
-		netConfig := types.NetworkCreate {
+		options := types.NetworkCreate {
 			CheckDuplicate: true,
 			Driver:         "bridge",
 			Scope:          "local",
@@ -136,20 +131,22 @@ func (gear *TypeDockerGear) NetworkCreate(netName string) *ux.State {
 			Labels:         nil,
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		//noinspection GoDeferInLoop
-		defer cancel()
+		gear.State = gear.Docker.NetworkCreate(netName, options)
 
-		resp, err := gear.Client.NetworkCreate(ctx, netName, netConfig)
-		gear.State.SetError(err)
-		if gear.State.IsError() {
-			break
-		}
-
-		if resp.ID == "" {
-			gear.State.SetError("cannot create network")
-			break
-		}
+		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		////noinspection GoDeferInLoop
+		//defer cancel()
+		//
+		//resp, err := gear.Docker.Client.NetworkCreate(ctx, netName, netConfig)
+		//gear.State.SetError(err)
+		//if gear.State.IsError() {
+		//	break
+		//}
+		//
+		//if resp.ID == "" {
+		//	gear.State.SetError("cannot create network")
+		//	break
+		//}
 	}
 
 	return gear.State

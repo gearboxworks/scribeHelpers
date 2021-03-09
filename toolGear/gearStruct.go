@@ -2,6 +2,7 @@ package toolGear
 
 import (
 	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
+	"github.com/newclarity/scribeHelpers/toolGear/gearSsh"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"strings"
@@ -12,11 +13,26 @@ import (
 
 type Gear struct {
 	Repo         *GitHubRepo
-	Docker       *TypeDockerGear
 	GearConfig   *gearConfig.GearConfig
+
+	//Docker       *TypeDockerGear
+	Image        *Image
+	Container    *Container
+	Ssh          *gearSsh.Ssh
+
+	Docker		 *Docker
 
 	Runtime      *toolRuntime.TypeRuntime
 	State        *ux.State
+}
+type Gears struct {
+	Array		map[string]*Gear
+	Selected    *Gear
+
+	Docker      *Docker
+
+	Runtime     *toolRuntime.TypeRuntime
+	State       *ux.State
 }
 
 
@@ -26,34 +42,92 @@ func NewGear(runtime *toolRuntime.TypeRuntime) *Gear {
 	for range onlyOnce {
 		runtime = runtime.EnsureNotNil()
 
-		gear = Gear{
+		gear = Gear {
 			Repo:       NewRepo(runtime),
-			Docker:     New(runtime),
 			GearConfig: gearConfig.New(runtime),
+			Image:      NewImage(runtime),
+			Container:  NewContainer(runtime),
+			Ssh:        nil,
+
+			Docker:     nil,
+
 			Runtime:    runtime,
 			State:      ux.NewState(runtime.CmdName, runtime.Debug),
 		}
 		gear.State.SetPackage("")
 		gear.State.SetFunctionCaller()
 
-		if gear.Repo.State.IsNotOk() {
-			gear.State = gear.Repo.State
-			break
-		}
+		//if gear.Repo.State.IsNotOk() {
+		//	gear.State = gear.Repo.State
+		//	break
+		//}
+		//
+		//if gear.Docker.State.IsNotOk() {
+		//	gear.State.SetError("can not connect to Docker service provider - maybe you haven't set DOCKER_HOST, or Docker not running on this host")
+		//	//gear.State = gear.Docker.State
+		//	break
+		//}
+		//
+		//if gear.GearConfig.State.IsNotOk() {
+		//	gear.State = gear.GearConfig.State
+		//	break
+		//}
+	}
 
-		if gear.Docker.State.IsNotOk() {
-			gear.State.SetError("can not connect to Docker service provider")
-			//gear.State = gear.Docker.State
-			break
-		}
+	return &gear
+}
 
-		if gear.GearConfig.State.IsNotOk() {
-			gear.State = gear.GearConfig.State
+
+func NewGears(runtime *toolRuntime.TypeRuntime) Gears {
+	var gears Gears
+
+	for range onlyOnce {
+		runtime = runtime.EnsureNotNil()
+
+		gears = Gears {
+			Array:      make(map[string]*Gear),
+			Selected:   nil,
+
+			Docker:     NewDocker(runtime),
+
+			Runtime:    runtime,
+			State:      ux.NewState(runtime.CmdName, runtime.Debug),
+		}
+		gears.State.SetPackage("")
+		gears.State.SetFunctionCaller()
+	}
+
+	return gears
+}
+
+func (gears *Gears) IsValid() *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gears.State = gears.State.EnsureNotNil()
+
+		if gears.Docker.Client == nil {
+			gears.State.SetError("docker client is nil")
 			break
 		}
 	}
 
-	return &gear
+	return gears.State
+}
+
+
+func (gears *Gears) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gears.State = gears.State.EnsureNotNil()
+	}
+
+	return gears.State
 }
 
 
@@ -104,25 +178,40 @@ func (gear *Gear) Status() *ux.State {
 	}
 
 	for range onlyOnce {
-		gear.State = gear.Docker.Container.Status()
+		//var found bool
+
+		//found, gear.State = gear.FindContainer(gear.GearConfig.Meta.Name)
+		//found, gear.State = gear.FindImage()
+		gear.State = gear.Image.Status()
+
+		//gear.Image.Name = name
+		//gear.Image.Version = version
+		//gear.Image.Status()
+		//
+		//gear.Container.Name = name
+		//gear.Container.Version = version
+		//gear.Container.Status()
+
+		gear.State = gear.Container.Status()
+		//gear.State = gear.Docker.Status()
 		if gear.State.IsError() {
 			break
 		}
 
-		if gear.Docker.Image.GearConfig != nil {
-			gear.GearConfig = gear.Docker.Image.GearConfig
+		if gear.Image.GearConfig != nil {
+			gear.GearConfig = gear.Image.GearConfig
 		}
-		if gear.Docker.Container.GearConfig != nil {
-			gear.GearConfig = gear.Docker.Container.GearConfig
-		}
-
-		if gear.Docker.Image.ID == "" {
-			gear.Docker.Image.ID = strings.TrimPrefix(gear.Docker.Container.Details.Image, "sha256:")
-			gear.Docker.Image.Name = gear.Docker.Container.Name
-			gear.Docker.Image.Version = gear.Docker.Container.Version
+		if gear.Container.GearConfig != nil {
+			gear.GearConfig = gear.Container.GearConfig
 		}
 
-		state2 := gear.Docker.Image.Status()
+		if gear.Image.ID == "" {
+			gear.Image.ID = strings.TrimPrefix(gear.Container.Details.Image, "sha256:")
+			gear.Image.Name = gear.Container.Name
+			gear.Image.Version = gear.Container.Version
+		}
+
+		state2 := gear.Image.Status()
 		if state2.IsError() {
 			break
 		}
@@ -139,62 +228,76 @@ func (gear *Gear) Status() *ux.State {
 }
 
 
-func (gear *Gear) FindContainer(gearName string, gearVersion string) (bool, *ux.State) {
-	var found bool
-	if state := gear.IsNil(); state.IsError() {
-		return false, state
+func (gears *Gears) Status() *ux.State {
+	state := ux.EnsureStateNotNil(nil)
+
+	for _, v := range gears.Array {
+		state = v.Status()
+		if state.IsNotOk() {
+			break
+		}
 	}
 
-	for range onlyOnce {
-		found, gear.State = gear.Docker.FindContainer(gearName, gearVersion)
-		if !found {
-			break
-		}
-		if gear.State.IsError() {
-			break
-		}
-
-		gear.State = gear.Status()
-		if gear.State.IsError() {
-			break
-		}
-
-		gear.GearConfig = gear.Docker.Container.GearConfig
-	}
-
-	return found, gear.State
+	return state
 }
 
 
-func (gear *Gear) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
-	var found bool
-	if state := gear.IsNil(); state.IsError() {
-		return false, state
-	}
+//func (gear *Gears) FindContainer(gearName string, gearVersion string) (bool, *ux.State) {
+//	var found bool
+//	if state := gear.IsNil(); state.IsError() {
+//		return false, state
+//	}
+//
+//	for range onlyOnce {
+//		found, gear.State = gear.FindContainer(gearName, gearVersion)
+//		if !found {
+//			break
+//		}
+//		if gear.State.IsError() {
+//			break
+//		}
+//
+//		gear.State = gear.Status()
+//		if gear.State.IsError() {
+//			break
+//		}
+//
+//		gear.Selected.GearConfig = gear.Selected.Container.GearConfig
+//	}
+//
+//	return found, gear.State
+//}
 
-	for range onlyOnce {
-		found, gear.State = gear.Docker.FindImage(gearName, gearVersion)
-		if !found {
-			//state.ClearError()
-			break
-		}
-		if gear.State.IsError() {
-			break
-		}
 
-		//if gear.GearConfig == nil {
-		//	gear.GearConfig = gear.Docker.Image.GearConfig
-		//}
-
-		//@TODO - TO CHECK
-		//state = gear.Status()
-		//if state.IsError() {
-		//	break
-		//}
-	}
-
-	return found, gear.State
-}
+//func (gear *Gears) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
+//	var found bool
+//	if state := gear.IsNil(); state.IsError() {
+//		return false, state
+//	}
+//
+//	for range onlyOnce {
+//		found, gear.State = gear.FindImage(gearName, gearVersion)
+//		if !found {
+//			//state.ClearError()
+//			break
+//		}
+//		if gear.State.IsError() {
+//			break
+//		}
+//
+//		//if gear.GearConfig == nil {
+//		//	gear.GearConfig = gear.Docker.Image.GearConfig
+//		//}
+//
+//		//@TODO - TO CHECK
+//		//state = gear.Status()
+//		//if state.IsError() {
+//		//	break
+//		//}
+//	}
+//
+//	return found, gear.State
+//}
 
 
 func (gear *Gear) DecodeError(err error) (bool, *ux.State) {
@@ -209,10 +312,10 @@ func (gear *Gear) DecodeError(err error) (bool, *ux.State) {
 				ok = true
 
 			//case gear.Docker.IsErrContainerNotFound(err):
-			case gear.Docker.IsErrConnectionFailed(err):
-			case gear.Docker.IsErrNotFound(err):
-			case gear.Docker.IsErrPluginPermissionDenied(err):
-			case gear.Docker.IsErrUnauthorized(err):
+			case gear.IsErrConnectionFailed(err):
+			case gear.IsErrNotFound(err):
+			case gear.IsErrPluginPermissionDenied(err):
+			case gear.IsErrUnauthorized(err):
 			default:
 		}
 	}
@@ -260,16 +363,21 @@ func (gear *Gear) RemoveLinks(version string) *ux.State {
 }
 
 
-func (gear *Gear) AddVolume(local string, remote string) bool {
-	return gear.Docker.AddVolume(local, remote)
-}
+//func (gear *Gear) AddVolume(local string, remote string) bool {
+//	return gear.AddVolume(local, remote)
+//}
 
 
-func (gear *Gear) AddMount(local string, remote string) bool {
-	return gear.Docker.AddMount(local, remote)
-}
+//func (gear *Gear) AddMount(local string, remote string) bool {
+//	return gear.AddMount(local, remote)
+//}
 
 
-func (gear *Gear) ContainerCreate(gearName string, gearVersion string) *ux.State {
-	return gear.Docker.ContainerCreate(gearName, gearVersion)
-}
+//func (gear *Gear) ContainerCreate(gearName string, gearVersion string) *ux.State {
+//	return gear.Docker.ContainerCreate(gearName, gearVersion)
+//}
+
+
+//func (gear *Gear) GetContainers(gearName string) (Gears, *ux.State) {
+//	return gear.GetContainers(gearName)
+//}

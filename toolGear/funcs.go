@@ -12,27 +12,27 @@ import (
 //}
 
 
-func (gear *TypeDockerGear) IsErrConnectionFailed(err error) bool {
+func (gear *Gear) IsErrConnectionFailed(err error) bool {
 	return client.IsErrConnectionFailed(err)
 }
 
 
-func (gear *TypeDockerGear) IsErrNotFound(err error) bool {
+func (gear *Gear) IsErrNotFound(err error) bool {
 	return client.IsErrNotFound(err)
 }
 
 
-func (gear *TypeDockerGear) IsErrPluginPermissionDenied(err error) bool {
+func (gear *Gear) IsErrPluginPermissionDenied(err error) bool {
 	return client.IsErrPluginPermissionDenied(err)
 }
 
 
-func (gear *TypeDockerGear) IsErrUnauthorized(err error) bool {
+func (gear *Gear) IsErrUnauthorized(err error) bool {
 	return client.IsErrUnauthorized(err)
 }
 
 
-func (gear *TypeDockerGear) ParseHostURL(format string, args ...interface{}) (*url.URL, error) {
+func (gear *Gear) ParseHostURL(format string, args ...interface{}) (*url.URL, error) {
 	return client.ParseHostURL(fmt.Sprintf(format, args...))
 }
 

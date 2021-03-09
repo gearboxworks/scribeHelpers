@@ -12,7 +12,7 @@ import (
 )
 
 
-func (gear *TypeDockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) *ux.State {
+func (gear *Gear) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
@@ -30,7 +30,7 @@ func (gear *TypeDockerGear) ContainerSsh(interactive bool, statusLine bool, moun
 		}
 
 		u := url.URL{}
-		err := u.UnmarshalBinary([]byte(gear.Client.DaemonHost()))
+		err := u.UnmarshalBinary([]byte(gear.Docker.Client.DaemonHost()))
 		if err != nil {
 			gear.State.SetError("error finding SSH port: %s", err)
 			break
@@ -120,7 +120,7 @@ func (gear *TypeDockerGear) ContainerSsh(interactive bool, statusLine bool, moun
 }
 
 
-func (gear *TypeDockerGear) SetMountPath(mp string) *ux.State {
+func (gear *Gear) SetMountPath(mp string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
@@ -170,7 +170,7 @@ func (gear *TypeDockerGear) SetMountPath(mp string) *ux.State {
 }
 
 
-func (gear *TypeDockerGear) AddMount(local string, remote string) bool {
+func (gear *Gear) AddMount(local string, remote string) bool {
 	if gear.Container.SshfsMounts == nil {
 		gear.Container.SshfsMounts = make(SshfsMounts)
 	}

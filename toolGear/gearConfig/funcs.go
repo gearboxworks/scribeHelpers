@@ -10,75 +10,23 @@ import (
 )
 
 
-func (gc *GearConfig) GetName() string {
-	return gc.Meta.Name
-}
-
-//func (gc *GearConfig) GetVersion() string {
-//	return gc.
-//}
-
-
-func (gc *GearConfig) GetCommand(cmd []string) []string {
-	var retCmd []string
-
-	for range onlyOnce {
-		var cmdExec string
-		switch {
-		case len(cmd) == 0:
-			cmdExec = DefaultCommandName
-
-		case cmd[0] == "":
-			cmdExec = DefaultCommandName
-
-		case cmd[0] == gc.Meta.Name:
-			cmdExec = DefaultCommandName
-
-		case cmd[0] != "":
-			cmdExec = cmd[0]
-
-		default:
-			//cmdExec = cmd[0]
-			cmdExec = DefaultCommandName
-		}
-
-		c := gc.MatchCommand(cmdExec)
-		if c == nil {
-			retCmd = []string{}
-			break
-		}
-
-		retCmd = append([]string{*c}, cmd[1:]...)
-	}
-
-	return retCmd
-}
-
-
-func (gc *GearConfig) MatchCommand(cmd string) *string {
-	var c *string
-
-	for range onlyOnce {
-		if c2, ok := gc.Run.Commands[cmd]; ok {
-			c = &c2
-			break
-		}
-	}
-
-	return c
-}
-
-
 func (gc *GearConfig) ListLinks(version string) *ux.State {
 	if state := gc.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
-		err := os.Chdir(gc.Runtime.CmdDir)
+		var err error
+
+		err = os.Chdir(gc.Runtime.CmdDir)
 		if err != nil {
 			gc.State.SetError(err)
 			break
+		}
+
+		isLatest := false
+		if version == gc.Versions.GetLatest() {
+			isLatest = true
 		}
 
 		ux.PrintfCyan("Files for Container: %s-%s\n", gc.Meta.Name, version)
@@ -89,17 +37,21 @@ func (gc *GearConfig) ListLinks(version string) *ux.State {
 			"File",
 		})
 
-		for k, v := range gc.Run.Commands {
+		for name, fileName := range gc.Run.Commands {
 			for ver := range gc.Versions {
 				if ver != version {
 					continue
 				}
 
-				gc.State = gc.CheckFile(ver, k, v)
+				if isLatest {
+					gc.State = gc.CheckFile("latest", name, fileName)
+				} else {
+					gc.State = gc.CheckFile(ver, name, fileName)
+				}
 
 				if gc.State.IsError() {
 					t.AppendRow([]interface{}{
-						ux.SprintfRed(k),
+						ux.SprintfRed(name),
 						ux.SprintfRed("%s", gc.State.GetError()),
 					})
 					continue
@@ -107,7 +59,7 @@ func (gc *GearConfig) ListLinks(version string) *ux.State {
 
 				if gc.State.IsWarning() {
 					t.AppendRow([]interface{}{
-						ux.SprintfYellow(k),
+						ux.SprintfYellow(name),
 						ux.SprintfYellow("%s", gc.State.GetWarning()),
 					})
 					continue
@@ -115,7 +67,7 @@ func (gc *GearConfig) ListLinks(version string) *ux.State {
 
 				if gc.State.IsOk() {
 					t.AppendRow([]interface{}{
-						ux.SprintfWhite(k),
+						ux.SprintfWhite(name),
 						ux.SprintfWhite("%s", gc.State.GetOk()),
 					})
 					continue
@@ -146,15 +98,18 @@ func (gc *GearConfig) CreateLinks(version string) *ux.State {
 	}
 
 	for range onlyOnce {
-		//links := make(map[string]string)
 		var failed bool
+		var err error
 
-		// @TODO - Consider doing a chdir here...
-		// @TODO - os.Chdir(Runtime.CmdDir)
-		err := os.Chdir(gc.Runtime.CmdDir)
+		err = os.Chdir(gc.Runtime.CmdDir)
 		if err != nil {
 			gc.State.SetError(err)
 			break
+		}
+
+		latest := gc.Versions.GetLatest()
+		if version == latest {
+			version = "latest"
 		}
 
 		for name, fileName := range gc.Run.Commands {
@@ -248,13 +203,6 @@ func (gc *GearConfig) CreateLinks(version string) *ux.State {
 		if failed {
 			gc.State.SetWarning("Failed to add all command links.")
 			ux.PrintflnWarning("Failed to add all command links.")
-			//gc.State.PrintResponse()
-			//for k, v := range links {
-			//	if v == "linked" {
-			//		continue
-			//	}
-			//	ux.PrintflnWarning("%s - %s", k, v)
-			//}
 			break
 		}
 
@@ -272,11 +220,21 @@ func (gc *GearConfig) RemoveLinks(version string) *ux.State {
 	}
 
 	for range onlyOnce {
-		links := make(map[string]string)
 		var failed bool
+		var err error
+
+		err = os.Chdir(gc.Runtime.CmdDir)
+		if err != nil {
+			gc.State.SetError(err)
+			break
+		}
+
+		latest := gc.Versions.GetLatest()
+		if version == latest {
+			version = "latest"
+		}
 
 		for name, fileName := range gc.Run.Commands {
-			var err error
 			//var dstFile string
 			//var linkStat os.FileInfo
 			//
@@ -345,9 +303,7 @@ func (gc *GearConfig) RemoveLinks(version string) *ux.State {
 
 		if failed {
 			gc.State.SetWarning("Failed to remove all command links.")
-			for k, v := range links {
-				ux.PrintflnWarning("%s - %s", k, v)
-			}
+			ux.PrintflnWarning("Failed to remove all command links.")
 			break
 		}
 

@@ -1,101 +1,75 @@
 package toolGear
 
 import (
-	"context"
 	"fmt"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/filters"
-	"github.com/dustin/go-humanize"
-	"github.com/jedib0t/go-pretty/table"
+	"github.com/docker/docker/api/types/registry"
 	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/ux"
-	"os"
 	"strings"
 )
 
 
 // List all images
 // List the images on your Engine, similar to docker image ls:
-// func ImageList(f types.ImageListOptions) error {
-func (gear *TypeDockerGear) ImageList(f string) (int, *ux.State) {
-	var count int
-	if state := gear.IsNil(); state.IsError() {
-		return 0, state
+func (gears *Gears) GetImages(name string) (*ux.State) {
+	if state := gears.IsNil(); state.IsError() {
+		return state
 	}
 
 	for range onlyOnce {
-		df := filters.NewArgs()
-		//if f != "" {
-		//	df.Add("label", f)
-		//}
-
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		//noinspection GoDeferInLoop
-		defer cancel()
-
-		images, err := gear.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
-		if err != nil {
-			gear.State.SetError("gear image list error: %s", err)
+		gears.State = gears.Docker.ImageList(types.ImageListOptions{All: true})
+		if gears.State.IsNotOk() {
 			break
 		}
 
-		ux.PrintfCyan("Downloaded Gearbox images: ")
-		t := table.NewWriter()
-		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{"Class", "Image", "Ports", "Size"})
-
-		gc := gearConfig.New(gear.Runtime)
-		for _, i := range images {
-			gear.State = gc.ParseJson(i.Labels["gearbox.json"])
-			if gear.State.IsError() {
+		for _, c := range gears.Docker.Images {
+			if _, ok := c.Labels["gearbox.json"]; !ok {
 				continue
 			}
 
-			if gc.Meta.Organization != DefaultOrganization {
+			gear := NewGear(gears.Runtime)
+			gear.Docker = gears.Docker
+			gears.State = gear.GearConfig.ParseJson(c.Labels["gearbox.json"])
+			if gears.State.IsError() {
 				continue
 			}
 
-			if len(i.RepoTags) == 0 {
+			if gear.GearConfig.Meta.Organization != DefaultOrganization {
 				continue
 			}
 
-			if i.RepoTags[0] == "<none>:<none>" {
+			if len(c.RepoTags) == 0 {
 				continue
 			}
 
-			if f != "" {
-				if gc.Meta.Name != f {
+			if c.RepoTags[0] == "<none>:<none>" {
+				continue
+			}
+
+			if name != "" {
+				if gear.GearConfig.Meta.Name != name {
 					continue
 				}
 			}
 
-			// foo := fmt.Sprintf("%s/%s", gc.Organization, gc.Name)
-			t.AppendRow([]interface{}{
-				ux.SprintfWhite(gc.Meta.Class),
-				//ux.SprintfWhite(gc.Meta.State),
-				ux.SprintfWhite(i.RepoTags[0]),
-				ux.SprintfWhite(gc.Build.Ports.ToString()),
-				ux.SprintfWhite(humanize.Bytes(uint64(i.Size))),
-			})
-		}
+			gear.Image.ID = c.ID
+			gear.Image.Name = gear.GearConfig.GetName()
+			gear.Image.Version = c.Labels["gearbox.version"]
+			gear.Image.Summary = &c
+			gear.Image.Docker = gear.Docker
+			gear.Image.GearConfig = gear.GearConfig
+			gear.Image.Details, _ = gear.Docker.ImageInspectWithRaw(c.ID)
 
-		gear.State.ClearError()
-		count = t.Length()
-		if count == 0 {
-			ux.PrintfYellow("None found\n")
-			break
+			gears.Array[c.ID] = gear
 		}
-
-		ux.PrintflnGreen("%d found", count)
-		t.Render()
-		ux.PrintflnBlue("")
 	}
 
-	return count, gear.State
+	return gears.State
 }
 
 
-func (gear *TypeDockerGear) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
+func (gear *Gears) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
 	var ok bool
 	if state := gear.IsNil(); state.IsError() {
 		return false, state
@@ -111,37 +85,40 @@ func (gear *TypeDockerGear) FindImage(gearName string, gearVersion string) (bool
 			gearVersion = "latest"
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		//noinspection GoDeferInLoop
-		defer cancel()
+		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		////noinspection GoDeferInLoop
+		//defer cancel()
+		//
+		//images, err := gear.ImageList(ctx, types.ImageListOptions{All: true})
+		//if err != nil {
+		//	gear.State.SetError("gear image list error: %s", err)
+		//	break
+		//}
 
-		images, err := gear.Client.ImageList(ctx, types.ImageListOptions{All: true})
-		if err != nil {
-			gear.State.SetError("gear image list error: %s", err)
+		gear.State = gear.Docker.ImageList(types.ImageListOptions{})
+		if gear.State.IsNotOk() {
 			break
 		}
-
-		if len(images) == 0 {
+		if len(gear.Docker.Images) == 0 {
 			break
 		}
 
 		// Start out with "not found". Will be cleared if found or error occurs.
 		gear.State.SetWarning("Gear image '%s:%s' doesn't exist.", gearName, gearVersion)
-
-		for _, i := range images {
+		for _, i := range gear.Docker.Images {
 			//var gc *gearConfig.GearConfig
-			ok, gear.Image.GearConfig = MatchImage(&i,
+			ok, gear.Selected.GearConfig = MatchImage(&i,
 				TypeMatchImage{Organization: DefaultOrganization, Name: gearName, Version: gearVersion})
 			if !ok {
 				continue
 			}
 
-			gear.Image.Name = gearName
-			gear.Image.Version = gearVersion
-			//gear.Image.GearConfig = gc
-			gear.Image.Summary = &i
-			gear.Image.ID = i.ID
-			gear.Image.State = gear.Image.State.EnsureNotNil()
+			gear.Selected.Image.Name = gearName
+			gear.Selected.Image.Version = gearVersion
+			//gear.Selected.Image.GearConfig = gc
+			gear.Selected.Image.Summary = &i
+			gear.Selected.Image.ID = i.ID
+			gear.Selected.Image.State = gear.Selected.Image.State.EnsureNotNil()
 			//gear.Image.client = gear.DockerClient
 			ok = true
 			gear.State.SetOk("Found Gear image '%s:%s'.", gearName, gearVersion)
@@ -155,18 +132,20 @@ func (gear *TypeDockerGear) FindImage(gearName string, gearVersion string) (bool
 			break
 		}
 
-		if gear.Image.Summary == nil {
+		if gear.Selected.Image.Summary == nil {
 			break
 		}
 
-		ctx2, cancel2 := context.WithTimeout(context.Background(), DefaultTimeout)
-		//noinspection GoDeferInLoop
-		defer cancel2()
-		gear.Image.Details, _, err = gear.Client.ImageInspectWithRaw(ctx2, gear.Image.ID)
-		if err != nil {
-			gear.State.SetError("error inspecting gear: %s", err)
-			break
-		}
+		//ctx2, cancel2 := context.WithTimeout(context.Background(), DefaultTimeout)
+		////noinspection GoDeferInLoop
+		//defer cancel2()
+		//gear.Image.Details, _, err = gear.Docker.Client.ImageInspectWithRaw(ctx2, gear.Image.ID)
+		//if err != nil {
+		//	gear.State.SetError("error inspecting gear: %s", err)
+		//	break
+		//}
+
+		gear.Selected.Image.Details, gear.State = gear.Docker.ImageInspectWithRaw(gear.Selected.Image.ID)
 
 		gear.State.SetOk("found image")
 	}
@@ -176,7 +155,7 @@ func (gear *TypeDockerGear) FindImage(gearName string, gearVersion string) (bool
 
 
 // Search for an image in remote registry.
-func (gear *TypeDockerGear) Search(gearName string, gearVersion string) *ux.State {
+func (gear *Gears) Search(gearName string, gearVersion string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
@@ -189,21 +168,21 @@ func (gear *TypeDockerGear) Search(gearName string, gearVersion string) *ux.Stat
 			repo = fmt.Sprintf("gearboxworks/%s:%s", gearName, gearVersion)
 		}
 
-		ctx := context.Background()
-		//ctx, cancel := context.WithTimeout(context.Background(), Timeout * 1000)
-		//defer cancel()
+		//repo = gearName
+		//ctx := context.Background()
+		////ctx, cancel := context.WithTimeout(context.Background(), Timeout * 1000)
+		////defer cancel()
+		//df := filters.NewArgs()
+		////df.Add("name", "terminus")
+		//images, err := gear.Docker.Client.ImageSearch(ctx, repo, types.ImageSearchOptions{Filters: df, Limit: 100})
+		//if err != nil {
+		//	gear.State.SetError("gear image search error: %s", err)
+		//	break
+		//}
+		var resp []registry.SearchResult
+		resp, gear.State = gear.Docker.ImageSearch(repo, types.ImageSearchOptions{})
 
-		df := filters.NewArgs()
-		//df.Add("name", "terminus")
-		repo = gearName
-
-		images, err := gear.Client.ImageSearch(ctx, repo, types.ImageSearchOptions{Filters: df, Limit: 100})
-		if err != nil {
-			gear.State.SetError("gear image search error: %s", err)
-			break
-		}
-
-		for _, v := range images {
+		for _, v := range resp {
 			if !strings.HasPrefix(v.Name, "gearboxworks/") {
 				continue
 			}

@@ -25,7 +25,8 @@ type Image struct {
 	Details    types.ImageInspect
 	GearConfig *gearConfig.GearConfig
 
-	_Parent    *TypeDockerGear
+	Docker    *Docker
+
 	runtime    *toolRuntime.TypeRuntime
 	State      *ux.State
 }
@@ -34,14 +35,14 @@ type Image struct {
 func NewImage(runtime *toolRuntime.TypeRuntime) *Image {
 	runtime = runtime.EnsureNotNil()
 
-	i := Image{
+	i := Image {
 		ID:         "",
 		Name:       "",
 		Version:    "",
 		Summary:    nil,
 		Details:    types.ImageInspect{},
 		GearConfig: gearConfig.New(runtime),
-		_Parent:    nil,
+		Docker:    nil,
 
 		runtime:    runtime,
 		State:      ux.NewState(runtime.CmdName, runtime.Debug),
@@ -92,7 +93,7 @@ func (i *Image) IsValid() *ux.State {
 			break
 		}
 
-		if i._Parent.Client == nil {
+		if i.Docker.Client == nil {
 			i.State.SetError("docker client is nil")
 			break
 		}
@@ -119,7 +120,7 @@ func (i *Image) Status() *ux.State {
 
 			var images []types.ImageSummary
 			var err error
-			images, err = i._Parent.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
+			images, err = i.Docker.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
 			if err != nil {
 				i.State.SetError("gear list error: %s", err)
 				break
@@ -133,7 +134,7 @@ func (i *Image) Status() *ux.State {
 			i.Summary.ID = i.ID
 
 			d := types.ImageInspect{}
-			d, _, err = i._Parent.Client.ImageInspectWithRaw(ctx, i.ID)
+			d, _, err = i.Docker.Client.ImageInspectWithRaw(ctx, i.ID)
 			if err != nil {
 				i.State.SetError("gear inspect error: %s", err)
 				break
@@ -194,7 +195,7 @@ func (i *Image) Pull() *ux.State {
 
 		var out io.ReadCloser
 		var err error
-		out, err = i._Parent.Client.ImagePull(ctx, repo, types.ImagePullOptions{All: false})
+		out, err = i.Docker.Client.ImagePull(ctx, repo, types.ImagePullOptions{All: false})
 		if err != nil {
 			i.State.SetError("Error pulling Gear %s:%s - %s", i.Name, i.Version, err)
 			break
@@ -288,7 +289,7 @@ func (i *Image) ImageAuthPull() *ux.State {
 		//noinspection GoDeferInLoop
 		defer cancel()
 
-		out, err := i._Parent.Client.ImagePull(ctx, "alpine", types.ImagePullOptions{RegistryAuth: authStr})
+		out, err := i.Docker.Client.ImagePull(ctx, "alpine", types.ImagePullOptions{RegistryAuth: authStr})
 		if err != nil {
 			i.State.SetError("error pulling gear: %s", err)
 			break
@@ -322,7 +323,7 @@ func (i *Image) Remove() *ux.State {
 			PruneChildren: true,
 		}
 
-		_, err := i._Parent.Client.ImageRemove(ctx, i.ID, options)
+		_, err := i.Docker.Client.ImageRemove(ctx, i.ID, options)
 		if err != nil {
 			i.State.SetError("error removing gear: %s", err)
 			break
@@ -332,4 +333,21 @@ func (i *Image) Remove() *ux.State {
 	}
 
 	return i.State
+}
+
+
+func (i *Image) GetName() (string) {
+	return strings.TrimPrefix(i.Details.RepoTags[0], "/")
+}
+
+func (i *Image) GetVersion() (string) {
+	return i.Summary.Labels["gearbox.version"]
+}
+
+func (i *Image) GetSize() (uint64) {
+	return uint64(i.Summary.Size)
+}
+
+func (i *Image) GetLabels() (map[string]string) {
+	return i.Summary.Labels
 }

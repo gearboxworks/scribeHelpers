@@ -7,7 +7,6 @@ import "reflect"
 var Types = map[string]reflect.Type{
 	"Container": reflect.TypeOf((*Container)(nil)).Elem(),
 	"Containers": reflect.TypeOf((*Containers)(nil)).Elem(),
-	"TypeDockerGear": reflect.TypeOf((*TypeDockerGear)(nil)).Elem(),
 	"ExecCommand": reflect.TypeOf((*ExecCommand)(nil)).Elem(),
 	"Gear": reflect.TypeOf((*Gear)(nil)).Elem(),
 	"GitHubRepo": reflect.TypeOf((*GitHubRepo)(nil)).Elem(),
@@ -18,7 +17,6 @@ var Types = map[string]reflect.Type{
 	"ReleaseSelector": reflect.TypeOf((*ReleaseSelector)(nil)).Elem(),
 	"ReleasesMap": reflect.TypeOf((*ReleasesMap)(nil)).Elem(),
 	"SshfsMounts": reflect.TypeOf((*SshfsMounts)(nil)).Elem(),
-	"ToolDockerGear": reflect.TypeOf((*ToolDockerGear)(nil)).Elem(),
 	"TypeMatchContainer": reflect.TypeOf((*TypeMatchContainer)(nil)).Elem(),
 	"TypeMatchImage": reflect.TypeOf((*TypeMatchImage)(nil)).Elem(),
 	"Version": reflect.TypeOf((*Version)(nil)).Elem(),
@@ -29,7 +27,6 @@ var Functions = map[string]reflect.Value{
 	"MatchContainer": reflect.ValueOf(MatchContainer),
 	"MatchImage": reflect.ValueOf(MatchImage),
 	"MatchTag": reflect.ValueOf(MatchTag),
-	"New": reflect.ValueOf(New),
 	"NewContainer": reflect.ValueOf(NewContainer),
 	"NewGear": reflect.ValueOf(NewGear),
 	"NewGearConfig": reflect.ValueOf(NewGearConfig),
