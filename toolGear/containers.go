@@ -15,6 +15,251 @@ import (
 
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
+
+func (gear *TypeDockerGear) GetContainers(name string) (TypeDockerGears, *ux.State) {
+	var ret TypeDockerGears
+	if state := gear.IsNil(); state.IsError() {
+		return ret, state
+	}
+
+	for range onlyOnce {
+		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		//noinspection GoDeferInLoop
+		defer cancel()
+
+		var containers []types.Container
+		var err error
+		containers, err = gear.Client.ContainerList(ctx, types.ContainerListOptions{Size: true, All: true})
+		if err != nil {
+			gear.State.SetError("gear list error: %s", err)
+			break
+		}
+
+		//ux.PrintfCyan("Installed Gearbox gears: ")
+		//t := table.NewWriter()
+		//t.SetOutputMirror(os.Stdout)
+		//t.AppendHeader(table.Row{
+		//	"Name",
+		//	"Class",
+		//	"State",
+		//	"Image",
+		//	"Ports",
+		//	"SSH port",
+		//	"IP Address",
+		//	"Mounts",
+		//	"Size",
+		//})
+
+
+		for _, c := range containers {
+			gc := gearConfig.New(gear.Runtime)
+			gear.State = gc.ParseJson(c.Labels["gearbox.json"])
+			if gear.State.IsError() {
+				continue
+			}
+
+			if gc.Meta.Organization != DefaultOrganization {
+				continue
+			}
+
+			if name != "" {
+				if gc.Meta.Name != name {
+					continue
+				}
+			}
+
+			cc := New(gear.Runtime)
+			cc.Container.Version = c.Labels["gearbox.version"]
+			cc.Container.GearConfig = gc
+			cc.Container.Summary = &c
+			cc.Container.ID = c.ID
+			cc.Container.Name = gc.Meta.Name
+			cc.Container.State = gear.Container.State.EnsureNotNil()
+			cc.gearConfig = gc
+
+			ret = append(ret, *cc)
+
+			//
+			//name := strings.TrimPrefix(c.Names[0], "/")
+			//
+			//sshPort := ""
+			//var ports string
+			//for _, p := range c.Ports {
+			//	if p.PrivatePort == 22 {
+			//		sshPort = fmt.Sprintf("%d", p.PublicPort)
+			//		continue
+			//	}
+			//	//ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
+			//	if p.IP == "0.0.0.0" {
+			//		ports += fmt.Sprintf("%d => %d\n", p.PublicPort, p.PrivatePort)
+			//	} else {
+			//		ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
+			//	}
+			//}
+			//if sshPort == "0" {
+			//	sshPort = "none"
+			//}
+			//
+			//var mounts string
+			//for _, m := range c.Mounts {
+			//	// ms += fmt.Sprintf("%s(%s) host:%s => container:%s (RW:%v)\n", m.Name, m.Type, m.Source, m.Destination, m.RW)
+			//	mounts += fmt.Sprintf("host:%s\n\t=> container:%s (RW:%v)\n", m.Source, m.Destination, m.RW)
+			//}
+			//
+			//var ipAddress string
+			//for k, n := range c.NetworkSettings.Networks {
+			//	ipAddress += fmt.Sprintf("(%s) %s\n", k, n.IPAddress)
+			//}
+			//
+			//var state string
+			//if c.State == ux.StateRunning {
+			//	state = ux.SprintfGreen(c.State)
+			//} else {
+			//	state = ux.SprintfYellow(c.State)
+			//}
+			//
+			//t.AppendRow([]interface{}{
+			//	ux.SprintfWhite(name),
+			//	ux.SprintfWhite(gc.Meta.Class),
+			//	state,
+			//	ux.SprintfWhite(c.Image),
+			//	ux.SprintfWhite(ports),
+			//	ux.SprintfWhite(sshPort),
+			//	ux.SprintfWhite(ipAddress),
+			//	ux.SprintfWhite(mounts),
+			//	ux.SprintfWhite(humanize.Bytes(uint64(c.SizeRootFs))),
+			//})
+		}
+
+	}
+
+	return ret, gear.State
+}
+
+//func (gear *TypeDockerGear) ContainerListFiles(f string) (int, *ux.State) {
+//	var count int
+//	if state := gear.IsNil(); state.IsError() {
+//		return 0, state
+//	}
+//
+//	for range onlyOnce {
+//		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+//		//noinspection GoDeferInLoop
+//		defer cancel()
+//
+//		var containers []types.Container
+//		var err error
+//		containers, err = gear.Client.ContainerList(ctx, types.ContainerListOptions{Size: true, All: true})
+//		if err != nil {
+//			gear.State.SetError("gear list error: %s", err)
+//			break
+//		}
+//
+//		ux.PrintfCyan("Installed Gearbox gears: ")
+//		t := table.NewWriter()
+//		t.SetOutputMirror(os.Stdout)
+//		t.AppendHeader(table.Row{
+//			"Name",
+//			"Class",
+//			"State",
+//			"Image",
+//			"Ports",
+//			"SSH port",
+//			"IP Address",
+//			"Mounts",
+//			"Size",
+//		})
+//
+//
+//		//gc := toolGear.NewGearConfig(gear.Runtime)
+//		gc := gearConfig.New(gear.Runtime)
+//		for _, c := range containers {
+//			//c.State = gc.ParseJson(c.Summary.Labels["gearbox.json"])
+//			//if c.State.IsError() {
+//			//	break
+//			//}
+//			gear.State = gc.ParseJson(c.Labels["gearbox.json"])
+//			if gear.State.IsError() {
+//				continue
+//			}
+//
+//			if gc.Meta.Organization != DefaultOrganization {
+//				continue
+//			}
+//
+//			if f != "" {
+//				if gc.Meta.Name != f {
+//					continue
+//				}
+//			}
+//
+//			name := strings.TrimPrefix(c.Names[0], "/")
+//
+//			sshPort := ""
+//			var ports string
+//			for _, p := range c.Ports {
+//				if p.PrivatePort == 22 {
+//					sshPort = fmt.Sprintf("%d", p.PublicPort)
+//					continue
+//				}
+//				//ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
+//				if p.IP == "0.0.0.0" {
+//					ports += fmt.Sprintf("%d => %d\n", p.PublicPort, p.PrivatePort)
+//				} else {
+//					ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
+//				}
+//			}
+//			if sshPort == "0" {
+//				sshPort = "none"
+//			}
+//
+//			var mounts string
+//			for _, m := range c.Mounts {
+//				// ms += fmt.Sprintf("%s(%s) host:%s => container:%s (RW:%v)\n", m.Name, m.Type, m.Source, m.Destination, m.RW)
+//				mounts += fmt.Sprintf("host:%s\n\t=> container:%s (RW:%v)\n", m.Source, m.Destination, m.RW)
+//			}
+//
+//			var ipAddress string
+//			for k, n := range c.NetworkSettings.Networks {
+//				ipAddress += fmt.Sprintf("(%s) %s\n", k, n.IPAddress)
+//			}
+//
+//			var state string
+//			if c.State == ux.StateRunning {
+//				state = ux.SprintfGreen(c.State)
+//			} else {
+//				state = ux.SprintfYellow(c.State)
+//			}
+//
+//			t.AppendRow([]interface{}{
+//				ux.SprintfWhite(name),
+//				ux.SprintfWhite(gc.Meta.Class),
+//				state,
+//				ux.SprintfWhite(c.Image),
+//				ux.SprintfWhite(ports),
+//				ux.SprintfWhite(sshPort),
+//				ux.SprintfWhite(ipAddress),
+//				ux.SprintfWhite(mounts),
+//				ux.SprintfWhite(humanize.Bytes(uint64(c.SizeRootFs))),
+//			})
+//		}
+//
+//		gear.State.ClearError()
+//		count = t.Length()
+//		if count == 0 {
+//			ux.PrintfYellow("None found\n")
+//			break
+//		}
+//
+//		ux.PrintflnGreen("%d found", count)
+//		t.Render()
+//		ux.PrintflnBlue("")
+//	}
+//
+//	return count, gear.State
+//}
+
+
 // func ContainerList(f types.ContainerListOptions) error {
 func (gear *TypeDockerGear) ContainerList(f string) (int, *ux.State) {
 	var count int
@@ -49,7 +294,6 @@ func (gear *TypeDockerGear) ContainerList(f string) (int, *ux.State) {
 			"Mounts",
 			"Size",
 		})
-
 
 		//gc := toolGear.NewGearConfig(gear.Runtime)
 		gc := gearConfig.New(gear.Runtime)

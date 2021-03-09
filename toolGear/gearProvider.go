@@ -64,7 +64,7 @@ func (p *Provider) SetHost(host string, port string) *ux.State {
 			p.Host = host
 
 			if port == "" {
-				port = "2376"
+				port = "2375"
 			}
 			p.Port = port
 

@@ -111,6 +111,74 @@ func (state *State) GetResponse() *TypeResponse {
 	return &state.response
 }
 
+func (state *State) GetResponseAsFunc() func() {
+	return (state.response).AsFunc()
+}
+
+func (state *State) GetResponseAsBool() bool {
+	return *(state.response).AsBool()
+}
+
+func (state *State) GetResponseAsString() string {
+	return *(state.response).AsString()
+}
+func (state *State) GetResponseAsByte() byte {
+	return *(state.response).AsByte()
+}
+
+func (state *State) GetResponseAsStringArray() []string {
+	return *(state.response).AsStringArray()
+}
+func (state *State) GetResponseAsByteArray() []byte {
+	return *(state.response).AsByteArray()
+}
+
+func (state *State) GetResponseAsInt() int {
+	return *(state.response).AsInt()
+}
+func (state *State) GetResponseAsInt8() int8 {
+	return *(state.response).AsInt8()
+}
+func (state *State) GetResponseAsInt16() int16 {
+	return *(state.response).AsInt16()
+}
+func (state *State) GetResponseAsInt32() int32 {
+	return *(state.response).AsInt32()
+}
+func (state *State) GetResponseAsInt64() int64 {
+	return *(state.response).AsInt64()
+}
+func (state *State) GetResponseAsUint() uint {
+	return *(state.response).AsUint()
+}
+func (state *State) GetResponseAsUint8() uint8 {
+	return *(state.response).AsUint8()
+}
+func (state *State) GetResponseAsUint16() uint16 {
+	return *(state.response).AsUint16()
+}
+func (state *State) GetResponseAsUint32() uint32 {
+	return *(state.response).AsUint32()
+}
+func (state *State) GetResponseAsUint64() uint64 {
+	return *(state.response).AsUint64()
+}
+func (state *State) GetResponseAsUintptr() uintptr {
+	return *(state.response).AsUintptr()
+}
+func (state *State) GetResponseAsFloat32() float32 {
+	return *(state.response).AsFloat32()
+}
+func (state *State) GetResponseAsFloat64() float64 {
+	return *(state.response).AsFloat64()
+}
+func (state *State) GetResponseAsComplex64() complex64 {
+	return *(state.response).AsComplex64()
+}
+func (state *State) GetResponseAsComplex128() complex128 {
+	return *(state.response).AsComplex128()
+}
+
 
 func (state *State) SetResponse(r interface{}) bool {
 	return state.response.Set(r)

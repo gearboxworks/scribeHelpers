@@ -22,6 +22,9 @@ type TypeDockerGear struct {
 	Runtime   *toolRuntime.TypeRuntime
 	State     *ux.State
 }
+type GearConfigs []*gearConfig.GearConfig
+type TypeDockerGears []TypeDockerGear
+
 func (gear *TypeDockerGear) IsNil() *ux.State {
 	return ux.IfNilReturnError(gear)
 }
@@ -47,6 +50,9 @@ func New(runtime *toolRuntime.TypeRuntime) *TypeDockerGear {
 		gear.Container = NewContainer(runtime)
 
 		gear.gearConfig = gearConfig.New(runtime)
+
+		//foo := os.Getenv("DOCKER_HOST")
+		//fmt.Printf("DOCKER_HOST:%s\n", foo)
 
 		var err error
 		gear.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -126,6 +132,24 @@ func (gear *TypeDockerGear) List(name string) *ux.State {
 			break
 		}
 
+		_, gear.State = gear.ContainerList(name)
+		if gear.State.IsError() {
+			break
+		}
+
+		gear.State = gear.NetworkList(DefaultNetwork)
+	}
+
+	return gear.State
+}
+
+
+func (gear *TypeDockerGear) Ls(name string) *ux.State {
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
 		_, gear.State = gear.ContainerList(name)
 		if gear.State.IsError() {
 			break

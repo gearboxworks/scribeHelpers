@@ -57,6 +57,10 @@ func TemplateSprintf(format string, args ...interface{}) (string, error) {
 	var ret string
 
 	for range onlyOnce {
+		if format == "" {
+			break
+		}
+
 		if colours.TemplateRef == nil {
 			err = CreateTemplate()
 			if err != nil {

@@ -18,10 +18,12 @@ func (p *TypeOsPath) MarshalJSON() ([]byte, error) {
 		ret, err = json.Marshal(&struct {
 			Path string `json:"path"`
 			//Overwrite bool `json:"overwrite"`
+
 			*Alias
 		}{
 			Path:  p.GetPath(),
 			//Overwrite:  p._CanOverwrite,
+
 			Alias: (*Alias)(p),
 		})
 

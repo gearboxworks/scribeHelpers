@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 //"github.com/docker/docker/integration-cli/cli"
-// DOCKER_HOST=tcp://macpro:2376
+// DOCKER_HOST=tcp://macpro:2375
 
 
 type Gear struct {
@@ -218,6 +218,19 @@ func (gear *Gear) DecodeError(err error) (bool, *ux.State) {
 	}
 
 	return ok, gear.State
+}
+
+
+func (gear *Gear) ListLinks(version string) *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gear.State = gear.GearConfig.ListLinks(version)
+	}
+
+	return gear.State
 }
 
 

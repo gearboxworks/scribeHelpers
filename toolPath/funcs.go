@@ -52,6 +52,41 @@ func (p *TypeOsPath) SetPath(path ...string) bool {
 	p.Path = ""
 	return p.AppendPath(path...)
 }
+
+func (p *TypeOsPath) SetFile(path ...string) bool {
+	p.Path = ""
+	return p.AppendFile(path...)
+}
+
+func (p *TypeOsPath) SetDir(path ...string) bool {
+	p.Path = ""
+	return p.AppendDir(path...)
+}
+
+func (p *TypeOsPath) AppendFile(path ...string) bool {
+	var ok bool
+	for range onlyOnce {
+		ok = p.AppendPath(path...)
+		if !ok {
+			break
+		}
+		p.ThisIsAFile()
+	}
+	return ok
+}
+
+func (p *TypeOsPath) AppendDir(path ...string) bool {
+	var ok bool
+	for range onlyOnce {
+		ok = p.AppendPath(path...)
+		if !ok {
+			break
+		}
+		p.ThisIsADir()
+	}
+	return ok
+}
+
 func (p *TypeOsPath) AppendPath(path ...string) bool {
 	var ok bool
 
@@ -332,7 +367,7 @@ func (p *TypeOsPath) DirExists() bool {
 func (p *TypeOsPath) ThisIsAFile() {
 	p._IsFile = true
 	p._IsDir = false
-	p.State.Clear()
+	p.State.SetOk()
 }
 func (p *TypeOsPath) IsAFile() bool {
 	return p._IsFile
@@ -342,7 +377,7 @@ func (p *TypeOsPath) IsAFile() bool {
 func (p *TypeOsPath) ThisIsADir() {
 	p._IsFile = false
 	p._IsDir = true
-	p.State.Clear()
+	p.State.SetOk()
 }
 func (p *TypeOsPath) IsADir() bool {
 	return p._IsDir

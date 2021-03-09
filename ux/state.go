@@ -82,6 +82,7 @@ func (state *State) EnsureNotNil() *State {
 	return state
 }
 
+
 func EnsureStateNotNil(p *State) *State {
 	for range onlyOnce {
 		if p == nil {
@@ -91,6 +92,7 @@ func EnsureStateNotNil(p *State) *State {
 	}
 	return p
 }
+
 
 func IsInterfaceNil(ref interface{}) bool {
 	var ok bool
@@ -150,6 +152,7 @@ func IsInterfaceNil(ref interface{}) bool {
 	return ok
 }
 
+
 func IfNilReturnError(ref interface{}, name ...string) *State {
 	if IsInterfaceNil(ref) {
 		s := NewState("", true)
@@ -169,6 +172,7 @@ func IfNilReturnError(ref interface{}, name ...string) *State {
 	return state
 }
 
+
 // Search a given structure for the State object and return it's pointer.
 func SearchStructureForUxState(ref interface{}, name ...string) *State {
 	var state *State
@@ -181,7 +185,7 @@ func SearchStructureForUxState(ref interface{}, name ...string) *State {
 		if v.Kind() == reflect.Ptr {
 			e = v.Elem()
 			if e.Kind().String() == "ptr" {
-				PrintflnCyan("POINTER TO POINTER")
+				//PrintflnCyan("POINTER TO POINTER")	@TODO - DEBUG
 				state = SearchStructureForUxState(e.Addr().Elem().Interface(), name...)
 				break
 			}
@@ -210,6 +214,7 @@ func SearchStructureForUxState(ref interface{}, name ...string) *State {
 
 	return state
 }
+
 
 func (state *State) Clear() {
 	if state == nil {
@@ -355,11 +360,53 @@ func (state *State) Sprint() string {
 	}
 
 	switch {
+	case state._Error != nil:
+		ret = SprintfError("ERROR: %s%s%s%s", pa, e, state._Error, ou)
+		//ret = SprintfError("ERROR: %s%s%s", e, state._Error, ou)
+
+	case state._Warning != nil:
+		ret = SprintfWarning("WARNING: %s%s%s%s", pa, e, state._Warning, ou)
+		//ret = SprintfWarning("WARNING: %s%s%s", e, state._Warning, ou)
+
+	case state._Ok != nil:
+		if state._Ok.Error() != "" {
+			ret = SprintfOk("%s%s", state._Ok, ou)
+		}
+
+	case state.debug.Enabled:
+		if state._Debug != nil {
+			ret = SprintfDebug("%s%s", state._Debug, ou)
+		}
+	}
+
+	return ret
+}
+func (state *State) SprintSimple() string {
+	var ret string
+
+	e := ""
+	if state.ExitCode != 0 {
+		e = fmt.Sprintf("Exit(%d) - ", state.ExitCode)
+	}
+
+	//pa := ""
+	//if len(state.prefixArray) > 0 {
+	//	pa = fmt.Sprintf("[%s] - ", state.prefixArray[0])
+	//}
+
+	ou := ""
+	if state.Output != "" {
+		ou = "\n" + SprintfOk("%s ", state.Output)
+	}
+
+	switch {
 		case state._Error != nil:
-			ret = SprintfError("ERROR: %s%s%s%s", pa, e, state._Error, ou)
+			//ret = SprintfError("ERROR: %s%s%s%s", pa, e, state._Error, ou)
+			ret = SprintfError("ERROR: %s%s%s", e, state._Error, ou)
 
 		case state._Warning != nil:
-			ret = SprintfWarning("WARNING: %s%s%s%s", pa, e, state._Warning, ou)
+			//ret = SprintfWarning("WARNING: %s%s%s%s", pa, e, state._Warning, ou)
+			ret = SprintfWarning("WARNING: %s%s%s", e, state._Warning, ou)
 
 		case state._Ok != nil:
 			if state._Ok.Error() != "" {
@@ -384,6 +431,10 @@ func (state *State) SprintError() string {
 	var ret string
 
 	for range onlyOnce {
+		if state == nil {
+			break
+		}
+
 		if state._Ok != nil {
 			// If we have an OK response.
 			break
@@ -395,10 +446,10 @@ func (state *State) SprintError() string {
 	return ret
 }
 func (state *State) SprintResponse() string {
-	return state.Sprint()
+	return state.SprintSimple()
 }
 func (state *State) PrintResponse() {
-	_, _ = fmt.Fprintf(os.Stdout, state.Sprint())
+	_, _ = fmt.Fprintf(os.Stdout, state.SprintSimple() + "\n")
 }
 
 

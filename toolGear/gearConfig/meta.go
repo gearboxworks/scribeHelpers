@@ -198,6 +198,7 @@ func (ports *GearPorts) String() string {
 
 
 type GearVersion struct {
+	//Version 	 string `json:"version"`
 	MajorVersion string `json:"majorversion"`
 	Latest       bool   `json:"latest"`
 	Ref          string `json:"ref"`
@@ -212,6 +213,7 @@ func (v *GearVersion) String() string {
 
 	for range onlyOnce {
 		//ret += ux.SprintfCyan("# GearVersion\n")
+		//ret += ux.SprintfBlue("Version: %-8s", v)
 		ret += ux.SprintfBlue("MajorVersion: %-8s", v.MajorVersion)
 		ret += ux.SprintfBlue("\tLatest: %v", v.Latest)
 		ret += ux.SprintfBlue("\tRef: %-16s", v.Ref)

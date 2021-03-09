@@ -115,19 +115,95 @@ func (p *TypeOsPath) Mkdir() *ux.State {
 		ok := false
 		p.State.SetResponse(&ok)
 
-		var err error
+		dir := ""
 		for range onlyOnce {
 			if p._Dirname != "" {
-				err = os.Mkdir(p._Dirname, p._Mode)
+				dir = p._Dirname
 				break
 			}
 			if p.Path != "" {
-				err = os.Mkdir(p.Path, p._Mode)
+				dir = p.Path
 				break
 			}
+			p.State.SetError("Path is empty")
 		}
+		if p.State.IsNotOk() {
+			break
+		}
+
+		p.StatPath()
+		if p.Exists() {
+			p.State.SetOk()	// Ignore errors.
+			break
+		}
+
+		err := os.Mkdir(dir, p._Mode)
 		if err != nil {
 			p.State.SetError(err)
+			break
+		}
+
+		p.State = p.StatPath()
+		if p.State.IsNotOk() {
+			break
+		}
+
+		ok = true
+		p.State.SetResponse(&ok)
+		//p.State.Clear()
+		p.State.SetOk("mkdir OK")
+	}
+
+	return p.State
+}
+
+
+func (p *TypeOsPath) MkdirAll() *ux.State {
+	for range onlyOnce {
+		p.State.SetFunction()
+		p.State.SetOk()
+
+		if !p.IsValid() {
+			break
+		}
+
+		if p._Mode == 0 {
+			p._Mode = 0755
+		}
+
+		ok := false
+		p.State.SetResponse(&ok)
+
+		dir := ""
+		for range onlyOnce {
+			if p._Dirname != "" {
+				dir = p._Dirname
+				break
+			}
+			if p.Path != "" {
+				dir = p.Path
+				break
+			}
+			p.State.SetError("Path is empty")
+		}
+		if p.State.IsNotOk() {
+			break
+		}
+
+		p.StatPath()
+		if p.Exists() {
+			p.State.SetOk()	// Ignore errors.
+			break
+		}
+
+		err := os.MkdirAll(dir, p._Mode)
+		if err != nil {
+			p.State.SetError(err)
+			break
+		}
+
+		p.State = p.StatPath()
+		if p.State.IsNotOk() {
 			break
 		}
 
