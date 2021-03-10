@@ -63,19 +63,6 @@ func (gears *Gears) FindNetwork(name string) *ux.State {
 			break
 		}
 
-		//df := filters.NewArgs()
-		//df.Add("name", netName)
-		//
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//nets, err := gear.Docker.Client.NetworkList(ctx, types.NetworkListOptions{Filters: df})
-		//if err != nil {
-		//	gear.State.SetError("gear image search error: %s", err)
-		//	break
-		//}
-
 		gears.State = gears.Docker.NetworkList(name)
 		if gears.State.IsNotOk() {
 			break

@@ -316,16 +316,6 @@ func (i *Image) Remove() *ux.State {
 		//	Force:         true,
 		//	PruneChildren: true,
 		//}
-		//
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//_, err := i.Docker.Client.ImageRemove(ctx, i.ID, options)
-		//if err != nil {
-		//	i.State.SetError("error removing gear: %s", err)
-		//	break
-		//}
 
 		i.State = i.Docker.ImageRemove(i.ID, nil)
 		if i.State.IsNotOk() {

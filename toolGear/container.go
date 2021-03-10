@@ -123,25 +123,6 @@ func (c *Container) Status() *ux.State {
 	}
 
 	for range onlyOnce {
-		//df := filters.NewArgs()
-		//df.Add("id", c.ID)
-		//
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//var containers []types.Container
-		//var err error
-		//containers, err = c._Parent.Client.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: df})
-		//if err != nil {
-		//	c.State.SetError("gear list error: %s", err)
-		//	break
-		//}
-		//if len(containers) == 0 {
-		//	c.State.SetWarning("no gears found")
-		//	break
-		//}
-
 		c.Summary, c.State = c.Docker.GetContainerById(c.ID)
 		if c.State.IsNotOk() {
 			break
@@ -159,22 +140,6 @@ func (c *Container) Status() *ux.State {
 		}
 
 		c.State.RunState = c.Summary.State
-
-		//if c.GearConfig.Meta.Organization != DefaultOrganization {
-		//	c.State.SetError("not a Gearbox container")
-		//	break
-		//}
-		//
-		//d := types.ContainerJSON{}
-		//d, err = c.Docker.Client.ContainerInspect(ctx, c.ID)
-		//if err != nil {
-		//	c.State.SetError("gear inspect error: %s", err)
-		//	break
-		//}
-		//
-		//c.Details, c.State = c.Docker.ContainerInspect(c.ID)
-		//
-		//c.State.SetRunState(c.Details.State.Status)
 	}
 
 	return c.State
