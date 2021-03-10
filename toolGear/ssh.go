@@ -17,29 +17,70 @@ func (gear *Gear) ContainerSsh(interactive bool, statusLine bool, mountPath stri
 		return state
 	}
 
+	return gear.Container.ContainerSsh(interactive, statusLine, mountPath, cmdArgs)
+}
+
+func (gear *Gear) SetMountPath(mp string) *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+
+	return gear.Container.SetMountPath(mp)
+}
+
+func (gear *Gear) AddMount(local string, remote string) bool {
+	if state := gear.IsNil(); state.IsError() {
+		return false
+	}
+
+	return gear.Container.AddMount(local, remote)
+}
+
+func (gear *Gear) SetSshStatusLine(s bool) {
+	if state := gear.IsNil(); state.IsError() {
+		return
+	}
+
+	gear.Container.SetSshStatusLine(s)
+}
+
+func (gear *Gear) SetSshShell(s bool) {
+	if state := gear.IsNil(); state.IsError() {
+		return
+	}
+
+	gear.Container.SetSshShell(s)
+}
+
+
+func (c *Container) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) *ux.State {
+	if state := c.IsNil(); state.IsError() {
+		return state
+	}
+
 	for range onlyOnce {
 		// Get Docker container SSH port.
 		var clientPort string
-		clientPort, gear.State = gear.Container.GetContainerSsh()
-		if gear.State.IsError() {
+		clientPort, c.State = c.GetContainerSsh()
+		if c.State.IsError() {
 			break
 		}
 		if clientPort == "" {
-			gear.State.SetError("no SSH port in gear")
+			c.State.SetError("no SSH port in gear")
 			break
 		}
 
 		u := url.URL{}
-		err := u.UnmarshalBinary([]byte(gear.Docker.Client.DaemonHost()))
+		err := u.UnmarshalBinary([]byte(c.Docker.Client.DaemonHost()))
 		if err != nil {
-			gear.State.SetError("error finding SSH port: %s", err)
+			c.State.SetError("error finding SSH port: %s", err)
 			break
 		}
 
 
 		// Create SSH client config.
 		// fmt.Printf("Connect to %s:%s\n", u.Hostname(), port)
-		gear.Ssh = gearSsh.NewSshClient(gearSsh.SshClientArgs {
+		c.Ssh = gearSsh.NewSshClient(gearSsh.SshClientArgs {
 			ClientAuth: &gearSsh.SshAuth {
 				Host:      u.Hostname(),
 				Port:      clientPort,
@@ -50,21 +91,21 @@ func (gear *Gear) ContainerSsh(interactive bool, statusLine bool, mountPath stri
 				Enable: statusLine,
 			},
 			Shell:       interactive,
-			GearName:    gear.Container.Name,
-			GearVersion: gear.Container.Version,
+			GearName:    c.Name,
+			GearVersion: c.Version,
 			CmdArgs:     cmdArgs,
-			State:       ux.NewState(gear.Runtime.CmdName, gear.Runtime.Debug),
+			State:       ux.NewState(c.runtime.CmdName, c.runtime.Debug),
 		})
 
 
 		// @TODO - Add remote host capability here!
 		// Run server for SSHFS if required.
-		gear.State = gear.SetMountPath(mountPath)
-		if gear.State.IsOk() {
-			err = gear.Ssh.InitServer()
+		c.State = c.SetMountPath(mountPath)
+		if c.State.IsOk() {
+			err = c.Ssh.InitServer()
 			if err == nil {
 				//noinspection GoUnhandledErrorResult
-				go gear.Ssh.StartServer()
+				go c.Ssh.StartServer()
 
 				// GEARBOX_MOUNT_HOST=10.0.5.57
 				// GEARBOX_MOUNT_PATH=/Users/mick/.gearbox
@@ -74,17 +115,17 @@ func (gear *Gear) ContainerSsh(interactive bool, statusLine bool, mountPath stri
 				//	time.Sleep(time.Second)
 				//}
 
-				err = os.Setenv("GEARBOX_MOUNT_HOST", gear.Ssh.ServerAuth.Host)
-				err = os.Setenv("GEARBOX_MOUNT_PORT", gear.Ssh.ServerAuth.Port)
-				err = os.Setenv("GEARBOX_MOUNT_USER", gear.Ssh.ServerAuth.Username)
-				err = os.Setenv("GEARBOX_MOUNT_PASSWORD", gear.Ssh.ServerAuth.Password)
-				err = os.Setenv("GEARBOX_MOUNT_PATH", gear.Ssh.FsMount)
+				err = os.Setenv("GEARBOX_MOUNT_HOST", c.Ssh.ServerAuth.Host)
+				err = os.Setenv("GEARBOX_MOUNT_PORT", c.Ssh.ServerAuth.Port)
+				err = os.Setenv("GEARBOX_MOUNT_USER", c.Ssh.ServerAuth.Username)
+				err = os.Setenv("GEARBOX_MOUNT_PASSWORD", c.Ssh.ServerAuth.Password)
+				err = os.Setenv("GEARBOX_MOUNT_PATH", c.Ssh.FsMount)
 			}
 		}
 
 
 		// Process env
-		gear.State = gear.Ssh.GetEnv()
+		c.State = c.Ssh.GetEnv()
 		if err != nil {
 			break
 		}
@@ -92,36 +133,35 @@ func (gear *Gear) ContainerSsh(interactive bool, statusLine bool, mountPath stri
 
 		// Connect to container SSH - retry 5 times.
 		for i := 0; i < 5; i++ {
-			gear.State.ClearError()
-			err = gear.Ssh.Connect()
+			c.State.ClearError()
+			err = c.Ssh.Connect()
 			if err == nil {
 				break
 			}
 
 			switch v := err.(type) {
 				case *ssh.ExitError:
-					gear.State.SetExitCode(v.Waitmsg.ExitStatus())
+					c.State.SetExitCode(v.Waitmsg.ExitStatus())
 					if len(cmdArgs) == 0 {
-						gear.State.SetError("Command exited with error code %d", v.Waitmsg.ExitStatus())
+						c.State.SetError("Command exited with error code %d", v.Waitmsg.ExitStatus())
 					} else {
-						gear.State.SetError("Command '%s' exited with error code %d", cmdArgs[0], v.Waitmsg.ExitStatus())
+						c.State.SetError("Command '%s' exited with error code %d", cmdArgs[0], v.Waitmsg.ExitStatus())
 					}
 					i = 5
 					continue
 
 				default:
-					gear.State.SetError("SSH to Gear %s:%s failed.", gear.Container.Name, gear.Container.Version)
+					c.State.SetError("SSH to Gear %s:%s failed.", c.Name, c.Version)
 			}
 			time.Sleep(time.Second)
 		}
 	}
 
-	return gear.State
+	return c.State
 }
 
-
-func (gear *Gear) SetMountPath(mp string) *ux.State {
-	if state := gear.IsNil(); state.IsError() {
+func (c *Container) SetMountPath(mp string) *ux.State {
+	if state := c.IsNil(); state.IsError() {
 		return state
 	}
 
@@ -139,40 +179,47 @@ func (gear *Gear) SetMountPath(mp string) *ux.State {
 			case mp == DefaultPathCwd:
 				cwd, err = os.Getwd()
 				if err != nil {
-					gear.State.SetError(err)
+					c.State.SetError(err)
 					break
 				}
-				gear.State.SetOk()
-				gear.Ssh.FsMount = cwd
+				c.State.SetOk()
+				c.Ssh.FsMount = cwd
 
 			case mp == DefaultPathHome:
 				var u *user.User
 				u, err = user.Current()
 				if err != nil {
-					gear.State.SetError(err)
+					c.State.SetError(err)
 					break
 				}
-				gear.State.SetOk()
-				gear.Ssh.FsMount = u.HomeDir
+				c.State.SetOk()
+				c.Ssh.FsMount = u.HomeDir
 
 			default:
 				mp, err = filepath.Abs(mp)
 				if err != nil {
-					gear.State.SetError(err)
+					c.State.SetError(err)
 					break
 				}
-				gear.State.SetOk()
-				gear.Ssh.FsMount = mp
+				c.State.SetOk()
+				c.Ssh.FsMount = mp
 		}
 	}
 
-	return gear.State
+	return c.State
 }
 
-
-func (gear *Gear) AddMount(local string, remote string) bool {
-	if gear.Container.SshfsMounts == nil {
-		gear.Container.SshfsMounts = make(SshfsMounts)
+func (c *Container) AddMount(local string, remote string) bool {
+	if c.SshfsMounts == nil {
+		c.SshfsMounts = make(SshfsMounts)
 	}
-	return gear.Container.SshfsMounts.Add(local, remote)
+	return c.SshfsMounts.Add(local, remote)
+}
+
+func (c *Container) SetSshStatusLine(s bool) {
+	c.Ssh.StatusLine.Enable = s
+}
+
+func (c *Container) SetSshShell(s bool) {
+	c.Ssh.Shell = s
 }

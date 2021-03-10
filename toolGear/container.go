@@ -3,13 +3,14 @@ package toolGear
 import (
 	"fmt"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	//"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
+	"github.com/jedib0t/go-pretty/table"
 	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
+	"github.com/newclarity/scribeHelpers/toolGear/gearSsh"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -19,9 +20,11 @@ type Container struct {
 	ID           string
 	Name         string
 	Version      string
+	IsLatest     bool
 
 	VolumeMounts VolumeMounts
 	SshfsMounts  SshfsMounts
+	Ssh          *gearSsh.Ssh
 
 	Summary      types.Container
 	Details      *types.ContainerJSON
@@ -41,12 +44,14 @@ func NewContainer(runtime *toolRuntime.TypeRuntime) *Container {
 		ID:         "",
 		Name:       "",
 		Version:    "",
+		IsLatest:   false,
 
 		VolumeMounts: make(VolumeMounts),
 		SshfsMounts:  make(SshfsMounts),
+		Ssh:        nil,
 
 		Summary:    types.Container{},
-		Details:    nil,
+		Details:    &types.ContainerJSON{},
 		GearConfig: gearConfig.New(runtime),
 
 		Docker:    nil,
@@ -137,9 +142,15 @@ func (c *Container) Status() *ux.State {
 		//	break
 		//}
 
-		//containers := c.Docker.GetContainerById()
-		//
-		//c.Summary = containers[0]
+		c.Summary, c.State = c.Docker.GetContainerById(c.ID)
+		if c.State.IsNotOk() {
+			break
+		}
+
+		c.Details, c.State = c.Docker.ContainerInspect(c.ID)
+		if c.State.IsNotOk() {
+			break
+		}
 
 		c.GearConfig = c.GearConfig.EnsureNotNil()
 		c.State = c.GearConfig.ParseJson(c.Summary.Labels["gearbox.json"])
@@ -147,25 +158,23 @@ func (c *Container) Status() *ux.State {
 			break
 		}
 
-		if c.GearConfig.Meta.Organization != DefaultOrganization {
-			c.State.SetError("not a Gearbox container")
-			break
-		}
+		c.State.RunState = c.Summary.State
 
+		//if c.GearConfig.Meta.Organization != DefaultOrganization {
+		//	c.State.SetError("not a Gearbox container")
+		//	break
+		//}
+		//
 		//d := types.ContainerJSON{}
 		//d, err = c.Docker.Client.ContainerInspect(ctx, c.ID)
 		//if err != nil {
 		//	c.State.SetError("gear inspect error: %s", err)
 		//	break
 		//}
-
-		c.Details, c.State = c.Docker.ContainerInspect(c.ID)
-
-		c.State.SetRunState(c.Details.State.Status)
-	}
-
-	if c.State.IsError() {
-		c.Details = nil
+		//
+		//c.Details, c.State = c.Docker.ContainerInspect(c.ID)
+		//
+		//c.State.SetRunState(c.Details.State.Status)
 	}
 
 	return c.State
@@ -218,264 +227,19 @@ func (c *Container) Start() *ux.State {
 			break
 		}
 
-		c.State = c.Docker.ContainerStart(c.ID, types.ContainerStartOptions{})
-
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//err := c.Docker.Client.ContainerStart(ctx, c.ID, types.ContainerStartOptions{})
-		//if err != nil {
-		//	c.State.SetError("Gear '%s:%s' start error - %s", c.Name, c.Version, err)
-		//	break
-		//}
-
-		//statusCh, errCh := c._Parent.Client.ContainerWait(ctx, c.ID, "") // container.WaitConditionNotRunning
-		//select {
-		//	case err := <-errCh:
-		//		if err != nil {
-		//			c.State.SetError("Docker client error: %s", err)
-		//			// fmt.Printf("SC: %s\n", response.Error)
-		//			// return false, err
-		//		}
-		//		break
-		//
-		//	case status := <-statusCh:
-		//		fmt.Printf("status.StatusCode: %#+v\n", status.StatusCode)
-		//		break
-		//}
-		// fmt.Printf("SC: %s\n", status)
-		// fmt.Printf("SC: %s\n", err)
+		c.State = c.Docker.ContainerStart(c.ID, nil)
 
 		c.State = c.WaitForState(ux.StateRunning, DefaultTimeout)
 		if c.State.IsError() {
 			break
 		}
+
 		if !c.State.IsRunning() {
 			c.State.SetError("Gear '%s:%s' failed to start.", c.Name, c.Version)
 			break
 		}
-	}
 
-	return c.State
-}
-
-
-// Run a container
-// This first example shows how to run a container using the Docker API.
-// On the command line, you would use the docker run command, but this is just as easy to do from your own apps too.
-// This is the equivalent of typing docker run alpine echo hello world at the command prompt:
-func (c *Gears) ContainerCreate(gearName string, gearVersion string) *ux.State {
-	if state := c.IsNil(); state.IsError() {
-		return state
-	}
-
-	for range onlyOnce {
-		//if c.runtime.Debug {
-		//	fmt.Printf("DEBUG: ContainerCreate(%s, %s)\n", gearName, gearVersion)
-		//}
-
-		if gearName == "" {
-			c.State.SetError("empty gearname")
-			break
-		}
-
-		if gearVersion == "" {
-			gearVersion = "latest"
-		}
-
-		var ok bool
-		ok, c.State = c.FindContainer(gearName, gearVersion)
-		if c.State.IsError() {
-			break
-		}
-		if !ok {
-			// Find Gear image since we don't have a container.
-			for range onlyOnce {
-				ok, c.State = c.FindImage(gearName, gearVersion)
-				if c.State.IsError() {
-					ok = false
-					break
-				}
-				if ok {
-					break
-				}
-
-				ux.PrintflnNormal("Downloading Gear '%s:%s'.", gearName, gearVersion)
-
-				// Pull Gear image.
-				c.Selected.Image.ID = gearName
-				c.Selected.Image.Name = gearName
-				c.Selected.Image.Version = gearVersion
-				c.State = c.Selected.Image.Pull()
-				if c.State.IsError() {
-					c.State.SetError("no such gear '%s'", gearName)
-					break
-				}
-
-				// Confirm it's there.
-				ok, c.State = c.FindImage(gearName, gearVersion)
-				if c.State.IsError() {
-					ok = false
-					break
-				}
-			}
-			if !ok {
-				c.State.SetError("Cannot install Gear image '%s:%s' - %s.", gearName, gearVersion, c.State.GetError())
-				break
-			}
-			//c.State.Clear()
-		}
-
-		c.Selected.Container.ID = c.Selected.Image.ID
-		c.Selected.Container.Name = c.Selected.Image.Name
-		c.Selected.Container.Version = c.Selected.Image.Version
-
-		// c.Image.Details.Container = "gearboxworks/golang:1.14"
-		// tag := fmt.Sprintf("", c.Image.Name, c.Image.Version)
-		tag := fmt.Sprintf("gearboxworks/%s:%s", c.Selected.Image.Name, c.Selected.Image.Version)
-		gn := fmt.Sprintf("%s-%s", c.Selected.Image.Name, c.Selected.Image.Version)
-
-		var binds []string
-		for k, v := range c.Selected.Container.VolumeMounts {
-			binds = append(binds, fmt.Sprintf("%s:%s", k, v))
-		}
-
-		config := container.Config {
-			// Hostname:        "",
-			// Domainname:      "",
-			User:            "root",
-			// AttachStdin:     false,
-			AttachStdout:    true,
-			AttachStderr:    true,
-			ExposedPorts:    nil,
-			Tty:             false,
-			OpenStdin:       false,
-			StdinOnce:       false,
-			Env:             nil,
-			Cmd:             []string{"/init"},
-			// Healthcheck:     nil,
-			// ArgsEscaped:     false,
-			Image:           tag,
-			// Volumes:         nil,
-			// WorkingDir:      "",
-			// Entrypoint:      nil,
-			// NetworkDisabled: false,
-			// MacAddress:      "",
-			// OnBuild:         nil,
-			// Labels:          nil,
-			// StopSignal:      "",
-			// StopTimeout:     nil,
-			// Shell:           nil,
-		}
-
-		netConfig := network.NetworkingConfig {}
-
-		// DockerMount
-		// ms := mount.Mount {
-		// 	Type:          "bind",
-		// 	Source:        "/Users/mick/Documents/GitHub/containers/docker-golang",
-		// 	Target:        "/foo",
-		// 	ReadOnly:      false,
-		// 	Consistency:   "",
-		// 	BindOptions:   nil,
-		// 	VolumeOptions: nil,
-		// 	TmpfsOptions:  nil,
-		// }
-
-		hostConfig := container.HostConfig {
-			Binds:           binds,
-			ContainerIDFile: "",
-			LogConfig:       container.LogConfig{
-				Type:   "",
-				Config: nil,
-			},
-			NetworkMode:     DefaultNetwork,
-			PortBindings:    nil,						// @TODO
-			RestartPolicy:   container.RestartPolicy {
-				Name:              "",
-				MaximumRetryCount: 0,
-			},
-			AutoRemove:      false,
-			VolumeDriver:    "",
-			VolumesFrom:     nil,
-			CapAdd:          nil,
-			CapDrop:         nil,
-			//Capabilities:    nil,
-			//CgroupnsMode:    "",
-			DNS:             []string{},
-			DNSOptions:      []string{},
-			DNSSearch:       []string{},
-			ExtraHosts:      nil,
-			GroupAdd:        nil,
-			IpcMode:         "",
-			Cgroup:          "",
-			Links:           nil,
-			OomScoreAdj:     0,
-			PidMode:         "",
-			Privileged:      true,
-			PublishAllPorts: true,
-			ReadonlyRootfs:  false,
-			SecurityOpt:     nil,
-			StorageOpt:      nil,
-			Tmpfs:           nil,
-			UTSMode:         "",
-			UsernsMode:      "",
-			ShmSize:         0,
-			Sysctls:         nil,
-			Runtime:         "runc",
-			ConsoleSize:     [2]uint{},
-			Isolation:       "",
-			Resources:       container.Resources{},
-			Mounts:          []mount.Mount{},
-			//MaskedPaths:     nil,
-			//ReadonlyPaths:   nil,
-			Init:            nil,
-		}
-
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//var resp container.ContainerCreateCreatedBody
-		//var err error
-		//resp, err = c.Docker.Client.ContainerCreate(ctx, &config, &hostConfig, &netConfig, gn)
-		//if err != nil {
-		//	c.State.SetError("error creating gear: %s", err)
-		//	break
-		//}
-		//if resp.ID == "" {
-		//	break
-		//}
-
-		var resp container.ContainerCreateCreatedBody
-		resp, c.State = c.Docker.ContainerCreate(&config, &hostConfig, &netConfig, gn)
-
-		c.Selected.Container.ID = resp.ID
-		//c.Container.Name = c.Image.Name
-		//c.Container.Version = c.Image.Version
-
-		// var response Response
 		c.State = c.Status()
-		if c.State.IsError() {
-			break
-		}
-
-		if c.State.IsCreated() {
-			break
-		}
-
-		//if c.State.IsRunning() {
-		//	break
-		//}
-		//
-		//if c.State.IsPaused() {
-		//	break
-		//}
-		//
-		//if c.State.IsRestarting() {
-		//	break
-		//}
 	}
 
 	return c.State
@@ -491,16 +255,6 @@ func (c *Container) Stop() *ux.State {
 	}
 
 	for range onlyOnce {
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//err := c.Docker.Client.ContainerStop(ctx, c.ID, nil)
-		//if err != nil {
-		//	c.State.SetError("gear stop error: %s", err)
-		//	break
-		//}
-
 		c.State = c.Docker.ContainerStop(c.ID, nil)
 		if c.State.IsNotOk() {
 			break
@@ -527,19 +281,11 @@ func (c *Container) Remove() *ux.State {
 			RemoveLinks:   false,
 			Force:         false,
 		}
-		c.State = c.Docker.ContainerRemove(c.ID, options)
+		c.State = c.Docker.ContainerRemove(c.ID, &options)
+		if c.State.IsNotOk() {
+			break
+		}
 
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//err := c.Docker.Client.ContainerRemove(ctx, c.ID, options)
-		//if err != nil {
-		//	c.State.SetError("gear remove error: %s", err)
-		//	break
-		//}
-
-		//c.State = c.State()
 		c.State.SetOk("OK")
 	}
 
@@ -559,20 +305,10 @@ func (c *Container) Logs() *ux.State {
 	for range onlyOnce {
 		options := types.ContainerLogsOptions{ShowStdout: true}
 
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//// Replace this ID with a container that really exists
-		//out, err := c.Docker.Client.ContainerLogs(ctx, c.ID, options)
-		//if err != nil {
-		//	c.State.SetError("gear logs error: %s", err)
-		//	break
-		//}
-
 		c.State = c.Docker.ContainerLogs(c.ID, options)
-
-		//_, _ = io.Copy(os.Stdout, out)
+		if c.State.IsNotOk() {
+			break
+		}
 
 		c.State = c.Status()
 	}
@@ -654,7 +390,7 @@ type Port struct {
 	Name string
 	types.Port
 }
-type Ports map[uint16]Port
+type Ports map[uint16]*Port
 func (c *Container) GetPorts() (Ports) {
 	ports := make(Ports)
 
@@ -664,7 +400,7 @@ func (c *Container) GetPorts() (Ports) {
 		//}
 		var found bool
 		for _, p := range c.Summary.Ports {
-			ports[p.PrivatePort] = Port {
+			ports[p.PrivatePort] = &Port {
 				Name: "",
 				Port: p,
 			}
@@ -677,3 +413,99 @@ func (c *Container) GetPorts() (Ports) {
 
 	return ports
 }
+
+
+func (gear *Gear) ListContainerPorts() *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		//var err error
+		if gear.IsNotRunning() {
+			break
+		}
+
+		ux.PrintfCyan("Open ports for Container: %s-%s\n", gear.Container.Name, gear.Container.Version)
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{
+			"Container",
+			"Port Name",
+			"Host Port",
+			"Container Port",
+		})
+
+		ports, _ := gear.GetPorts()
+		for _, v := range ports {
+			if v.PrivatePort == 22 {
+				t.AppendRow([]interface{} {
+					ux.SprintfYellow("%s-%s\n", gear.Container.Name, gear.Container.Version),
+					ux.SprintfYellow("ssh"),
+					ux.SprintfYellow("%s:%d", v.IP, v.PublicPort),
+					ux.SprintfYellow("%d", v.PrivatePort),
+				})
+				continue
+			}
+
+			t.AppendRow([]interface{} {
+				ux.SprintfGreen("%s-%s\n", gear.Container.Name, gear.Container.Version),
+				ux.SprintfGreen(v.Name),
+				ux.SprintfGreen("%s:%d", v.IP, v.PublicPort),
+				ux.SprintfGreen("%d", v.PrivatePort),
+			})
+		}
+
+		count := t.Length()
+		if count == 0 {
+			ux.PrintfYellow("None found\n")
+			break
+		}
+
+		t.Render()
+		ux.PrintflnGreen("Ports found: %d", count)
+		ux.PrintflnBlue("")
+
+		gear.State.SetOk("")
+	}
+
+	return gear.State
+}
+
+
+func (gear *Gear) GetPorts() (Ports, *ux.State) {
+	ports := make(Ports)
+	if state := gear.IsNil(); state.IsError() {
+		return ports, state
+	}
+
+	for range onlyOnce {
+		ports = gear.Container.GetPorts()
+
+		//gcp := gear.gearConfig.Build.Ports
+		for _, p := range ports {
+			if p.PrivatePort == 22 {
+				p.Name = "ssh"
+				continue
+			}
+			if p.PrivatePort == 9970 {
+				p.Name = "gearbox"
+				continue
+			}
+
+			for k, v := range gear.GearConfig.Build.Ports {
+				if k == "" {
+					continue
+				}
+				i, _ := strconv.Atoi(v)
+				if uint16(i) == p.PrivatePort {
+					p.Name = k
+					break
+				}
+			}
+		}
+	}
+
+	return ports, gear.State
+}
+

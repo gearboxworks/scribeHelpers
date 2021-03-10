@@ -123,14 +123,14 @@ type TypeMatchContainer TypeMatchImage
 //}
 
 
-func (gear *Gear) SetSshStatusLine(s bool) {
-	gear.Ssh.StatusLine.Enable = s
-}
-
-
-func (gear *Gear) SetSshShell(s bool) {
-	gear.Ssh.Shell = s
-}
+//func (c *Container) SetSshStatusLine(s bool) {
+//	c.Ssh.StatusLine.Enable = s
+//}
+//
+//
+//func (c *Container) SetSshShell(s bool) {
+//	c.Ssh.Shell = s
+//}
 
 
 func (gear *Gear) AddVolume(local string, remote string) bool {
@@ -188,7 +188,7 @@ func (gears *Gears) ListContainers(name string) (*ux.State) {
 			break
 		}
 
-		ux.PrintfCyan("Gearbox containers: ")
+		ux.PrintfCyan("%s %ss: ", gears.Language.AppName, gears.Language.ContainerName)
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{
@@ -235,7 +235,12 @@ func (gears *Gears) ListContainers(name string) (*ux.State) {
 			var mounts string
 			for _, m := range gear.Container.GetMounts() {
 				// ms += fmt.Sprintf("%s(%s) host:%s => container:%s (RW:%v)\n", m.Name, m.Type, m.Source, m.Destination, m.RW)
-				mounts += fmt.Sprintf("host:%s\n\t=> container:%s (RW:%v)\n", m.Source, m.Destination, m.RW)
+				mounts += fmt.Sprintf("host:%s\n\t=> %s:%s (RW:%v)\n",
+					m.Source,
+					gears.Language.ContainerName,
+					m.Destination,
+					m.RW,
+					)
 			}
 
 			var ipAddress string

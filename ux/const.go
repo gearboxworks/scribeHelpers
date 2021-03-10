@@ -1,6 +1,7 @@
 package ux
 
 const (
+	StateUnknown = ""
 	StateRunning = "running"
 	StatePaused = "paused"
 	StateCreated = "created"

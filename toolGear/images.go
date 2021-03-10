@@ -18,7 +18,7 @@ func (gears *Gears) GetImages(name string) (*ux.State) {
 	}
 
 	for range onlyOnce {
-		gears.State = gears.Docker.ImageList(types.ImageListOptions{All: true})
+		gears.State = gears.Docker.ImageList(&types.ImageListOptions{All: true})
 		if gears.State.IsNotOk() {
 			break
 		}
@@ -30,6 +30,7 @@ func (gears *Gears) GetImages(name string) (*ux.State) {
 
 			gear := NewGear(gears.Runtime)
 			gear.Docker = gears.Docker
+
 			gears.State = gear.GearConfig.ParseJson(c.Labels["gearbox.json"])
 			if gears.State.IsError() {
 				continue
@@ -56,8 +57,9 @@ func (gears *Gears) GetImages(name string) (*ux.State) {
 			gear.Image.ID = c.ID
 			gear.Image.Name = gear.GearConfig.GetName()
 			gear.Image.Version = c.Labels["gearbox.version"]
-			gear.Image.Summary = &c
+			gear.Image.Summary = c
 			gear.Image.Docker = gear.Docker
+			gear.Container.Docker = gear.Docker
 			gear.Image.GearConfig = gear.GearConfig
 			gear.Image.Details, _ = gear.Docker.ImageInspectWithRaw(c.ID)
 
@@ -69,15 +71,15 @@ func (gears *Gears) GetImages(name string) (*ux.State) {
 }
 
 
-func (gear *Gears) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
+func (gears *Gears) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
 	var ok bool
-	if state := gear.IsNil(); state.IsError() {
+	if state := gears.IsNil(); state.IsError() {
 		return false, state
 	}
 
 	for range onlyOnce {
 		if gearName == "" {
-			gear.State.SetError("empty gear name")
+			gears.State.SetError("empty gear name")
 			break
 		}
 
@@ -85,78 +87,94 @@ func (gear *Gears) FindImage(gearName string, gearVersion string) (bool, *ux.Sta
 			gearVersion = "latest"
 		}
 
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//images, err := gear.ImageList(ctx, types.ImageListOptions{All: true})
-		//if err != nil {
-		//	gear.State.SetError("gear image list error: %s", err)
-		//	break
-		//}
-
-		gear.State = gear.Docker.ImageList(types.ImageListOptions{})
-		if gear.State.IsNotOk() {
-			break
-		}
-		if len(gear.Docker.Images) == 0 {
-			break
-		}
-
-		// Start out with "not found". Will be cleared if found or error occurs.
-		gear.State.SetWarning("Gear image '%s:%s' doesn't exist.", gearName, gearVersion)
-		for _, i := range gear.Docker.Images {
-			//var gc *gearConfig.GearConfig
-			ok, gear.Selected.GearConfig = MatchImage(&i,
+		for _, i := range gears.Array {
+			ok, _ = MatchImage(&i.Image.Summary,
 				TypeMatchImage{Organization: DefaultOrganization, Name: gearName, Version: gearVersion})
-			if !ok {
-				continue
+			if ok {
+				gears.Selected = i
+				break
 			}
-
-			gear.Selected.Image.Name = gearName
-			gear.Selected.Image.Version = gearVersion
-			//gear.Selected.Image.GearConfig = gc
-			gear.Selected.Image.Summary = &i
-			gear.Selected.Image.ID = i.ID
-			gear.Selected.Image.State = gear.Selected.Image.State.EnsureNotNil()
-			//gear.Image.client = gear.DockerClient
-			ok = true
-			gear.State.SetOk("Found Gear image '%s:%s'.", gearName, gearVersion)
-			break
 		}
 
-		if gear.State.IsNotOk() {
-			if !ok {
-				gear.State.ClearError()
-			}
-			break
+		if !ok {
+			gears.State.SetWarning("Container image '%s:%s' doesn't exist.", gearName, gearVersion)
 		}
 
-		if gear.Selected.Image.Summary == nil {
-			break
-		}
-
-		//ctx2, cancel2 := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel2()
-		//gear.Image.Details, _, err = gear.Docker.Client.ImageInspectWithRaw(ctx2, gear.Image.ID)
-		//if err != nil {
-		//	gear.State.SetError("error inspecting gear: %s", err)
-		//	break
-		//}
-
-		gear.Selected.Image.Details, gear.State = gear.Docker.ImageInspectWithRaw(gear.Selected.Image.ID)
-
-		gear.State.SetOk("found image")
+		gears.State.SetOk("found image")
 	}
 
-	return ok, gear.State
+	return ok, gears.State
 }
+
+//func (gear *Gears) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
+//	var ok bool
+//	if state := gear.IsNil(); state.IsError() {
+//		return false, state
+//	}
+//
+//	for range onlyOnce {
+//		if gearName == "" {
+//			gear.State.SetError("empty gear name")
+//			break
+//		}
+//
+//		if gearVersion == "" {
+//			gearVersion = "latest"
+//		}
+//
+//		gear.State = gear.Docker.ImageList(types.ImageListOptions{})
+//		if gear.State.IsNotOk() {
+//			break
+//		}
+//		if len(gear.Docker.Images) == 0 {
+//			break
+//		}
+//
+//		// Start out with "not found". Will be cleared if found or error occurs.
+//		gear.State.SetWarning("Gear image '%s:%s' doesn't exist.", gearName, gearVersion)
+//		for _, i := range gear.Docker.Images {
+//			//var gc *gearConfig.GearConfig
+//			ok, gear.Selected.GearConfig = MatchImage(&i,
+//				TypeMatchImage{Organization: DefaultOrganization, Name: gearName, Version: gearVersion})
+//			if !ok {
+//				continue
+//			}
+//
+//			gear.Selected.Image.Name = gearName
+//			gear.Selected.Image.Version = gearVersion
+//			//gear.Selected.Image.GearConfig = gc
+//			gear.Selected.Image.Summary = i
+//			gear.Selected.Image.ID = i.ID
+//			gear.Selected.Image.State = gear.Selected.Image.State.EnsureNotNil()
+//			//gear.Image.client = gear.DockerClient
+//			ok = true
+//			gear.State.SetOk("Found Gear image '%s:%s'.", gearName, gearVersion)
+//			break
+//		}
+//
+//		if gear.State.IsNotOk() {
+//			if !ok {
+//				gear.State.ClearError()
+//			}
+//			break
+//		}
+//
+//		if gear.Selected.Image.Summary.ID == "" {
+//			break
+//		}
+//
+//		gear.Selected.Image.Details, gear.State = gear.Docker.ImageInspectWithRaw(gear.Selected.Image.ID)
+//
+//		gear.State.SetOk("found image")
+//	}
+//
+//	return ok, gear.State
+//}
 
 
 // Search for an image in remote registry.
-func (gear *Gears) Search(gearName string, gearVersion string) *ux.State {
-	if state := gear.IsNil(); state.IsError() {
+func (gears *Gears) Search(gearName string, gearVersion string) *ux.State {
+	if state := gears.IsNil(); state.IsError() {
 		return state
 	}
 
@@ -180,7 +198,7 @@ func (gear *Gears) Search(gearName string, gearVersion string) *ux.State {
 		//	break
 		//}
 		var resp []registry.SearchResult
-		resp, gear.State = gear.Docker.ImageSearch(repo, types.ImageSearchOptions{})
+		resp, gears.State = gears.Docker.ImageSearch(repo, nil)
 
 		for _, v := range resp {
 			if !strings.HasPrefix(v.Name, "gearboxworks/") {
@@ -190,11 +208,10 @@ func (gear *Gears) Search(gearName string, gearVersion string) *ux.State {
 		}
 	}
 
-	return gear.State
+	return gears.State
 }
 
 
-//func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVersion string) (bool, *gearConfig.GearConfig) {
 func MatchImage(m *types.ImageSummary, match TypeMatchImage) (bool, *gearConfig.GearConfig) {
 	var ok bool
 	gc := gearConfig.New(nil)

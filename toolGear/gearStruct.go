@@ -2,10 +2,8 @@ package toolGear
 
 import (
 	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
-	"github.com/newclarity/scribeHelpers/toolGear/gearSsh"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
-	"strings"
 )
 //"github.com/docker/docker/integration-cli/cli"
 // DOCKER_HOST=tcp://macpro:2375
@@ -15,10 +13,8 @@ type Gear struct {
 	Repo         *GitHubRepo
 	GearConfig   *gearConfig.GearConfig
 
-	//Docker       *TypeDockerGear
 	Image        *Image
 	Container    *Container
-	Ssh          *gearSsh.Ssh
 
 	Docker		 *Docker
 
@@ -26,6 +22,7 @@ type Gear struct {
 	State        *ux.State
 }
 type Gears struct {
+	Language    Language
 	Array		map[string]*Gear
 	Selected    *Gear
 
@@ -33,6 +30,11 @@ type Gears struct {
 
 	Runtime     *toolRuntime.TypeRuntime
 	State       *ux.State
+}
+type Language struct {
+	AppName string
+	ImageName string
+	ContainerName string
 }
 
 
@@ -47,7 +49,6 @@ func NewGear(runtime *toolRuntime.TypeRuntime) *Gear {
 			GearConfig: gearConfig.New(runtime),
 			Image:      NewImage(runtime),
 			Container:  NewContainer(runtime),
-			Ssh:        nil,
 
 			Docker:     nil,
 
@@ -84,7 +85,14 @@ func NewGears(runtime *toolRuntime.TypeRuntime) Gears {
 	for range onlyOnce {
 		runtime = runtime.EnsureNotNil()
 
+		l := Language {
+			AppName:       "Gearbox",
+			ImageName:     "Gear Image",
+			ContainerName: "Gear",
+		}
+
 		gears = Gears {
+			Language:   l,
 			Array:      make(map[string]*Gear),
 			Selected:   nil,
 
@@ -95,6 +103,11 @@ func NewGears(runtime *toolRuntime.TypeRuntime) Gears {
 		}
 		gears.State.SetPackage("")
 		gears.State.SetFunctionCaller()
+
+		gears.State = gears.Get()
+		if gears.State.IsNotOk() {
+			break
+		}
 	}
 
 	return gears
@@ -125,6 +138,23 @@ func (gears *Gears) IsNil() *ux.State {
 
 	for range onlyOnce {
 		gears.State = gears.State.EnsureNotNil()
+	}
+
+	return gears.State
+}
+
+
+func (gears *Gears) SetLanguage(appName string, imageName string, containerName string) *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gears.Language = Language {
+			AppName:       appName,
+			ImageName:     imageName,
+			ContainerName: containerName,
+		}
 	}
 
 	return gears.State
@@ -172,59 +202,248 @@ func (gear *Gear) IsValid() *ux.State {
 }
 
 
+func (gear *Gear) IsRunning() bool {
+	var ok bool
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return ok
+	}
+
+	for range onlyOnce {
+		switch gear.Container.Summary.State {
+			case ux.StateUnknown:
+				//
+			case ux.StateRunning:
+				ok = true
+			case ux.StatePaused:
+				//
+			case ux.StateCreated:
+				//
+			case ux.StateRestarting:
+				//
+			case ux.StateRemoving:
+				//
+			case ux.StateExited:
+				//
+			case ux.StateDead:
+				//
+		}
+	}
+
+	return ok
+}
+func (gear *Gear) IsNotRunning() bool {
+	return !gear.IsRunning()
+}
+
+func (gear *Gear) IsCreated() bool {
+	var ok bool
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return ok
+	}
+
+	for range onlyOnce {
+		switch gear.Container.Summary.State {
+			case ux.StateUnknown:
+				//
+			case ux.StateRunning:
+				ok = true
+			case ux.StatePaused:
+				ok = true
+			case ux.StateCreated:
+				ok = true
+			case ux.StateRestarting:
+				ok = true
+			case ux.StateRemoving:
+				//
+			case ux.StateExited:
+				ok = true
+			case ux.StateDead:
+				ok = true
+		}
+	}
+
+	return ok
+}
+func (gear *Gear) IsNotCreated() bool {
+	return !gear.IsCreated()
+}
+
+func (gear *Gear) IsStopped() bool {
+	var ok bool
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return ok
+	}
+
+	for range onlyOnce {
+		switch gear.Container.Summary.State {
+			case ux.StateUnknown:
+				//
+			case ux.StateRunning:
+				//
+			case ux.StatePaused:
+				//
+			case ux.StateCreated:
+				//
+			case ux.StateRestarting:
+				//
+			case ux.StateRemoving:
+				//
+			case ux.StateExited:
+				ok = true
+			case ux.StateDead:
+				//
+		}
+	}
+
+	return ok
+}
+func (gear *Gear) IsNotStopped() bool {
+	return !gear.IsStopped()
+}
+
+//func (gear *Gear) IsNotRunning() bool {
+//	var ok bool
+//	if state := ux.IfNilReturnError(gear); state.IsError() {
+//		return ok
+//	}
+//
+//	for range onlyOnce {
+//		switch gear.Container.Summary.State {
+//			case ux.StateUnknown:
+//				//
+//			case ux.StateRunning:
+//				//
+//			case ux.StatePaused:
+//				//
+//			case ux.StateCreated:
+//				//
+//			case ux.StateRestarting:
+//				//
+//			case ux.StateRemoving:
+//				//
+//			case ux.StateExited:
+//				//
+//			case ux.StateDead:
+//				//
+//		}
+//	}
+//
+//	return ok
+//}
+//func (gear *Gear) IsNotRunning() bool {
+//	return !gear.IsRunning()
+//}
+
+
 func (gear *Gear) Status() *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
 
-	for range onlyOnce {
-		//var found bool
+	//for range onlyOnce {
+	//	//var found bool
+	//
+	//	//found, gear.State = gear.FindContainer(gear.GearConfig.Meta.Name)
+	//	//found, gear.State = gear.FindImage()
+	//	gear.State = gear.Image.Status()
+	//
+	//	//gear.Image.Name = name
+	//	//gear.Image.Version = version
+	//	//gear.Image.Status()
+	//	//
+	//	//gear.Container.Name = name
+	//	//gear.Container.Version = version
+	//	//gear.Container.Status()
+	//
+	//	gear.State = gear.Container.Status()
+	//	//gear.State = gear.Docker.Status()
+	//	if gear.State.IsError() {
+	//		break
+	//	}
+	//
+	//	if gear.Image.GearConfig != nil {
+	//		gear.GearConfig = gear.Image.GearConfig
+	//	}
+	//	if gear.Container.GearConfig != nil {
+	//		gear.GearConfig = gear.Container.GearConfig
+	//	}
+	//
+	//	if gear.Image.ID == "" {
+	//		gear.Image.ID = strings.TrimPrefix(gear.Container.Details.Image, "sha256:")
+	//		gear.Image.Name = gear.Container.Name
+	//		gear.Image.Version = gear.Container.Version
+	//	}
+	//
+	//	state2 := gear.Image.Status()
+	//	if state2.IsError() {
+	//		break
+	//	}
+	//
+	//	//state = runState
+	//
+	//	//state = gear.Docker.Image.State()
+	//	//if state.IsError() {
+	//	//	break
+	//	//}
+	//}
 
-		//found, gear.State = gear.FindContainer(gear.GearConfig.Meta.Name)
-		//found, gear.State = gear.FindImage()
-		gear.State = gear.Image.Status()
-
-		//gear.Image.Name = name
-		//gear.Image.Version = version
-		//gear.Image.Status()
-		//
-		//gear.Container.Name = name
-		//gear.Container.Version = version
-		//gear.Container.Status()
-
-		gear.State = gear.Container.Status()
-		//gear.State = gear.Docker.Status()
-		if gear.State.IsError() {
-			break
-		}
-
-		if gear.Image.GearConfig != nil {
-			gear.GearConfig = gear.Image.GearConfig
-		}
-		if gear.Container.GearConfig != nil {
-			gear.GearConfig = gear.Container.GearConfig
-		}
-
-		if gear.Image.ID == "" {
-			gear.Image.ID = strings.TrimPrefix(gear.Container.Details.Image, "sha256:")
-			gear.Image.Name = gear.Container.Name
-			gear.Image.Version = gear.Container.Version
-		}
-
-		state2 := gear.Image.Status()
-		if state2.IsError() {
-			break
-		}
-
-		//state = runState
-
-		//state = gear.Docker.Image.State()
-		//if state.IsError() {
-		//	break
-		//}
-	}
+	gear.State = gear.Container.Status()
 
 	return gear.State
+}
+
+
+func (gear *Gear) Start() *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+	return gear.Container.Start()
+}
+
+func (gear *Gear) Stop() *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+	return gear.Container.Stop()
+}
+
+func (gear *Gear) Remove() *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+	return gear.Container.Remove()
+}
+
+func (gear *Gear) GetCommand(cmd []string) []string {
+	return gear.GearConfig.GetCommand(cmd)
+}
+
+//func (gear *Gear) Create() *ux.State {
+//	if state := gear.IsNil(); state.IsError() {
+//		return state
+//	}
+//	return gear.Container.Create()
+//}
+
+
+func (gears *Gears) Get() *ux.State {
+	if state := gears.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gears.State = gears.GetImages("")
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		gears.State = gears.GetContainers("")
+		if gears.State.IsNotOk() {
+			break
+		}
+	}
+
+	return gears.State
 }
 
 
@@ -328,12 +547,7 @@ func (gear *Gear) ListLinks(version string) *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
-
-	for range onlyOnce {
-		gear.State = gear.GearConfig.ListLinks(version)
-	}
-
-	return gear.State
+	return gear.GearConfig.ListLinks(gear.Container.Version)
 }
 
 

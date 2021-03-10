@@ -4,26 +4,26 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
 	"github.com/jedib0t/go-pretty/table"
-	//"launch/defaults"
 	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 )
 
+
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
-func (gear *Gears) NetworkList(name string) *ux.State {
-	if state := gear.IsNil(); state.IsError() {
+func (gears *Gears) NetworkList(name string) *ux.State {
+	if state := gears.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
-		gear.State = gear.Docker.NetworkList(name)
-		if gear.State.IsNotOk() {
+		gears.State = gears.Docker.NetworkList(name)
+		if gears.State.IsNotOk() {
 			break
 		}
 
-		ux.PrintflnCyan("\nConfigured Gearbox networks:")
+		ux.PrintflnCyan("\nConfigured %s networks:", gears.Language.AppName)
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{
@@ -32,7 +32,7 @@ func (gear *Gears) NetworkList(name string) *ux.State {
 			"Subnet",
 		})
 
-		for _, c := range gear.Docker.Networks {
+		for _, c := range gears.Docker.Networks {
 			n := ""
 			if len(c.IPAM.Config) > 0 {
 				n = c.IPAM.Config[0].Subnet
@@ -48,18 +48,18 @@ func (gear *Gears) NetworkList(name string) *ux.State {
 		t.Render()
 	}
 
-	return gear.State
+	return gears.State
 }
 
 
-func (gear *Gears) FindNetwork(name string) *ux.State {
-	if state := gear.IsNil(); state.IsError() {
+func (gears *Gears) FindNetwork(name string) *ux.State {
+	if state := gears.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
 		if name == "" {
-			gear.State.SetError("empty container name")
+			gears.State.SetError("empty %s name", gears.Language.ContainerName)
 			break
 		}
 
@@ -76,34 +76,34 @@ func (gear *Gears) FindNetwork(name string) *ux.State {
 		//	break
 		//}
 
-		gear.State = gear.Docker.NetworkList(name)
-		if gear.State.IsNotOk() {
+		gears.State = gears.Docker.NetworkList(name)
+		if gears.State.IsNotOk() {
 			break
 		}
 
-		for _, c := range gear.Docker.Networks {
+		for _, c := range gears.Docker.Networks {
 			if c.Name == name {
-				gear.State.SetOk("found")
+				gears.State.SetOk("found")
 				break
 			}
 		}
 	}
 
-	return gear.State
+	return gears.State
 }
 
 
-func (gear *Gears) NetworkCreate(netName string) *ux.State {
-	if state := gear.IsNil(); state.IsError() {
+func (gears *Gears) NetworkCreate(netName string) *ux.State {
+	if state := gears.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
-		gear.State = gear.FindNetwork(netName)
-		if gear.State.IsError() {
+		gears.State = gears.FindNetwork(netName)
+		if gears.State.IsError() {
 			break
 		}
-		if gear.State.IsOk() {
+		if gears.State.IsOk() {
 			break
 		}
 
@@ -131,23 +131,8 @@ func (gear *Gears) NetworkCreate(netName string) *ux.State {
 			Labels:         nil,
 		}
 
-		gear.State = gear.Docker.NetworkCreate(netName, options)
-
-		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		////noinspection GoDeferInLoop
-		//defer cancel()
-		//
-		//resp, err := gear.Docker.Client.NetworkCreate(ctx, netName, netConfig)
-		//gear.State.SetError(err)
-		//if gear.State.IsError() {
-		//	break
-		//}
-		//
-		//if resp.ID == "" {
-		//	gear.State.SetError("cannot create network")
-		//	break
-		//}
+		gears.State = gears.Docker.NetworkCreate(netName, options)
 	}
 
-	return gear.State
+	return gears.State
 }

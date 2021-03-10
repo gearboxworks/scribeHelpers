@@ -34,11 +34,15 @@ func (gm *GearMeta) String() string {
 
 
 type GearBuild struct {
+	FixedPorts   GearPorts    `json:"fixed_ports"`
 	Ports        GearPorts    `json:"ports"`
+	Workdir      string       `json:"workdir"`		//
 	Run          string       `json:"run"`		//
 	Args         GearArgs     `json:"args"`		//
 	Env          GearEnv      `json:"env"`
 	Network      string       `json:"network"`
+	Volumes      string       `json:"volumes"`
+	Restart      string       `json:"restart"`
 }
 
 func (b *GearBuild) String() string {

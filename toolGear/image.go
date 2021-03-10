@@ -17,11 +17,12 @@ import (
 )
 
 type Image struct {
+	Language   *Language
 	ID         string
 	Name       string
 	Version    string
 
-	Summary    *types.ImageSummary
+	Summary    types.ImageSummary
 	Details    types.ImageInspect
 	GearConfig *gearConfig.GearConfig
 
@@ -39,7 +40,7 @@ func NewImage(runtime *toolRuntime.TypeRuntime) *Image {
 		ID:         "",
 		Name:       "",
 		Version:    "",
-		Summary:    nil,
+		Summary:    types.ImageSummary{},
 		Details:    types.ImageInspect{},
 		GearConfig: gearConfig.New(runtime),
 		Docker:    nil,
@@ -109,7 +110,7 @@ func (i *Image) Status() *ux.State {
 	}
 
 	for range onlyOnce {
-		if i.Summary == nil {
+		if i.Summary.ID == "" {
 			ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 			//noinspection GoDeferInLoop
 			defer cancel()
@@ -130,7 +131,7 @@ func (i *Image) Status() *ux.State {
 				break
 			}
 
-			i.Summary = &images[0]
+			i.Summary = images[0]
 			i.Summary.ID = i.ID
 
 			d := types.ImageInspect{}
@@ -152,13 +153,9 @@ func (i *Image) Status() *ux.State {
 		}
 
 		if i.GearConfig.Meta.Organization != DefaultOrganization {
-			i.State.SetError("not a Gearbox container")
+			i.State.SetError("not a valid image")
 			break
 		}
-	}
-
-	if i.State.IsError() {
-		i.Summary = nil
 	}
 
 	return i.State
@@ -254,6 +251,7 @@ func (i *Image) Pull() *ux.State {
 	return i.State
 }
 
+
 type PullEvent struct {
 	Status         string `json:"status"`
 	Error          string `json:"error"`
@@ -314,22 +312,27 @@ func (i *Image) Remove() *ux.State {
 	}
 
 	for range onlyOnce {
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
-		//noinspection GoDeferInLoop
-		defer cancel()
+		//options := types.ImageRemoveOptions {
+		//	Force:         true,
+		//	PruneChildren: true,
+		//}
+		//
+		//ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		////noinspection GoDeferInLoop
+		//defer cancel()
+		//
+		//_, err := i.Docker.Client.ImageRemove(ctx, i.ID, options)
+		//if err != nil {
+		//	i.State.SetError("error removing gear: %s", err)
+		//	break
+		//}
 
-		options := types.ImageRemoveOptions {
-			Force:         true,
-			PruneChildren: true,
-		}
-
-		_, err := i.Docker.Client.ImageRemove(ctx, i.ID, options)
-		if err != nil {
-			i.State.SetError("error removing gear: %s", err)
+		i.State = i.Docker.ImageRemove(i.ID, nil)
+		if i.State.IsNotOk() {
 			break
 		}
 
-		i.State.SetOk("removed gear i %s:%s", i.Name, i.Version)
+		i.State.SetOk("removed image i %s:%s", i.Name, i.Version)
 	}
 
 	return i.State

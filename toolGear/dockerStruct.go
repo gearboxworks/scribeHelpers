@@ -115,10 +115,10 @@ func (d *Docker) IsNil() *ux.State {
 }
 
 
-func (d *Docker) GetContainerById(containerID string) ([]types.Container, *ux.State) {
-	var containers []types.Container
+func (d *Docker) GetContainerById(containerID string) (types.Container, *ux.State) {
+	var container types.Container
 	if state := d.IsNil(); state.IsError() {
-		return containers, state
+		return container, state
 	}
 
 	for range onlyOnce {
@@ -129,8 +129,7 @@ func (d *Docker) GetContainerById(containerID string) ([]types.Container, *ux.St
 		//noinspection GoDeferInLoop
 		defer cancel()
 
-		var err error
-		containers, err = d.Client.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: df})
+		containers, err := d.Client.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: df})
 		if err != nil {
 			d.State.SetError("gear list error: %s", err)
 			break
@@ -139,6 +138,7 @@ func (d *Docker) GetContainerById(containerID string) ([]types.Container, *ux.St
 			d.State.SetWarning("no gears found")
 			break
 		}
+		container = containers[0]
 
 		//c.Summary = &containers[0]
 		//
@@ -164,12 +164,7 @@ func (d *Docker) GetContainerById(containerID string) ([]types.Container, *ux.St
 		//c.State.SetRunState(c.Details.State.Status)
 	}
 
-	//if c.State.IsError() {
-	//	c.Summary = nil
-	//	c.Details = nil
-	//}
-
-	return containers, d.State
+	return container, d.State
 }
 
 
@@ -198,6 +193,7 @@ func (d *Docker) ContainerList(force bool) (*ux.State) {
 			d.State.SetError("container list error: %s", err)
 			break
 		}
+
 		if len(d.Containers) == 0 {
 			d.State.SetWarning("no containers found")
 			break
@@ -208,7 +204,7 @@ func (d *Docker) ContainerList(force bool) (*ux.State) {
 }
 
 
-func (d *Docker) ContainerStart(containerID string, options types.ContainerStartOptions) (*ux.State) {
+func (d *Docker) ContainerStart(containerID string, options *types.ContainerStartOptions) (*ux.State) {
 	if state := d.IsNil(); state.IsError() {
 		return state
 	}
@@ -277,7 +273,7 @@ func (d *Docker) ContainerStop(containerID string, timeout *time.Duration) (*ux.
 }
 
 
-func (d *Docker) ContainerRemove(containerID string, options types.ContainerRemoveOptions) (*ux.State) {
+func (d *Docker) ContainerRemove(containerID string, options *types.ContainerRemoveOptions) (*ux.State) {
 	if state := d.IsNil(); state.IsError() {
 		return state
 	}
@@ -292,7 +288,7 @@ func (d *Docker) ContainerRemove(containerID string, options types.ContainerRemo
 		//noinspection GoDeferInLoop
 		defer cancel()
 
-		err := d.Client.ContainerRemove(ctx, containerID, options)
+		err := d.Client.ContainerRemove(ctx, containerID, *options)
 		if err != nil {
 			d.State.SetError("container remove error: %s", err)
 			break
@@ -433,7 +429,7 @@ func (d *Docker) ContainerCreate(config *container.Config, hostConfig *container
 		//noinspection GoDeferInLoop
 		defer cancel()
 
-		var resp container.ContainerCreateCreatedBody
+		//var resp container.ContainerCreateCreatedBody
 		var err error
 		resp, err = d.Client.ContainerCreate(ctx, config, hostConfig, netConfig, containerName)
 		if err != nil {
@@ -453,7 +449,7 @@ func (d *Docker) ContainerCreate(config *container.Config, hostConfig *container
 }
 
 
-func (d *Docker) ImageList(options types.ImageListOptions) (*ux.State) {
+func (d *Docker) ImageList(options *types.ImageListOptions) (*ux.State) {
 	if state := d.IsNil(); state.IsError() {
 		return state
 	}
@@ -468,7 +464,12 @@ func (d *Docker) ImageList(options types.ImageListOptions) (*ux.State) {
 
 		d.Images, err = d.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
 		if err != nil {
-			d.State.SetError("container image list error: %s", err)
+			d.State.SetError("image list error: %s", err)
+			break
+		}
+
+		if len(d.Images) == 0 {
+			d.State.SetWarning("no images found")
 			break
 		}
 
@@ -505,7 +506,7 @@ func (d *Docker) ImageInspectWithRaw(imageID string) (types.ImageInspect, *ux.St
 }
 
 
-func (d *Docker) ImageSearch(repo string, options types.ImageSearchOptions) ([]registry.SearchResult, *ux.State) {
+func (d *Docker) ImageSearch(repo string, options *types.ImageSearchOptions) ([]registry.SearchResult, *ux.State) {
 	var resp []registry.SearchResult
 	if state := d.IsNil(); state.IsError() {
 		return resp, state
@@ -521,9 +522,9 @@ func (d *Docker) ImageSearch(repo string, options types.ImageSearchOptions) ([]r
 
 		df := filters.NewArgs()
 		//df.Add("name", "terminus")
-		options = types.ImageSearchOptions{Filters: df, Limit: 100}
+		options = &types.ImageSearchOptions{Filters: df, Limit: 100}
 
-		resp, err = d.Client.ImageSearch(ctx, repo, options)
+		resp, err = d.Client.ImageSearch(ctx, repo, *options)
 		if err != nil {
 			d.State.SetError("gear image search error: %s", err)
 			break
@@ -588,6 +589,36 @@ func (d *Docker) NetworkCreate(name string, options types.NetworkCreate) (*ux.St
 
 		if resp.ID == "" {
 			d.State.SetError("cannot create network")
+			break
+		}
+
+		d.State.SetOk()
+	}
+
+	return d.State
+}
+
+
+func (d *Docker) ImageRemove(imageID string, options *types.ImageRemoveOptions) (*ux.State) {
+	if state := d.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		var err error
+
+		options := types.ImageRemoveOptions {
+			Force:         true,
+			PruneChildren: true,
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		//noinspection GoDeferInLoop
+		defer cancel()
+
+		_, err = d.Client.ImageRemove(ctx, imageID, options)
+		if err != nil {
+			d.State.SetError("error removing: %s", err)
 			break
 		}
 
