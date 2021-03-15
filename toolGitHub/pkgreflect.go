@@ -5,6 +5,8 @@ package toolGitHub
 import "reflect"
 
 var Types = map[string]reflect.Type{
+	"State": reflect.TypeOf((*State)(nil)).Elem(),
+	"ToolGitHub": reflect.TypeOf((*ToolGitHub)(nil)).Elem(),
 	"TypeGetRepositories": reflect.TypeOf((*TypeGetRepositories)(nil)).Elem(),
 	"TypeGetRepository": reflect.TypeOf((*TypeGetRepository)(nil)).Elem(),
 	"TypeGitHub": reflect.TypeOf((*TypeGitHub)(nil)).Elem(),
@@ -12,6 +14,8 @@ var Types = map[string]reflect.Type{
 
 var Functions = map[string]reflect.Value{
 	"New": reflect.ValueOf(New),
+	"ReflectState": reflect.ValueOf(ReflectState),
+	"ReflectToolGitHub": reflect.ValueOf(ReflectToolGitHub),
 	"ToolGitHubGetBranch": reflect.ValueOf(ToolGitHubGetBranch),
 	"ToolGitHubGetOrganization": reflect.ValueOf(ToolGitHubGetOrganization),
 	"ToolGitHubLogin": reflect.ValueOf(ToolGitHubLogin),

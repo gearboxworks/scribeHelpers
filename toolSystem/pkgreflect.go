@@ -25,6 +25,7 @@ var Functions = map[string]reflect.Value{
 	"NewProcess": reflect.ValueOf(NewProcess),
 	"NewProcesses": reflect.ValueOf(NewProcesses),
 	"PrintEnv": reflect.ValueOf(PrintEnv),
+	"ReflectState": reflect.ValueOf(ReflectState),
 	"ReflectToolProcess": reflect.ValueOf(ReflectToolProcess),
 	"ReflectToolSystem": reflect.ValueOf(ReflectToolSystem),
 	"ToolFindProcByName": reflect.ValueOf(ToolFindProcByName),

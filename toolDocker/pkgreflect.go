@@ -7,9 +7,11 @@ import "reflect"
 var Types = map[string]reflect.Type{
 	"Container": reflect.TypeOf((*Container)(nil)).Elem(),
 	"Containers": reflect.TypeOf((*Containers)(nil)).Elem(),
-	"TypeDocker": reflect.TypeOf((*TypeDocker)(nil)).Elem(),
 	"Image": reflect.TypeOf((*Image)(nil)).Elem(),
 	"PullEvent": reflect.TypeOf((*PullEvent)(nil)).Elem(),
+	"State": reflect.TypeOf((*State)(nil)).Elem(),
+	"ToolDocker": reflect.TypeOf((*ToolDocker)(nil)).Elem(),
+	"TypeDocker": reflect.TypeOf((*TypeDocker)(nil)).Elem(),
 	"TypeMatchContainer": reflect.TypeOf((*TypeMatchContainer)(nil)).Elem(),
 	"TypeMatchImage": reflect.TypeOf((*TypeMatchImage)(nil)).Elem(),
 }
@@ -20,6 +22,8 @@ var Functions = map[string]reflect.Value{
 	"NewContainer": reflect.ValueOf(NewContainer),
 	"NewImage": reflect.ValueOf(NewImage),
 	"ParseHostURL": reflect.ValueOf(ParseHostURL),
+	"ReflectState": reflect.ValueOf(ReflectState),
+	"ReflectToolDocker": reflect.ValueOf(ReflectToolDocker),
 }
 
 var Variables = map[string]reflect.Value{

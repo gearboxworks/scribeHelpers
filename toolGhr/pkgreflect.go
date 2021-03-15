@@ -28,6 +28,7 @@ var Functions = map[string]reflect.Value{
 	"NewAuth": reflect.ValueOf(NewAuth),
 	"NewFile": reflect.ValueOf(NewFile),
 	"NewRepo": reflect.ValueOf(NewRepo),
+	"ReflectState": reflect.ValueOf(ReflectState),
 	"ReflectToolGhr": reflect.ValueOf(ReflectToolGhr),
 	"ReleaseSync": reflect.ValueOf(ReleaseSync),
 	"RemoveVersionPrefix": reflect.ValueOf(RemoveVersionPrefix),

@@ -13,8 +13,8 @@ import (
 	"io"
 	"os"
 	"strings"
-	"time"
 )
+
 
 type Image struct {
 	Language   *Language
@@ -104,7 +104,7 @@ func (i *Image) IsValid() *ux.State {
 }
 
 
-func (i *Image) Status() *ux.State {
+func (i *Image) Refresh() *ux.State {
 	if state := i.IsNil(); state.IsError() {
 		return state
 	}
@@ -132,19 +132,17 @@ func (i *Image) Status() *ux.State {
 			}
 
 			i.Summary = images[0]
-			i.Summary.ID = i.ID
+			i.ID = i.Summary.ID
 
-			d := types.ImageInspect{}
-			d, _, err = i.Docker.Client.ImageInspectWithRaw(ctx, i.ID)
+			i.Details, _, err = i.Docker.Client.ImageInspectWithRaw(ctx, i.ID)
 			if err != nil {
 				i.State.SetError("gear inspect error: %s", err)
 				break
 			}
-			i.Details = d
 		}
 
-		if i.GearConfig == nil {
-			i.GearConfig = gearConfig.New(nil)
+		if i.GearConfig.IsNotValid() {
+			//i.GearConfig = gearConfig.New(nil)
 			i.GearConfig.ParseJson(i.Summary.Labels["gearbox.json"])
 			if i.GearConfig.State.IsError() {
 				i.State = i.GearConfig.State
@@ -170,96 +168,10 @@ func (i *Image) Pull() *ux.State {
 	}
 
 	for range onlyOnce {
-		var repo string
-		if i.Version == "" {
-			repo = fmt.Sprintf("gearboxworks/%s", i.Name)
-		} else {
-			repo = fmt.Sprintf("gearboxworks/%s:%s", i.Name, i.Version)
-		}
-
-		//ctx := context.Background()
-		ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
-		//noinspection GoDeferInLoop
-		defer cancel()
-
-		//df := filters.NewArgs()
-		//df.Add("name", "terminus")
-		//var results []registry.SearchResult
-		//results, err = i.client.ImageSearch(ctx, "", types.ImageSearchOptions{Filters:df})
-		//for _, v := range results {
-		//	fmt.Printf("%s - %s\n", v.Name, v.Description)
-		//}
-
-		var out io.ReadCloser
-		var err error
-		out, err = i.Docker.Client.ImagePull(ctx, repo, types.ImagePullOptions{All: false})
-		if err != nil {
-			i.State.SetError("Error pulling Gear %s:%s - %s", i.Name, i.Version, err)
-			break
-		}
-
-		//noinspection GoDeferInLoop
-		defer out.Close()
-
-		ux.PrintflnNormal("Pulling Gear %s:%s.", i.Name, i.Version)
-		d := json.NewDecoder(out)
-		var event *PullEvent
-		for {
-			err := d.Decode(&event)
-			if err != nil {
-				if err == io.EOF {
-					break
-				}
-
-				i.State.SetError("Error pulling Gear %s:%s - %s", i.Name, i.Version, err)
-				break
-			}
-
-			// fmt.Printf("EVENT: %+v\n", event)
-			ux.Printf("%+v\r", event.Progress)
-		}
-		ux.Printf("\n")
-
-		if i.State.IsError() {
-			break
-		}
-
-		// Latest event for new i
-		// EVENT: {Status:Status: Downloaded newer i for busybox:latest Error: Progress:[==================================================>]  699.2kB/699.2kB ProgressDetail:{Current:699243 Total:699243}}
-		// Latest event for up-to-date i
-		// EVENT: {Status:Status: Image is up to date for busybox:latest Error: Progress: ProgressDetail:{Current:0 Total:0}}
-		if event != nil {
-			if strings.HasPrefix(event.Status, "Status: Downloaded newer") {
-				// new
-				ux.PrintfOk("Pulling Gear %s:%s - OK.\n", i.Name, i.Version)
-			} else if strings.HasPrefix(event.Status, "Status: Image is up to date for") {
-				// up-to-date
-				ux.PrintfOk("Pulling Gear %s:%s - updated.\n", i.Name, i.Version)
-			} else {
-				ux.PrintfWarning("Pulling Gear %s:%s - unknown state.\n", i.Name, i.Version)
-			}
-		}
-		//ux.Printf("\nGear i pull OK: %+v\n", event)
-		//ux.Printf("%s\n", event.Status)
-
-		//buf := new(bytes.Buffer)
-		//_, err = buf.ReadFrom(out)
-		//fmt.Printf("%s", buf.String())
-		//_, _ = io.Copy(os.Stdout, out)
+		i.State = i.Docker.Pull("gearboxworks", i.Name, i.Version)
 	}
 
 	return i.State
-}
-
-
-type PullEvent struct {
-	Status         string `json:"status"`
-	Error          string `json:"error"`
-	Progress       string `json:"progress"`
-	ProgressDetail struct {
-		Current int `json:"current"`
-		Total   int `json:"total"`
-	} `json:"progressDetail"`
 }
 
 
@@ -293,7 +205,7 @@ func (i *Image) ImageAuthPull() *ux.State {
 			break
 		}
 
-		//noinspection GoDeferInLoop
+		//goland:noinspection ALL
 		defer out.Close()
 
 		_, _ = io.Copy(os.Stdout, out)
@@ -329,18 +241,34 @@ func (i *Image) Remove() *ux.State {
 }
 
 
-func (i *Image) GetName() (string) {
+func (i *Image) GetName() string {
+	if i.Details.RepoTags == nil {
+		return ""
+	}
+
+	if len(i.Details.RepoTags) == 0 {
+		return ""
+	}
+
 	return strings.TrimPrefix(i.Details.RepoTags[0], "/")
 }
 
-func (i *Image) GetVersion() (string) {
+func (i *Image) GetVersion() string {
+	if i.Summary.Labels == nil {
+		return ""
+	}
+
+	if len(i.Summary.Labels) == 0 {
+		return ""
+	}
+
 	return i.Summary.Labels["gearbox.version"]
 }
 
-func (i *Image) GetSize() (uint64) {
+func (i *Image) GetSize() uint64 {
 	return uint64(i.Summary.Size)
 }
 
-func (i *Image) GetLabels() (map[string]string) {
+func (i *Image) GetLabels() map[string]string {
 	return i.Summary.Labels
 }

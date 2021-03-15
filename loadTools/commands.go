@@ -58,7 +58,7 @@ func (at *TypeScribeArgs) LoadCommands(cmd *cobra.Command, subCmd bool) *ux.Stat
 			break
 		}
 
-		var rootCmd = &cobra.Command{
+		var rootCmd = &cobra.Command {
 			Use:   CmdRoot,
 			Short: ux.SprintfMagenta(CmdRoot) + ux.SprintfBlue(" - The ultimate scripting toolkit."),
 			Long: ux.SprintfBlue(`The ultimate scripting toolkit.
@@ -72,23 +72,26 @@ See help for further information:
 				ux.SprintfWhite("  Variables: %s --FlagHelpVariables\n", CmdRoot) +
 				ux.SprintfWhite("  Examples:  %s --FlagHelpExamples\n", CmdRoot),
 			Run: at.CmdRoot,
+			DisableFlagParsing: false,
 		}
 
-		var toolsCmd = &cobra.Command{
+		var toolsCmd = &cobra.Command {
 			Use:   CmdTools,
 			Short: ux.SprintfMagenta(CmdRoot) + ux.SprintfBlue(" - Show all built-in template helpers."),
 			Long:  ux.SprintfMagenta(CmdRoot) + ux.SprintfBlue(" - Show all built-in template helpers."),
 			Run:   at.CmdTools,
+			DisableFlagParsing: false,
 		}
 
-		var convertCmd = &cobra.Command{
+		var convertCmd = &cobra.Command {
 			Use:   CmdConvert,
 			Short: ux.SprintfMagenta(CmdRoot) + ux.SprintfBlue(" - Convert a template file to the resulting output file."),
 			Long: ux.SprintfMagenta(CmdRoot) + ux.SprintfBlue(" - Convert a template file to the resulting output file."),
 			Run: at.CmdConvert,
+			DisableFlagParsing: false,
 		}
 
-		var loadCmd = &cobra.Command{
+		var loadCmd = &cobra.Command {
 			Use:   CmdLoad,
 			Short: ux.SprintfMagenta(CmdRoot) + ux.SprintfBlue(" - Load and execute a template file."),
 			Long: ux.SprintfMagenta(CmdRoot) + ux.SprintfBlue(" - Load and execute a template file."),
@@ -96,7 +99,7 @@ See help for further information:
 			DisableFlagParsing: false,
 		}
 
-		var runCmd = &cobra.Command{
+		var runCmd = &cobra.Command {
 			Use:   CmdRun,
 			Short: ux.SprintfMagenta(CmdRoot) + ux.SprintfBlue(" - Execute resulting output file as a BASH script."),
 			Long: ux.SprintfMagenta(CmdRoot) + ux.SprintfBlue(`Execute resulting output file as a BASH script.
@@ -104,6 +107,7 @@ You can also use this command as the start to '#!' scripts.
 For example: #!/usr/bin/env scribe --json gearbox.json run
 `),
 			Run: at.CmdRun,
+			DisableFlagParsing: false,
 		}
 
 
@@ -112,10 +116,16 @@ For example: #!/usr/bin/env scribe --json gearbox.json run
 			at.cmd = rootCmd
 			cmd.AddCommand(rootCmd)
 			flags = at.cmd.Flags()
+			rootCmd.DisableFlagParsing = true
+			toolsCmd.DisableFlagParsing = true
+			convertCmd.DisableFlagParsing = true
+			loadCmd.DisableFlagParsing = true
+			runCmd.DisableFlagParsing = true
 		} else {
 			at.cmd = cmd
 			flags = at.cmd.PersistentFlags()
 		}
+		flags = at.cmd.PersistentFlags()
 
 		at.cmd.AddCommand(convertCmd)
 		at.cmd.AddCommand(toolsCmd)
@@ -414,6 +424,12 @@ func (at *TypeScribeArgs) CmdRoot(cmd *cobra.Command, args []string) {
 	}
 
 	for range onlyOnce {
+		var ok bool
+		ok, at.State = at.CheckSubCommand(cmd, args)
+		if ok {
+			break
+		}
+
 		if at.ParseScribeFlags(cmd) {
 			break
 		}
@@ -448,6 +464,12 @@ func (at *TypeScribeArgs) CmdTools(cmd *cobra.Command, args []string) {
 	}
 
 	for range onlyOnce {
+		var ok bool
+		ok, at.State = at.CheckSubCommand(cmd, args)
+		if ok {
+			break
+		}
+
 		at.State = at.ProcessArgs(cmd.Use, args)
 		// Ignore errors as there's no args.
 
@@ -471,6 +493,12 @@ func (at *TypeScribeArgs) CmdConvert(cmd *cobra.Command, args []string) {
 	}
 
 	for range onlyOnce {
+		var ok bool
+		ok, at.State = at.CheckSubCommand(cmd, args)
+		if ok {
+			break
+		}
+
 		at.RemoveTemplate = true
 		at.Output.Arg = SelectConvert
 
@@ -498,6 +526,12 @@ func (at *TypeScribeArgs) CmdLoad(cmd *cobra.Command, args []string) {
 	}
 
 	for range onlyOnce {
+		var ok bool
+		ok, at.State = at.CheckSubCommand(cmd, args)
+		if ok {
+			break
+		}
+
 		at.State = at.ProcessArgs(cmd.Use, args)
 		if at.State.IsNotOk() {
 			break
@@ -525,6 +559,12 @@ func (at *TypeScribeArgs) CmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	for range onlyOnce {
+		var ok bool
+		ok, at.State = at.CheckSubCommand(cmd, args)
+		if ok {
+			break
+		}
+
 		at.ExecShell = true
 		at.Output.Arg = SelectConvert
 		at.StripHashBang = true

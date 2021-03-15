@@ -13,11 +13,13 @@ var Types = map[string]reflect.Type{
 }
 
 var Functions = map[string]reflect.Value{
+	"MapStructureDecodeHook": reflect.ValueOf(MapStructureDecodeHook),
 	"New": reflect.ValueOf(New),
 	"NewPaths": reflect.ValueOf(NewPaths),
 	"ReflectAbsPath": reflect.ValueOf(ReflectAbsPath),
 	"ReflectFileMode": reflect.ValueOf(ReflectFileMode),
 	"ReflectPath": reflect.ValueOf(ReflectPath),
+	"ReflectState": reflect.ValueOf(ReflectState),
 	"ReflectToolOsPath": reflect.ValueOf(ReflectToolOsPath),
 	"ToolChdir": reflect.ValueOf(ToolChdir),
 	"ToolChmod": reflect.ValueOf(ToolChmod),

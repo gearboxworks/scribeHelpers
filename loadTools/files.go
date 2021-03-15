@@ -342,8 +342,8 @@ func (at *TypeArgFile) SetInputFile(fileName string) *ux.State {
 			if at.isAString(fileName) {
 				at.valid = true
 				at.Arg = SelectString
-				at.Value = at.DefaultString
-				at.SetContents(fileName)
+				at.Value = UnescapeString(fileName)
+				at.SetContents(at.Value)
 				at.State.SetOk("Input string set.")
 				break
 			}
@@ -423,6 +423,9 @@ func (at *TypeArgFile) SetOutputFile(fileName string, overwrite bool) *ux.State 
 		if at.State.IsNotOk() {
 			break
 		}
+
+		at.SetOverwriteable()
+		at.Arg = SelectFile
 	}
 
 	return at.State

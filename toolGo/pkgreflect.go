@@ -25,6 +25,7 @@ var Functions = map[string]reflect.Value{
 	"New": reflect.ValueOf(New),
 	"NewGoFile": reflect.ValueOf(NewGoFile),
 	"ParseGoFiles": reflect.ValueOf(ParseGoFiles),
+	"ReflectState": reflect.ValueOf(ReflectState),
 	"ReflectToolGo": reflect.ValueOf(ReflectToolGo),
 }
 

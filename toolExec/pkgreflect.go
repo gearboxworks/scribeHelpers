@@ -5,6 +5,7 @@ package toolExec
 import "reflect"
 
 var Types = map[string]reflect.Type{
+	"State": reflect.TypeOf((*State)(nil)).Elem(),
 	"ToolExecCommand": reflect.TypeOf((*ToolExecCommand)(nil)).Elem(),
 	"TypeExecCommand": reflect.TypeOf((*TypeExecCommand)(nil)).Elem(),
 	"TypeExecCommandGetter": reflect.TypeOf((*TypeExecCommandGetter)(nil)).Elem(),
@@ -15,6 +16,8 @@ var Functions = map[string]reflect.Value{
 	"New": reflect.ValueOf(New),
 	"NewMultiExec": reflect.ValueOf(NewMultiExec),
 	"ReflectExecCommand": reflect.ValueOf(ReflectExecCommand),
+	"ReflectState": reflect.ValueOf(ReflectState),
+	"ReflectToolExecCommand": reflect.ValueOf(ReflectToolExecCommand),
 	"ToolExec": reflect.ValueOf(ToolExec),
 	"ToolExecBash": reflect.ValueOf(ToolExecBash),
 	"ToolExecCmd": reflect.ValueOf(ToolExecCmd),

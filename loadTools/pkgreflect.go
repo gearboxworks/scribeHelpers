@@ -10,6 +10,7 @@ var Types = map[string]reflect.Type{
 	"FileInfo": reflect.TypeOf((*FileInfo)(nil)).Elem(),
 	"Files": reflect.TypeOf((*Files)(nil)).Elem(),
 	"JsonFile": reflect.TypeOf((*JsonFile)(nil)).Elem(),
+	"JsonMap": reflect.TypeOf((*JsonMap)(nil)).Elem(),
 	"PkgReflect": reflect.TypeOf((*PkgReflect)(nil)).Elem(),
 	"ScribeFile": reflect.TypeOf((*ScribeFile)(nil)).Elem(),
 	"SortedTools": reflect.TypeOf((*SortedTools)(nil)).Elem(),

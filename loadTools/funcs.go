@@ -16,6 +16,7 @@ import (
 	"github.com/newclarity/scribeHelpers/toolTypes"
 	"github.com/newclarity/scribeHelpers/toolUx"
 	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/spf13/cobra"
 	"os/exec"
 	"path/filepath"
 	"sort"
@@ -40,6 +41,26 @@ func (at *TypeScribeArgs) ProcessArgs(cmd string, args []string) *ux.State {
 	}
 
 	return at.State
+}
+
+
+func (at *TypeScribeArgs) CheckSubCommand(cmd *cobra.Command, args []string) (bool, *ux.State) {
+	var ok bool
+
+	for range onlyOnce {
+		if cmd.DisableFlagParsing {
+			cmd.DisableFlagParsing = false
+			err := cmd.Execute()
+			if err != nil {
+				at.State.SetError()
+			}
+
+			ok = true
+			break
+		}
+	}
+
+	return ok, at.State
 }
 
 
@@ -125,6 +146,8 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 
 			// Validate template file OR string.
 			at.State = at.Template.SetInputFile(at.Template.Value)
+			//at.Template.Value = UnescapeString(at.Template.Value)
+
 			if at.RemoveTemplate {
 				at.PrintflnNotify("Will remove template file '%s' afterwards.", at.Template.GetPath())
 				at.Template.SetRemoveable()
@@ -228,7 +251,7 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 
 			at.Output.Arg = strings.TrimSuffix(at.Template.GetPathAbs(), DefaultTemplateFileSuffix)
 		}
-		at.State = at.Output.SetOutputFile(at.Output.Arg, at.ForceOverwrite)
+		at.State = at.Output.SetOutputFile(at.Output.Value, at.ForceOverwrite)
 		if at.State.IsNotOk() {
 			break
 		}
@@ -380,12 +403,17 @@ func (at *TypeScribeArgs) Run() *ux.State {
 	for range onlyOnce {
 		at.PrintflnNotify("Processing template file '%s'. Output sent to '%s'", at.Template.GetPath(), at.Output.GetPath())
 
+		//var tpl bytes.Buffer
+		//err := at.TemplateRef.Execute(&tpl, &at.JsonStruct)
 		err := at.TemplateRef.Execute(at.Output.FileHandle, &at.JsonStruct)
-		//err := at.TemplateRef.Execute(os.Stdout, &at.JsonStruct)
 		if err != nil {
 			at.State.SetError("Error processing template: %s", err)
 			break
 		}
+
+		//at.Output.SetContents(tpl.String())
+		//at.Output.SetContents(fmt.Sprintf(tpl.String()))
+		at.Output.WriteFile()
 
 		at.State = at.Output.CloseFile()
 		if at.State.IsNotOk() {

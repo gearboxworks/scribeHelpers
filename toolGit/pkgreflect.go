@@ -26,7 +26,9 @@ var Types = map[string]reflect.Type{
 var Functions = map[string]reflect.Value{
 	"GitClone": reflect.ValueOf(GitClone),
 	"GitOpen": reflect.ValueOf(GitOpen),
+	"MapStructureDecodeHook": reflect.ValueOf(MapStructureDecodeHook),
 	"New": reflect.ValueOf(New),
+	"ReflectState": reflect.ValueOf(ReflectState),
 	"ReflectToolGit": reflect.ValueOf(ReflectToolGit),
 	"ToolNewGit": reflect.ValueOf(ToolNewGit),
 }

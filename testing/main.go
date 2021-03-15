@@ -525,7 +525,9 @@ func Test_toolGear() {
 	state := ux.NewState(test, globalDebug)
 	PrintTestStart(test)
 
-	Test := toolGear.New(nil)
+	Docker := toolGear.NewDocker(nil)
+
+	Test := toolGear.NewGear(nil, Docker)
 	PrintTestResult(Test.State, test, "New()")
 
 	state = Test.IsNil()
@@ -588,8 +590,8 @@ func Test_toolPaths() {
 	Test := toolPath.NewPaths(nil)
 	PrintTestResult(Test.State, test, "NewPaths()")
 
-	state = Test.IsNil()
-	PrintTestResult(state, test, "IsNil()")
+	//state = Test.IsNil()
+	//PrintTestResult(state, test, "IsNil()")
 
 	state = Test.FindRegex(`go.mod`, "..")
 	PrintTestResult(Test.State, test, "FindRegex(`go.mod`, \"..\")")

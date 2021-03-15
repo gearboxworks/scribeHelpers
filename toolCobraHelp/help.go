@@ -118,6 +118,32 @@ func (tc *TypeCommands) _GetUsage(c *cobra.Command) string {
 }
 
 
+func (tc *TypeCommands) _GetCmdPath(c *cobra.Command) string {
+	var str string
+
+	str = strings.TrimPrefix(c.CommandPath(), tc.runtime.CmdName + " ")
+
+	return str
+}
+
+
+func (tc *TypeCommands) _GetCmdHelp(c *cobra.Command) string {
+	var str string
+
+	str = ux.SprintfBlue("\nUse ")
+	str += ux.SprintfCyan("%s help %s ",
+		tc.runtime.CmdName,
+		tc._GetCmdPath(c),
+		)
+	str += ux.SprintfGreen("[command] ")
+	str += ux.SprintfBlue("for more information about a command.")
+
+	// {{ SprintfBlue "\nUse" }} {{ SprintfCyan "help" }} {{ SprintfCyan .CommandPath }} {{ SprintfGreen "[command]" }} {{ SprintfBlue "for more information about a command." }}
+
+	return str
+}
+
+
 func (tc *TypeCommands) _GetVersion(c *cobra.Command) string {
 	var str string
 
@@ -218,6 +244,105 @@ func (tc *TypeCommands) SetHelp(c *cobra.Command) {
 {{ .UsageString }}
 {{- end }}
 `
+
+	//c.SetHelpCommand(c)
+	//c.SetHelpFunc(PrintHelp)
+	c.SetHelpTemplate(tmplHelp)
+	c.SetUsageTemplate(tmplUsage)
+}
+
+
+func (tc *TypeCommands) ChangeHelp(c *cobra.Command, tmplUsage string, tmplHelp string) {
+	//fmt.Printf("%s", rootCmd.UsageTemplate())
+	//fmt.Printf("%s", rootCmd.HelpTemplate())
+
+	cobra.AddTemplateFunc("GetUsage", tc._GetUsage)
+	cobra.AddTemplateFunc("GetVersion", tc._GetVersion)
+	cobra.AddTemplateFunc("GetCmdPath", tc._GetCmdPath)
+	cobra.AddTemplateFunc("GetCmdHelp", tc._GetCmdHelp)
+
+	cobra.AddTemplateFunc("HelpCommands", tc.HelpCommands)
+
+	cobra.AddTemplateFunc("SprintfBlue", ux.SprintfBlue)
+	cobra.AddTemplateFunc("SprintfCyan", ux.SprintfCyan)
+	cobra.AddTemplateFunc("SprintfGreen", ux.SprintfGreen)
+	cobra.AddTemplateFunc("SprintfMagenta", ux.SprintfMagenta)
+	cobra.AddTemplateFunc("SprintfRed", ux.SprintfRed)
+	cobra.AddTemplateFunc("SprintfWhite", ux.SprintfWhite)
+	cobra.AddTemplateFunc("SprintfYellow", ux.SprintfYellow)
+
+	// 	{{ with .Parent }}{{ SprintfCyan .Name }}{{ end }} {{ SprintfGreen .Name }} {{ if .HasAvailableSubCommands }}{{ SprintfGreen "[command]" }}{{ end }}
+
+	// {{ HelpCommands }}
+
+	//{{- range .Commands }}
+	// {{- if (or .IsAvailableCommand (eq .Name "help")) }}
+	// {{ rpad (SprintfGreen .Name) .NamePadding}}	- {{ .Short }}{{ end }}
+	//{{- end }}
+
+	if tmplUsage == "" {
+		tmplUsage = `
+{{ SprintfBlue "Usage: " }}
+	{{ GetUsage . }}
+
+{{- if gt (len .Aliases) 0 }}
+{{ SprintfBlue "\nAliases:" }} {{ .NameAndAliases }}
+{{- end }}
+
+{{- if .HasExample }}
+{{ SprintfBlue "\nExamples:" }}
+	{{ .Example }}
+{{- end }}
+
+{{- if .HasAvailableSubCommands }}
+{{ SprintfBlue "\nWhere " }}{{ SprintfGreen "[command]" }}{{ SprintfBlue " is one of:" }}
+{{- range .Commands }}
+{{- if (or .IsAvailableCommand (eq .Name "help")) }}
+	{{ rpad (SprintfGreen .Name) .NamePadding}}     	- {{ .Short }}{{ end }}
+{{- end }}
+{{- end }}
+
+
+{{- if .HasAvailableLocalFlags }}
+{{ SprintfBlue "\nFlags:" }}
+{{ .LocalFlags.FlagUsages | trimTrailingWhitespaces }}
+{{- end }}
+
+{{- if .HasAvailableInheritedFlags }}
+{{ SprintfBlue "\nGlobal Flags:" }}
+{{ .InheritedFlags.FlagUsages | trimTrailingWhitespaces }}
+{{- end }}
+
+{{- if .HasHelpSubCommands }}
+{{- SprintfBlue "\nAdditional help topics:" }}
+{{- range .Commands }}
+{{- if .IsAdditionalHelpTopicCommand }}
+	{{ rpad (SprintfGreen .CommandPath) .CommandPathPadding }} {{ .Short }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .HasAvailableSubCommands }}
+{{ GetCmdHelp . }}
+{{- end }}
+`
+	}
+
+	if tmplHelp == "" {
+		tmplHelp = `{{ GetVersion . }}
+
+{{ SprintfBlue "Commmand:" }} {{ SprintfCyan .Use }}
+
+{{ SprintfBlue "Description:" }} 
+	{{ with (or .Long .Short) }}
+{{- . | trimTrailingWhitespaces }}
+{{- end }}
+
+{{- if or .Runnable .HasSubCommands }}
+{{ .UsageString }}
+{{- end }}
+`
+	}
 
 	//c.SetHelpCommand(c)
 	//c.SetHelpFunc(PrintHelp)

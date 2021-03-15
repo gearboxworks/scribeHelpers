@@ -31,5 +31,12 @@ var Variables = map[string]reflect.Value{
 
 var Consts = map[string]reflect.Value{
 	"DefaultCommandName": reflect.ValueOf(DefaultCommandName),
+	"FileIsFile": reflect.ValueOf(FileIsFile),
+	"FileIsLaunchManaged": reflect.ValueOf(FileIsLaunchManaged),
+	"FileIsNotFirst": reflect.ValueOf(FileIsNotFirst),
+	"FileIsNotInPath": reflect.ValueOf(FileIsNotInPath),
+	"FileIsNotThere": reflect.ValueOf(FileIsNotThere),
+	"FileIsSymlink": reflect.ValueOf(FileIsSymlink),
+	"FileIsUnknown": reflect.ValueOf(FileIsUnknown),
 }
 

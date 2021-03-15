@@ -5,6 +5,7 @@ import (
 	"github.com/newclarity/scribeHelpers/toolPath"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
+	"strconv"
 	"strings"
 )
 
@@ -184,16 +185,21 @@ func UnescapeString(s string) string {
 	// \'	Single quote (only in rune literals)
 	// \"	Double quote (only in string literals)
 
-	s = strings.ReplaceAll(s, `\a`, "\a")
-	s = strings.ReplaceAll(s, `\b`, "\b")
-	s = strings.ReplaceAll(s, `\\`, "\\")
-	s = strings.ReplaceAll(s, `\t`, "\t")
-	s = strings.ReplaceAll(s, `\n`, "\n")
-	s = strings.ReplaceAll(s, `\f`, "\f")
-	s = strings.ReplaceAll(s, `\r`, "\r")
-	s = strings.ReplaceAll(s, `\v`, "\v")
-	s = strings.ReplaceAll(s, `\'`, `'`)
-	s = strings.ReplaceAll(s, `\"`, `"`)
+	//fmt.Println(s)
+	s, _ = strconv.Unquote(`"` + s + `"`)
+
+	//s = strings.ReplaceAll(s, `\a`, "\a")
+	//s = strings.ReplaceAll(s, `\b`, "\b")
+	//s = strings.ReplaceAll(s, `\\`, "\\")
+	//s = strings.ReplaceAll(s, `\t`, `\x09`)
+	////s = strings.ReplaceAll(s, `\t`, "\t")
+	//s = strings.ReplaceAll(s, `\n`, "\n")
+	//s = strings.ReplaceAll(s, `\f`, "\f")
+	//s = strings.ReplaceAll(s, `\r`, "\r")
+	//s = strings.ReplaceAll(s, `\v`, "\v")
+	//s = strings.ReplaceAll(s, `\'`, `'`)
+	//s = strings.ReplaceAll(s, `\"`, `"`)
+	//fmt.Println(s)
 
 	return s
 }

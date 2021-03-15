@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
-	"github.com/jedib0t/go-pretty/table"
+	"github.com/docker/go-connections/nat"
 	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/toolGear/gearSsh"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
-	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -63,7 +61,6 @@ func NewContainer(runtime *toolRuntime.TypeRuntime) *Container {
 	return c
 }
 
-
 func (c *Container) EnsureNotNil() *Container {
 	for range onlyOnce {
 		if c == nil {
@@ -74,7 +71,6 @@ func (c *Container) EnsureNotNil() *Container {
 	return c
 }
 
-
 func (c *Container) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(c); state.IsError() {
 		return state
@@ -83,10 +79,10 @@ func (c *Container) IsNil() *ux.State {
 	return c.State
 }
 
-
-func (c *Container) IsValid() *ux.State {
+func (c *Container) IsValid() bool {
+	var ok bool
 	if state := ux.IfNilReturnError(c); state.IsError() {
-		return state
+		return ok
 	}
 
 	for range onlyOnce {
@@ -111,13 +107,17 @@ func (c *Container) IsValid() *ux.State {
 			c.State.SetError("docker client is nil")
 			break
 		}
+
+		ok = true
 	}
 
-	return c.State
+	return ok
+}
+func (c *Container) IsNotValid() bool {
+	return !c.IsValid()
 }
 
-
-func (c *Container) Status() *ux.State {
+func (c *Container) Refresh() *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
 	}
@@ -145,7 +145,6 @@ func (c *Container) Status() *ux.State {
 	return c.State
 }
 
-
 func (c *Container) WaitForState(s string, t time.Duration) *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
@@ -156,7 +155,7 @@ func (c *Container) WaitForState(s string, t time.Duration) *ux.State {
 		until.Add(t)
 
 		for now := time.Now(); until.Before(now); now = time.Now() {
-			c.State = c.Status()
+			c.State = c.Refresh()
 			if c.State.IsError() {
 				break
 			}
@@ -170,7 +169,6 @@ func (c *Container) WaitForState(s string, t time.Duration) *ux.State {
 	return c.State
 }
 
-
 // Run a container in the background
 // You can also run containers in the background, the equivalent of typing docker run -d bfirsh/reticulate-splines:
 func (c *Container) Start() *ux.State {
@@ -179,7 +177,7 @@ func (c *Container) Start() *ux.State {
 	}
 
 	for range onlyOnce {
-		c.State = c.Status()
+		c.State = c.Refresh()
 		if c.State.IsError() {
 			break
 		}
@@ -204,12 +202,11 @@ func (c *Container) Start() *ux.State {
 			break
 		}
 
-		c.State = c.Status()
+		c.State = c.Refresh()
 	}
 
 	return c.State
 }
-
 
 // Stop all running containers
 // Now that you know what containers exist, you can perform operations on them.
@@ -225,12 +222,11 @@ func (c *Container) Stop() *ux.State {
 			break
 		}
 
-		c.State = c.Status()
+		c.State = c.Refresh()
 	}
 
 	return c.State
 }
-
 
 // Remove containers
 // Now that you know what containers exist, you can perform operations on them.
@@ -257,7 +253,6 @@ func (c *Container) Remove() *ux.State {
 	return c.State
 }
 
-
 // Print the logs of a specific container
 // You can also perform actions on individual containers.
 // This example prints the logs of a container given its ID.
@@ -275,12 +270,11 @@ func (c *Container) Logs() *ux.State {
 			break
 		}
 
-		c.State = c.Status()
+		c.State = c.Refresh()
 	}
 
 	return c.State
 }
-
 
 // Commit a container
 // Commit a container to create an image from its contents:
@@ -295,7 +289,6 @@ func (c *Container) Commit() *ux.State {
 
 	return c.State
 }
-
 
 func (c *Container) GetContainerSsh() (string, *ux.State) {
 	var port string
@@ -321,33 +314,54 @@ func (c *Container) GetContainerSsh() (string, *ux.State) {
 	return port, c.State
 }
 
-
-func (c *Container) GetName() (string) {
+func (c *Container) GetName() string {
 	return strings.TrimPrefix(c.Summary.Names[0], "/")
 }
 
-func (c *Container) GetVersion() (string) {
+func (c *Container) GetVersion() string {
 	return c.Summary.Labels["gearbox.version"]
 }
 
-func (c *Container) GetMounts() ([]types.MountPoint) {
+func (c *Container) GetMounts() []types.MountPoint {
 	return c.Summary.Mounts
 }
 
-func (c *Container) GetNetworks() (map[string]*network.EndpointSettings) {
+func (c *Container) GetNetworks() map[string]*network.EndpointSettings {
 	return c.Summary.NetworkSettings.Networks
 }
 
-func (c *Container) GetState() (string) {
+func (c *Container) GetState() string {
 	return c.Summary.State
 }
 
-func (c *Container) GetSize() (uint64) {
+func (c *Container) GetSize() uint64 {
 	return uint64(c.Summary.SizeRootFs)
 }
 
-func (c *Container) GetLabels() (map[string]string) {
+func (c *Container) GetLabels() map[string]string {
 	return c.Summary.Labels
+}
+
+func (c *Container) GetVolumeMounts() []string {
+	var ret []string
+	if state := c.IsNil(); state.IsError() {
+		return ret
+	}
+
+	for range onlyOnce {
+		for k, v := range c.VolumeMounts {
+			ret = append(ret, fmt.Sprintf("%s:%s", k, v))
+		}
+	}
+
+	return ret
+}
+
+func (c *Container) GetFixedPorts() nat.PortMap {
+	if state := c.IsNil(); state.IsError() {
+		return nil
+	}
+	return c.GearConfig.GetFixedPorts()
 }
 
 
@@ -356,7 +370,7 @@ type Port struct {
 	types.Port
 }
 type Ports map[uint16]*Port
-func (c *Container) GetPorts() (Ports) {
+func (c *Container) GetPorts() Ports {
 	ports := make(Ports)
 
 	for range onlyOnce {
@@ -378,99 +392,3 @@ func (c *Container) GetPorts() (Ports) {
 
 	return ports
 }
-
-
-func (gear *Gear) ListContainerPorts() *ux.State {
-	if state := gear.IsNil(); state.IsError() {
-		return state
-	}
-
-	for range onlyOnce {
-		//var err error
-		if gear.IsNotRunning() {
-			break
-		}
-
-		ux.PrintfCyan("Open ports for Container: %s-%s\n", gear.Container.Name, gear.Container.Version)
-		t := table.NewWriter()
-		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{
-			"Container",
-			"Port Name",
-			"Host Port",
-			"Container Port",
-		})
-
-		ports, _ := gear.GetPorts()
-		for _, v := range ports {
-			if v.PrivatePort == 22 {
-				t.AppendRow([]interface{} {
-					ux.SprintfYellow("%s-%s\n", gear.Container.Name, gear.Container.Version),
-					ux.SprintfYellow("ssh"),
-					ux.SprintfYellow("%s:%d", v.IP, v.PublicPort),
-					ux.SprintfYellow("%d", v.PrivatePort),
-				})
-				continue
-			}
-
-			t.AppendRow([]interface{} {
-				ux.SprintfGreen("%s-%s\n", gear.Container.Name, gear.Container.Version),
-				ux.SprintfGreen(v.Name),
-				ux.SprintfGreen("%s:%d", v.IP, v.PublicPort),
-				ux.SprintfGreen("%d", v.PrivatePort),
-			})
-		}
-
-		count := t.Length()
-		if count == 0 {
-			ux.PrintfYellow("None found\n")
-			break
-		}
-
-		t.Render()
-		ux.PrintflnGreen("Ports found: %d", count)
-		ux.PrintflnBlue("")
-
-		gear.State.SetOk("")
-	}
-
-	return gear.State
-}
-
-
-func (gear *Gear) GetPorts() (Ports, *ux.State) {
-	ports := make(Ports)
-	if state := gear.IsNil(); state.IsError() {
-		return ports, state
-	}
-
-	for range onlyOnce {
-		ports = gear.Container.GetPorts()
-
-		//gcp := gear.gearConfig.Build.Ports
-		for _, p := range ports {
-			if p.PrivatePort == 22 {
-				p.Name = "ssh"
-				continue
-			}
-			if p.PrivatePort == 9970 {
-				p.Name = "gearbox"
-				continue
-			}
-
-			for k, v := range gear.GearConfig.Build.Ports {
-				if k == "" {
-					continue
-				}
-				i, _ := strconv.Atoi(v)
-				if uint16(i) == p.PrivatePort {
-					p.Name = k
-					break
-				}
-			}
-		}
-	}
-
-	return ports, gear.State
-}
-
