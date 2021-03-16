@@ -270,7 +270,7 @@ func (c *Container) Logs() *ux.State {
 			break
 		}
 
-		c.State = c.Refresh()
+		//c.State = c.Refresh()
 	}
 
 	return c.State

@@ -49,6 +49,9 @@ func (at *TypeScribeArgs) CheckSubCommand(cmd *cobra.Command, args []string) (bo
 
 	for range onlyOnce {
 		if cmd.DisableFlagParsing {
+			a := []string{cmd.Use}
+			a = append(a, args...)
+			cmd.SetArgs(a)
 			cmd.DisableFlagParsing = false
 			err := cmd.Execute()
 			if err != nil {
@@ -249,7 +252,7 @@ func (at *TypeScribeArgs) ProcessInputFiles() *ux.State {
 				break
 			}
 
-			at.Output.Arg = strings.TrimSuffix(at.Template.GetPathAbs(), DefaultTemplateFileSuffix)
+			at.Output.Value = strings.TrimSuffix(at.Template.GetPathAbs(), DefaultTemplateFileSuffix)
 		}
 		at.State = at.Output.SetOutputFile(at.Output.Value, at.ForceOverwrite)
 		if at.State.IsNotOk() {

@@ -49,7 +49,7 @@ var Functions = map[string]reflect.Value{
 	"ReflectToolDockerGear": reflect.ValueOf(ReflectToolDockerGear),
 	"ToolListVersionInfo": reflect.ValueOf(ToolListVersionInfo),
 	"ToolListVersions": reflect.ValueOf(ToolListVersions),
-	"ToolNewGear": reflect.ValueOf(ToolNewGear),
+	"ToolGearbox": reflect.ValueOf(ToolGearbox),
 	"ToolShowGear": reflect.ValueOf(ToolShowGear),
 }
 

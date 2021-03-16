@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"github.com/newclarity/scribeHelpers/toolPath"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
+	"github.com/newclarity/scribeHelpers/toolUx"
 	"github.com/newclarity/scribeHelpers/ux"
-	"strconv"
+	//"strconv"
 	"strings"
 )
 
@@ -26,6 +27,7 @@ type jsonStruct struct {
 	CreationWarning string	`json:"CreationWarning" mapstructure:"CreationWarning"`
 
 	Json            map[string]interface{}	`json:"Json" mapstructure:"Json"`
+	Color           map[string]interface{}	`json:"Color" mapstructure:"Json"`
 
 	state           *ux.State	`json:"-"`
 }
@@ -46,6 +48,14 @@ func NewJsonStruct(binary string, version string, debugFlag bool) *jsonStruct {
 		CreationInfo:    "",
 		CreationWarning: "",
 		Json:            nil,
+		Color:           nil,
+	}
+
+	// Process JSON string.
+	js.Color = make(map[string]interface{})
+	err := json.Unmarshal([]byte(toolUx.ColorString), &js.Color)
+	if err != nil {
+		js.state.SetError("Json processing error: %s", err)
 	}
 
 	return &js
@@ -186,19 +196,23 @@ func UnescapeString(s string) string {
 	// \"	Double quote (only in string literals)
 
 	//fmt.Println(s)
-	s, _ = strconv.Unquote(`"` + s + `"`)
-
-	//s = strings.ReplaceAll(s, `\a`, "\a")
-	//s = strings.ReplaceAll(s, `\b`, "\b")
-	//s = strings.ReplaceAll(s, `\\`, "\\")
-	//s = strings.ReplaceAll(s, `\t`, `\x09`)
-	////s = strings.ReplaceAll(s, `\t`, "\t")
+	//s = strings.ReplaceAll(s, `\t`, "\t")
+	//s = strings.ReplaceAll(s, `\t`, "\x09")
 	//s = strings.ReplaceAll(s, `\n`, "\n")
-	//s = strings.ReplaceAll(s, `\f`, "\f")
-	//s = strings.ReplaceAll(s, `\r`, "\r")
-	//s = strings.ReplaceAll(s, `\v`, "\v")
-	//s = strings.ReplaceAll(s, `\'`, `'`)
-	//s = strings.ReplaceAll(s, `\"`, `"`)
+	//s = strings.ReplaceAll(s, `\n`, "\x0a")
+
+	//s, _ = strconv.Unquote(`"` + s + `"`)
+
+	s = strings.ReplaceAll(s, `\a`, "\a")
+	s = strings.ReplaceAll(s, `\b`, "\b")
+	s = strings.ReplaceAll(s, `\\`, "\\")
+	s = strings.ReplaceAll(s, `\t`, "\t")
+	s = strings.ReplaceAll(s, `\n`, "\n")
+	s = strings.ReplaceAll(s, `\f`, "\f")
+	s = strings.ReplaceAll(s, `\r`, "\r")
+	s = strings.ReplaceAll(s, `\v`, "\v")
+	s = strings.ReplaceAll(s, `\'`, `'`)
+	s = strings.ReplaceAll(s, `\"`, `"`)
 	//fmt.Println(s)
 
 	return s

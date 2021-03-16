@@ -5,19 +5,61 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/ux"
+	"os"
 )
 
 
 // Usage:
 //		{{ $copy := CopyFiles }}
-func ToolNewGear() *Gear {
-	ret := NewGear(nil, nil)
+func ToolGearbox(gcm interface{}, remote string) *Gears {
+	var gears Gears
 
 	for range onlyOnce {
-		//ret.State.SetOk()
+		//if remote != "" {
+		//	_ = os.Setenv("DOCKER_HOST", remote)
+			ux.PrintfWhite("# Remote Docker is %s\n", os.Getenv("DOCKER_HOST"))
+		//}
+
+		gears = NewGears(nil)
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		//gears.State = gears.SetProvider("docker")
+		//if gears.State.IsError() {
+		//	break
+		//}
+
+		gears.State = gears.SetProviderUrl(remote)
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		gears.State = gears.Get()
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		if gcm != nil {
+			gc := NewGearConfig(gears.Runtime)
+			err := mapstructure.Decode(gcm, &gc)
+			if err != nil {
+				gears.State.SetError(err)
+				break
+			}
+
+			gears.State = gears.AddGears(gc)
+
+			//gears.FindImage("mountebank", "2.4.0")
+			//gears.Selected.Logs().GetOutput()
+		}
 	}
 
-	return (*Gear)(ret)
+	if gears.State.IsNotOk() {
+		gears.State.PrintResponse()
+	}
+
+	return &gears
 }
 
 
@@ -90,6 +132,17 @@ func ToolShowGear(gc interface{}) string {
 	}
 
 	return ret
+}
+
+
+func ToolNewGear() *Gear {
+	ret := NewGear(nil, nil)
+
+	for range onlyOnce {
+		//ret.State.SetOk()
+	}
+
+	return (*Gear)(ret)
 }
 
 

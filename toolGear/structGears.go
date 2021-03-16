@@ -21,6 +21,7 @@ type Gears struct {
 	Language    Language
 	Array		map[string]*Gear
 	Selected    *Gear
+	//Build		map[string]*Gear
 
 	Docker      *Docker
 
@@ -59,10 +60,11 @@ func NewGears(runtime *toolRuntime.TypeRuntime) Gears {
 		gears.State.SetPackage("")
 		gears.State.SetFunctionCaller()
 
-		gears.State = gears.Get()
-		if gears.State.IsNotOk() {
-			break
-		}
+		//_ = gears.Get()
+		//gears.State = gears.Get()
+		//if gears.State.IsNotOk() {
+		//	break
+		//}
 	}
 
 	return gears
@@ -113,6 +115,55 @@ func (gears *Gears) SetLanguage(appName string, imageName string, containerName 
 			ImageName:     imageName,
 			ContainerName: containerName,
 		}
+	}
+
+	return gears.State
+}
+
+func (gears *Gears) SetProvider(provider string) *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gears.State = gears.Docker.Provider.SetProvider(provider)
+		if gears.State.IsNotOk() {
+			break
+		}
+	}
+
+	return gears.State
+}
+
+func (gears *Gears) SetProviderUrl(Url string) *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gears.State = gears.Docker.Provider.SetUrl(Url)
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		gears.State = gears.Docker.Connect()
+	}
+
+	return gears.State
+}
+
+func (gears *Gears) SetProviderHost(host string, port string) *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gears.State = gears.Docker.Provider.SetHost(host, port)
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		gears.State = gears.Docker.Connect()
 	}
 
 	return gears.State
@@ -275,6 +326,42 @@ func (gears *Gears) Ls(name string) *ux.State {
 	return gears.State
 }
 
+func (gears *Gears) AddGears(gc *gearConfig.GearConfig) *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		for k, _ := range gc.Versions {
+			var ok bool
+			gears.State = gears.FindImage(gc.Meta.Name, k)
+			//if gears.State.IsNotOk() {
+			//	break
+			//}
+			ok = gears.State.GetResponseAsBool()
+			if ok {
+				gears.Selected.BuildFlag = true
+				continue
+			}
+
+			gear := NewGear(gears.Runtime, gears.Docker)
+			gear.GearConfig = gc
+			gear.BuildFlag = true
+			gears.Array[gc.Meta.Name + "-" + k] = gear
+		}
+	}
+
+	return gears.State
+}
+
+func (gears *Gears) Pull(version string) *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	return gears.Selected.Pull(version)
+}
+
 
 // ******************************************************************************** //
 
@@ -380,10 +467,10 @@ func (gears *Gears) GetImages(name string) *ux.State {
 	return gears.State
 }
 
-func (gears *Gears) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
+func (gears *Gears) FindImage(gearName string, gearVersion string) (*ux.State) {
 	var ok bool
 	if state := gears.IsNil(); state.IsError() {
-		return false, state
+		return state
 	}
 
 	for range onlyOnce {
@@ -412,7 +499,86 @@ func (gears *Gears) FindImage(gearName string, gearVersion string) (bool, *ux.St
 		gears.State.SetOk("found image")
 	}
 
-	return ok, gears.State
+	gears.State.SetResponse(ok)
+	return gears.State
+}
+
+func (gears *Gears) CreateImage(gearName string, gearVersion string) (*ux.State) {
+	if state := gears.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		if gearName == "" {
+			gears.State.SetError("empty gear name")
+			break
+		}
+
+		if gearVersion == "" {
+			gearVersion = "latest"
+		}
+
+		var found bool
+		gears.State = gears.FindImage(gearName, gearVersion)
+		if gears.State.IsError() {
+			break
+		}
+		found = gears.State.GetResponseAsBool()
+		if found {
+			//gears.State = gears.Selected.Remove()
+			//if gears.State.IsError() {
+			//	break
+			//}
+			gears.State.SetWarning("Already exists.")
+			break
+		}
+
+		//gears.State = gears.Docker.Pull("gearboxworks", gearName, gearVersion)
+		//if gears.State.IsNotOk() {
+		//	break
+		//}
+
+		vers := gears.Selected.GetVersion(gearVersion)
+		//var DockerArgs string
+		if vers.IsBaseRef() {
+			//DockerArgs = "--squash"
+		} else {
+			// docker pull "${GB_REF}"
+			run := gears.Selected.GetBuildRun()
+			if run == "" {
+				//GEARBOX_ENTRYPOINT="$(docker inspect --format '{{ with }}{{ else }}{{ with .ContainerConfig.Entrypoint}}{{ index . 0 }}{{ end }}' "${GB_REF}")"
+				//export GEARBOX_ENTRYPOINT
+				//GEARBOX_ENTRYPOINT_ARGS="$(docker inspect --format '{{ join .ContainerConfig.Entrypoint " " }}' "${GB_REF}")"
+				//export GEARBOX_ENTRYPOINT_ARGS
+			} else {
+				//GEARBOX_ENTRYPOINT="${GB_RUN}"
+				//export GEARBOX_ENTRYPOINT
+				//GEARBOX_ENTRYPOINT_ARGS="${GB_ARGS}"
+				//export GEARBOX_ENTRYPOINT_ARGS
+
+				//
+			}
+
+			// docker build -t ${GB_IMAGENAME}:${GB_VERSION} -f ${GB_DOCKERFILE} --build-arg GEARBOX_ENTRYPOINT
+			// --build-arg GEARBOX_ENTRYPOINT_ARGS ${DOCKER_ARGS} .
+
+			//if [ "${GB_MAJORVERSION}" != "" ]
+			//then
+			//	docker tag ${GB_IMAGENAME}:${GB_VERSION} ${GB_IMAGENAME}:${GB_MAJORVERSION}
+			//fi
+			//
+			//if [ "${GB_LATEST}" == "true" ]
+			//then
+			//	docker tag ${GB_IMAGENAME}:${GB_VERSION} ${GB_IMAGENAME}:latest
+			//fi
+		}
+
+		//if gears.Selected.GearConfig.Versions.HasVersion(gearVersion) == "" {
+		//	//
+		//}
+	}
+
+	return gears.State
 }
 
 // Search for an image in remote registry.
@@ -464,11 +630,19 @@ func MatchImage(m *types.ImageSummary, match TypeMatchImage) (bool, *gearConfig.
 			break
 		}
 
-		tagCheck := fmt.Sprintf("%s/%s:%s", match.Organization, match.Name, match.Version)
-		if !MatchTag(tagCheck, m.RepoTags) {
-			ok = false
-			break
-		}
+		//tagCheck := fmt.Sprintf("%s/%s:%s", match.Organization, match.Name, match.Version)
+		//if !MatchTag(tagCheck, m.RepoTags) {
+		//	ok = false
+		//	break
+		//}
+		//
+		//if _, ok2 := m.Labels["container.latest"]; ok2 {
+		//	tagCheck := fmt.Sprintf("%s/%s:latest", match.Organization, match.Name)
+		//	if !MatchTag(tagCheck, m.RepoTags) {
+		//		ok = false
+		//		break
+		//	}
+		//}
 
 		if gc.Meta.Name != match.Name {
 			if !RunAs.AsLink {
@@ -601,11 +775,12 @@ func (gears *Gears) ContainerCreate(gearName string, gearVersion string) *ux.Sta
 		if !ok {
 			// Find Gear image since we don't have a container.
 			for range onlyOnce {
-				ok, gears.State = gears.FindImage(gearName, gearVersion)
+				gears.State = gears.FindImage(gearName, gearVersion)
 				if gears.State.IsError() {
 					ok = false
 					break
 				}
+				ok = gears.State.GetResponseAsBool()
 				if ok {
 					break
 				}

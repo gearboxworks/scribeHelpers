@@ -244,7 +244,6 @@ func (vers *GearVersions) String() string {
 	return ret
 }
 
-
 func (ports *GearPorts) ToString() string {
 	var p string
 
@@ -254,7 +253,6 @@ func (ports *GearPorts) ToString() string {
 
 	return p
 }
-
 
 func (vers *GearVersions) GetLatest() string {
 	var v string
@@ -269,6 +267,18 @@ func (vers *GearVersions) GetLatest() string {
 	return v
 }
 
+func (vers *GearVersions) GetVersion(version string) *GearVersion {
+	var ret GearVersion
+
+	for k, v := range *vers {
+		if k == version {
+			ret = v
+			break
+		}
+	}
+
+	return &ret
+}
 
 func (vers *GearVersions) HasVersion(gearVersion string) bool {
 	var ok bool
@@ -300,4 +310,20 @@ func (vers *GearVersions) HasVersion(gearVersion string) bool {
 	}
 
 	return ok
+}
+
+func (vers *GearVersion) IsBaseRef() bool {
+	var ok bool
+
+	for range onlyOnce {
+		if vers.Base == "base" {
+			ok = true
+		}
+	}
+
+	return ok
+}
+
+func (vers *GearVersion) IsLatest() bool {
+	return vers.Latest
 }

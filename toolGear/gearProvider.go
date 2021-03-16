@@ -59,15 +59,15 @@ func (p *Provider) SetHost(host string, port string) *ux.State {
 		case ProviderDocker:
 			dh := os.Getenv("DOCKER_HOST")
 			if dh != "" {
-				url, err := url.Parse(dh)
+				u, err := url.Parse(dh)
 				if err != nil {
 					p.State.SetError(err)
 				}
-				if url.Host != "" {
-					p.Host = url.Hostname()
+				if u.Host != "" {
+					p.Host = u.Hostname()
 				}
-				if url.Port() != "" {
-					p.Port = url.Port()
+				if u.Port() != "" {
+					p.Port = u.Port()
 				}
 				break
 			}
@@ -98,6 +98,32 @@ func (p *Provider) SetHost(host string, port string) *ux.State {
 				break
 			}
 			p.State.SetOk()
+
+		default:
+			p.State.SetError("Unknown provider '%s'", p.Name)
+	}
+
+	return p.State
+}
+
+
+func (p *Provider) SetUrl(Url string) *ux.State {
+	switch p.Name {
+		case ProviderDocker:
+			if Url == "" {
+				break
+			}
+			u, err := url.Parse(Url)
+			if err != nil {
+				p.State.SetError(err)
+			}
+			if u.Host != "" {
+				p.Host = u.Hostname()
+			}
+			if u.Port() != "" {
+				p.Port = u.Port()
+			}
+			p.State = p.SetHost(p.Host, p.Port)
 
 		default:
 			p.State.SetError("Unknown provider '%s'", p.Name)

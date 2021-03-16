@@ -1,6 +1,7 @@
 package toolGear
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"github.com/newclarity/scribeHelpers/ux"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -27,6 +29,7 @@ type Docker struct {
 	Images     []types.ImageSummary
 	Networks   []types.NetworkResource
 
+	Provider    *Provider
 	Client    	*client.Client
 
 	Runtime     *toolRuntime.TypeRuntime
@@ -52,14 +55,33 @@ func NewDocker(runtime *toolRuntime.TypeRuntime) *Docker {
 
 		d = Docker{
 			Containers:     nil,
-			Images: nil,
+			Images:         nil,
 
+			Provider:       NewProvider(runtime),
 			Client:         nil,
 
 			Runtime:        runtime,
 			State:          ux.NewState(runtime.CmdName, runtime.Debug),
 		}
 
+		d.State.SetPackage("")
+		d.State.SetFunctionCaller()
+
+		d.State = d.Connect()
+		if d.State.IsNotOk() {
+			break
+		}
+	}
+
+	return &d
+}
+
+func (d *Docker) Connect() *ux.State {
+	if state := d.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
 		//foo := os.Getenv("DOCKER_HOST")
 		//fmt.Printf("DOCKER_HOST:%s\n", foo)
 
@@ -81,18 +103,9 @@ func NewDocker(runtime *toolRuntime.TypeRuntime) *Docker {
 			d.State.SetError("can not connect to Docker service provider - maybe you haven't set DOCKER_HOST, or Docker not running on this host")
 			break
 		}
-
-		d.State.SetPackage("")
-		d.State.SetFunctionCaller()
-
-		if d.State.IsNotOk() {
-			d.State.SetError("can not connect to Docker service provider - maybe you haven't set DOCKER_HOST, or Docker not running on this host")
-			//gear.State = gear.Docker.State
-			break
-		}
 	}
 
-	return &d
+	return d.State
 }
 
 func (d *Docker) IsValid() *ux.State {
@@ -333,6 +346,34 @@ func (d *Docker) Pull(user string, name string, version string) *ux.State {
 	return d.State
 }
 
+func (d *Docker) PullRepo(repo string) *ux.State {
+	if state := d.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		var user string
+		var name string
+		var version string
+
+		re := regexp.MustCompile("([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)")
+		match := re.FindStringSubmatch(repo)
+		if len(match) >= 4 {
+			version = match[3]
+		}
+		if len(match) >= 3 {
+			name = match[2]
+		}
+		if len(match) >= 2 {
+			user = match[1]
+		}
+
+		d.State = d.Pull(user, name, version)
+	}
+
+	return d.State
+}
+
 
 // ******************************************************************************** //
 
@@ -549,9 +590,16 @@ func (d *Docker) ContainerLogs(containerID string, options types.ContainerLogsOp
 			d.State.SetError("container logs error: %s", err)
 			break
 		}
-		_, _ = io.Copy(os.Stdout, out)
 
-		d.State.SetOutput(out)
+		buf := new(bytes.Buffer)
+		_, _ = io.Copy(buf, out)
+		//_, _ = buf.ReadFrom(out)
+		//foo := buf.String()
+		//fmt.Printf("DEBUG: %s", foo)
+		d.State.SetOutput(buf.String())
+
+		_, _ = io.Copy(os.Stdout, buf)
+
 		d.State.SetOk()
 	}
 

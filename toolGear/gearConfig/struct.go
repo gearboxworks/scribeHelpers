@@ -228,6 +228,20 @@ func (gc *GearConfig) GetFixedPorts() nat.PortMap {
 	return ports
 }
 
+func (gc *GearConfig) GetBuildRun() string {
+	if gc == nil {
+		return ""
+	}
+	return gc.Build.Run
+}
+
+func (gc *GearConfig) GetBuildArgs() string {
+	if gc == nil {
+		return ""
+	}
+	return gc.Build.Args.String()
+}
+
 func (gc *GearConfig) GetCommand(cmd []string) []string {
 	var retCmd []string
 
@@ -274,4 +288,22 @@ func (gc *GearConfig) MatchCommand(cmd string) *string {
 	}
 
 	return c
+}
+
+func (gc *GearConfig) GetVersion(version string) *GearVersion {
+	return gc.Versions.GetVersion(version)
+}
+
+func (gc *GearConfig) IsBaseRef(version string) bool {
+	var ok bool
+	if state := gc.IsNil(); state.IsError() {
+		return ok
+	}
+
+	for range onlyOnce {
+		vers := gc.Versions.GetVersion(version)
+		ok = vers.IsBaseRef()
+	}
+
+	return ok
 }

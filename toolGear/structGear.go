@@ -14,6 +14,7 @@ import (
 type Gear struct {
 	Repo         *GitHubRepo
 	GearConfig   *gearConfig.GearConfig
+	BuildFlag    bool
 
 	Image        *Image
 	Container    *Container
@@ -333,6 +334,13 @@ func (gear *Gear) Logs() *ux.State {
 	return gear.Container.Logs()
 }
 
+func (gear *Gear) Pull(version string) *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+	return gear.Docker.Pull(gear.GearConfig.Meta.Organization, gear.GearConfig.Meta.Name, version)
+}
+
 
 func (gear *Gear) GetCommand(cmd []string) []string {
 	return gear.GearConfig.GetCommand(cmd)
@@ -532,4 +540,46 @@ func (gear *Gear) GetPorts() (Ports, *ux.State) {
 	}
 
 	return ports, gear.State
+}
+
+func (gear *Gear) GetVersion(version string) *gearConfig.GearVersion {
+	if state := gear.IsNil(); state.IsError() {
+		return nil
+	}
+	return gear.GearConfig.GetVersion(version)
+}
+
+func (gear *Gear) GetBuildRun() string {
+	if state := gear.IsNil(); state.IsError() {
+		return ""
+	}
+	return gear.GearConfig.GetBuildRun()
+}
+
+func (gear *Gear) GetBuildArgs() string {
+	if state := gear.IsNil(); state.IsError() {
+		return ""
+	}
+	return gear.GearConfig.GetBuildArgs()
+}
+
+func (gear *Gear) IsBaseRef(version string) bool {
+	if state := gear.IsNil(); state.IsError() {
+		return false
+	}
+	return gear.GearConfig.IsBaseRef(version)
+}
+
+func (gear *Gear) GetRef(version string) string {
+	var ret string
+	if state := gear.IsNil(); state.IsError() {
+		return ret
+	}
+
+	for range onlyOnce {
+		vers := gear.GearConfig.GetVersion(version)
+		ret = vers.Ref
+	}
+
+	return ret
 }
