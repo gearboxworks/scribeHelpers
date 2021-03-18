@@ -46,7 +46,6 @@ var Functions = map[string]reflect.Value{
 	"ParseHostURL": reflect.ValueOf(ParseHostURL),
 	"ReflectGearConfig": reflect.ValueOf(ReflectGearConfig),
 	"ReflectState": reflect.ValueOf(ReflectState),
-	"ReflectToolDockerGear": reflect.ValueOf(ReflectToolDockerGear),
 	"ToolListVersionInfo": reflect.ValueOf(ToolListVersionInfo),
 	"ToolListVersions": reflect.ValueOf(ToolListVersions),
 	"ToolGearbox": reflect.ValueOf(ToolGearbox),

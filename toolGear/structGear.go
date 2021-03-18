@@ -376,7 +376,7 @@ func (gear *Gear) DecodeError(err error) (bool, *ux.State) {
 	return ok, gear.State
 }
 
-func (gear *Gear) ListLinks(version string) *ux.State {
+func (gear *Gear) ListLinks() *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}

@@ -27,6 +27,6 @@ func ReflectState(p *ux.State) *State {
 	return (*State)(p)
 }
 
-func ReflectToolDockerGear(p *TypeGear) *TypeGear {
-	return (*TypeGear)(p)
-}
+//func ReflectToolDockerGear(p *TypeGear) *TypeGear {
+//	return p
+//}

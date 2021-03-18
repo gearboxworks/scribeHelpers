@@ -53,7 +53,7 @@ type TypeScribeArgs struct {
 	State   *ux.State                `json:"-"`
 	valid   bool                     `json:"-"`
 	cmd     *cobra.Command           `json:"-"`
-	//cmdHelp        *toolCobraHelp.TypeCommands
+	SelfCmd *cobra.Command
 }
 func (at *TypeScribeArgs) IsNil() *ux.State {
 	return ux.IfNilReturnError(at)
@@ -145,13 +145,4 @@ func (at *TypeScribeArgs) PrintflnNotify(format string, args ...interface{}) {
 	if at.Verbose {
 		ux.PrintflnBlue(format, args...)
 	}
-}
-
-
-func (at *TypeScribeArgs) GetCmd() *cobra.Command {
-	var ret *cobra.Command
-	if state := at.IsNil(); state.IsError() {
-		return ret
-	}
-	return at.cmd
 }

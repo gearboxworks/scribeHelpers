@@ -215,7 +215,7 @@ func (d *Docker) ImageSearch(repo string, options *types.ImageSearchOptions) ([]
 		defer cancel()
 
 		df := filters.NewArgs()
-		//df.Add("name", "terminus")
+		//df.Add("name", "*")
 		options = &types.ImageSearchOptions{Filters: df, Limit: 100}
 
 		resp, err = d.Client.ImageSearch(ctx, repo, *options)
@@ -746,6 +746,13 @@ func (d *Docker) NetworkList(name string) *ux.State {
 		d.Networks, err = d.Client.NetworkList(ctx, types.NetworkListOptions{Filters: df})
 		if err != nil {
 			d.State.SetError("error listing networks")
+			break
+		}
+
+		d.State.SetResponse(len(d.Networks))
+
+		if len(d.Networks) == 0 {
+			d.State.SetWarning("%s network found", name)
 			break
 		}
 

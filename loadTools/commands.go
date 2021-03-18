@@ -74,6 +74,8 @@ See help for further information:
 			Run: at.CmdRoot,
 			DisableFlagParsing: false,
 		}
+		at.SelfCmd = rootCmd
+
 
 		var toolsCmd = &cobra.Command {
 			Use:   CmdTools,
@@ -590,6 +592,28 @@ func (at *TypeScribeArgs) CmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	return
+}
+
+
+func (at *TypeScribeArgs) GetCmd() *cobra.Command {
+	var ret *cobra.Command
+	if state := at.IsNil(); state.IsError() {
+		return ret
+	}
+	return at.SelfCmd
+}
+
+
+func (at *TypeScribeArgs) CmdHelp() *ux.State {
+	if state := at.IsNil(); state.IsError() {
+		return state
+	}
+
+	err := at.SelfCmd.Help()
+	if err != nil {
+		at.State.SetError(err)
+	}
+	return at.State
 }
 
 

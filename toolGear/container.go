@@ -64,6 +64,7 @@ func NewContainer(runtime *toolRuntime.TypeRuntime) *Container {
 func (c *Container) EnsureNotNil() *Container {
 	for range onlyOnce {
 		if c == nil {
+			//goland:noinspection ALL
 			c = NewContainer(nil)
 		}
 		c.State = c.State.EnsureNotNil()
@@ -191,6 +192,9 @@ func (c *Container) Start() *ux.State {
 		}
 
 		c.State = c.Docker.ContainerStart(c.ID, nil)
+		if c.State.IsNotOk() {
+			break
+		}
 
 		c.State = c.WaitForState(ux.StateRunning, DefaultTimeout)
 		if c.State.IsError() {

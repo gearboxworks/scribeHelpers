@@ -34,6 +34,8 @@ func (su *TypeSelfUpdate) LoadCommands(cmd *cobra.Command, disableVflag bool) *u
 				su.State = su.Version(cmd, args...)
 			},
 		}
+		su.SelfCmd = versionCmd
+
 		var selfUpdateCmd = &cobra.Command{
 			Use:                   CmdSelfUpdate,
 			Short:                 ux.SprintfMagenta(su.Runtime.CmdName) + ux.SprintfBlue(" - Update version of executable."),
@@ -255,6 +257,27 @@ func (su *TypeSelfUpdate) FlagCheckVersion(cmd *cobra.Command) bool {
 	return ok
 }
 
+
+func (su *TypeSelfUpdate) GetCmd() *cobra.Command {
+	var ret *cobra.Command
+	if state := su.IsNil(); state.IsError() {
+		return ret
+	}
+	return su.SelfCmd
+}
+
+
+func (su *TypeSelfUpdate) CmdHelp() *ux.State {
+	if state := su.IsNil(); state.IsError() {
+		return state
+	}
+
+	err := su.SelfCmd.Help()
+	if err != nil {
+		su.State.SetError(err)
+	}
+	return su.State
+}
 
 
 func _GetUsage(c *cobra.Command) string {

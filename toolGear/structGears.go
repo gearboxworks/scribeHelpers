@@ -13,6 +13,7 @@ import (
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -332,7 +333,7 @@ func (gears *Gears) AddGears(gc *gearConfig.GearConfig) *ux.State {
 	}
 
 	for range onlyOnce {
-		for k, _ := range gc.Versions {
+		for k := range gc.Versions {
 			var ok bool
 			gears.State = gears.FindImage(gc.Meta.Name, k)
 			//if gears.State.IsNotOk() {
@@ -381,6 +382,7 @@ func (gears *Gears) ListImages(f string) *ux.State {
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{"Class", "Image", "Ports", "Size"})
 
+		//sort.Sort(ArraySorter(gears.Array))
 		for _, gear := range gears.Array {
 			// foo := fmt.Sprintf("%s/%s", gc.Organization, gc.Name)
 			t.AppendRow([]interface{}{
@@ -408,6 +410,11 @@ func (gears *Gears) ListImages(f string) *ux.State {
 
 	return gears.State
 }
+
+//type ArraySorter map[string]*Gear
+//func (a ArraySorter) Len() int           { return len(a) }
+//func (a ArraySorter) Swap(i, j string)      { a[i], a[j] = a[j], a[i] }
+//func (a ArraySorter) Less(i, j string) bool { return a[i].GearConfig.Meta.Name < a[j].GearConfig.Meta.Name }
 
 func (gears *Gears) GetImages(name string) *ux.State {
 	if state := gears.IsNil(); state.IsError() {
@@ -467,7 +474,7 @@ func (gears *Gears) GetImages(name string) *ux.State {
 	return gears.State
 }
 
-func (gears *Gears) FindImage(gearName string, gearVersion string) (*ux.State) {
+func (gears *Gears) FindImage(gearName string, gearVersion string) *ux.State {
 	var ok bool
 	if state := gears.IsNil(); state.IsError() {
 		return state
@@ -503,7 +510,7 @@ func (gears *Gears) FindImage(gearName string, gearVersion string) (*ux.State) {
 	return gears.State
 }
 
-func (gears *Gears) CreateImage(gearName string, gearVersion string) (*ux.State) {
+func (gears *Gears) CreateImage(gearName string, gearVersion string) *ux.State {
 	if state := gears.IsNil(); state.IsError() {
 		return state
 	}
@@ -594,20 +601,30 @@ func (gears *Gears) Search(gearName string, gearVersion string) *ux.State {
 		} else {
 			repo = fmt.Sprintf("gearboxworks/%s:%s", gearName, gearVersion)
 		}
+		repo = gearName
 
 		var resp []registry.SearchResult
 		resp, gears.State = gears.Docker.ImageSearch(repo, nil)
 
+		sort.Sort(NameSorter(resp))
 		for _, v := range resp {
 			if !strings.HasPrefix(v.Name, "gearboxworks/") {
 				continue
 			}
-			fmt.Printf("%s - %s\n", v.Name, v.Description)
+			ux.PrintfCyan("%s", v.Name)
+			ux.PrintfWhite("\t- ")
+			ux.PrintfBlue("%s\n", v.Description)
 		}
 	}
 
 	return gears.State
 }
+
+type NameSorter []registry.SearchResult
+func (a NameSorter) Len() int           { return len(a) }
+func (a NameSorter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a NameSorter) Less(i, j int) bool { return a[i].Name < a[j].Name }
+
 
 func MatchImage(m *types.ImageSummary, match TypeMatchImage) (bool, *gearConfig.GearConfig) {
 	var ok bool

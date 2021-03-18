@@ -4,8 +4,180 @@ import (
 	"fmt"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
+	"strconv"
 	"strings"
 )
+
+
+func (tc *TypeCommands) GetLevel(cmd *cobra.Command) string {
+	var ret string
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+		if len(cmd.Annotations) == 0 {
+			break
+		}
+		if _, ok := cmd.Annotations["level"]; !ok {
+			break
+		}
+		ret = cmd.Annotations["level"]
+	}
+	return ret
+}
+
+func (tc *TypeCommands) GetType(cmd *cobra.Command) string {
+	var ret string
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+		if len(cmd.Annotations) == 0 {
+			break
+		}
+		if _, ok := cmd.Annotations["type"]; !ok {
+			break
+		}
+		ret = cmd.Annotations["type"]
+	}
+	return ret
+}
+
+func (tc *TypeCommands) GetOrder(cmd *cobra.Command) string {
+	var ret string
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+		if len(cmd.Annotations) == 0 {
+			break
+		}
+		if _, ok := cmd.Annotations["order"]; !ok {
+			break
+		}
+		ret = cmd.Annotations["order"]
+	}
+	return ret
+}
+
+
+func (tc *TypeCommands) IsAdvanced(cmd *cobra.Command) bool {
+	var ok bool
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+		if len(cmd.Annotations) == 0 {
+			break
+		}
+		if _, ok := cmd.Annotations["level"]; !ok {
+			break
+		}
+		if cmd.Annotations["level"] == "advanced" {
+			ok = true
+		}
+	}
+	return ok
+}
+
+func (tc *TypeCommands) IsDefault(cmd *cobra.Command) bool {
+	var ok bool
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+		if len(cmd.Annotations) == 0 {
+			break
+		}
+		if _, ok := cmd.Annotations["level"]; !ok {
+			break
+		}
+		if cmd.Annotations["level"] == "default" {
+			ok = true
+		}
+	}
+	return ok
+}
+
+func (tc *TypeCommands) IsBasic(cmd *cobra.Command) bool {
+	return tc.IsDefault(cmd)
+}
+
+
+func (tc *TypeCommands) SetLevelAdvanced(cmd ...*cobra.Command) {
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+
+		for _, c := range cmd {
+			if len(c.Annotations) == 0 {
+				c.Annotations = map[string]string{"level": "default", "area": "", "order": "0"}
+			}
+			c.Annotations["level"] = "advanced"
+		}
+	}
+}
+
+func (tc *TypeCommands) SetLevelDefault(cmd ...*cobra.Command) {
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+
+		for _, c := range cmd {
+			if len(c.Annotations) == 0 {
+				c.Annotations = map[string]string{"level": "default", "area": "", "order": "0"}
+			}
+			c.Annotations["level"] = "default"
+		}
+	}
+}
+
+func (tc *TypeCommands) SetType(t string, cmd ...*cobra.Command) {
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+
+		for _, c := range cmd {
+			if len(c.Annotations) == 0 {
+				c.Annotations = map[string]string{"level": "default", "area": "", "order": "0"}
+			}
+			c.Annotations["area"] = t
+		}
+	}
+}
+
+func (tc *TypeCommands) SetOrder(cmd ...*cobra.Command) {
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+
+		for k, c := range cmd {
+			if len(c.Annotations) == 0 {
+				c.Annotations = map[string]string{"level": "default", "area": "", "order": "0"}
+			}
+			c.Annotations["order"] = strconv.Itoa(k)
+		}
+	}
+}
+
+func (tc *TypeCommands) SetOrderPos(pos string, cmd ...*cobra.Command) {
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+
+		for _, c := range cmd {
+			if len(c.Annotations) == 0 {
+				c.Annotations = map[string]string{"level": "default", "area": "", "order": "0"}
+			}
+			c.Annotations["order"] = pos
+		}
+	}
+}
 
 
 func (tc *TypeCommands) AddCommands(name string, parent *cobra.Command, child ...*cobra.Command) {
@@ -17,6 +189,9 @@ func (tc *TypeCommands) AddCommands(name string, parent *cobra.Command, child ..
 			tc.Commands[name] = []*cobra.Command{}
 		}
 
+		tc.SetOrder(child...)
+		tc.SetType(name, child...)
+
 		parent.AddCommand(child...)
 
 		for _, c := range child {
@@ -24,7 +199,6 @@ func (tc *TypeCommands) AddCommands(name string, parent *cobra.Command, child ..
 		}
 	}
 }
-
 
 func (tc *TypeCommands) HelpCommand(section string) string {
 	var ret string
@@ -43,7 +217,6 @@ func (tc *TypeCommands) HelpCommand(section string) string {
 	return ret
 }
 
-
 func (tc *TypeCommands) HelpCommands() string {
 	var ret string
 	for range onlyOnce {
@@ -60,7 +233,6 @@ func (tc *TypeCommands) HelpCommands() string {
 	}
 	return ret
 }
-
 
 func (tc *TypeCommands) ParseHelpFlags(cmd *cobra.Command) bool {
 	var ok bool
@@ -98,7 +270,6 @@ func (tc *TypeCommands) ParseHelpFlags(cmd *cobra.Command) bool {
 	return ok
 }
 
-
 func (tc *TypeCommands) _GetUsage(c *cobra.Command) string {
 	var str string
 
@@ -117,7 +288,6 @@ func (tc *TypeCommands) _GetUsage(c *cobra.Command) string {
 	return str
 }
 
-
 func (tc *TypeCommands) _GetCmdPath(c *cobra.Command) string {
 	var str string
 
@@ -125,7 +295,6 @@ func (tc *TypeCommands) _GetCmdPath(c *cobra.Command) string {
 
 	return str
 }
-
 
 func (tc *TypeCommands) _GetCmdHelp(c *cobra.Command) string {
 	var str string
@@ -143,7 +312,6 @@ func (tc *TypeCommands) _GetCmdHelp(c *cobra.Command) string {
 	return str
 }
 
-
 func (tc *TypeCommands) _GetVersion(c *cobra.Command) string {
 	var str string
 
@@ -154,7 +322,6 @@ func (tc *TypeCommands) _GetVersion(c *cobra.Command) string {
 
 	return str
 }
-
 
 func (tc *TypeCommands) SetHelp(c *cobra.Command) {
 	var tmplHelp string
@@ -250,7 +417,6 @@ func (tc *TypeCommands) SetHelp(c *cobra.Command) {
 	c.SetHelpTemplate(tmplHelp)
 	c.SetUsageTemplate(tmplUsage)
 }
-
 
 func (tc *TypeCommands) ChangeHelp(c *cobra.Command, tmplUsage string, tmplHelp string) {
 	//fmt.Printf("%s", rootCmd.UsageTemplate())
@@ -350,7 +516,6 @@ func (tc *TypeCommands) ChangeHelp(c *cobra.Command, tmplUsage string, tmplHelp 
 	c.SetUsageTemplate(tmplUsage)
 }
 
-
 func (tc *TypeCommands) ShowHelpAll() {
 	for range onlyOnce {
 		tc.ShowHelpExamples()
@@ -359,7 +524,6 @@ func (tc *TypeCommands) ShowHelpAll() {
 	tc.State.SetOk()
 }
 
-
 func (tc *TypeCommands) ShowHelpVariables() {
 	for range onlyOnce {
 		ux.PrintfBlue("Keys accessible within your template file:\n")
@@ -367,7 +531,6 @@ func (tc *TypeCommands) ShowHelpVariables() {
 
 	tc.State.SetOk()
 }
-
 
 func (tc *TypeCommands) ShowHelpExamples() {
 	for range onlyOnce {

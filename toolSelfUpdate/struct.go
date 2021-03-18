@@ -40,6 +40,7 @@ type TypeSelfUpdate struct {
 	Runtime    *toolRuntime.TypeRuntime
 	State      *ux.State
 	cmd        *cobra.Command
+	SelfCmd    *cobra.Command
 }
 func (su *TypeSelfUpdate) IsNil() *ux.State {
 	return ux.IfNilReturnError(su)

@@ -74,7 +74,7 @@ func ToolListVersions(gc interface{}) string {
 			break
 		}
 
-		for k, _ := range gear.GearConfig.Versions {
+		for k := range gear.GearConfig.Versions {
 			ret += k + " "
 		}
 	}
@@ -142,7 +142,7 @@ func ToolNewGear() *Gear {
 		//ret.State.SetOk()
 	}
 
-	return (*Gear)(ret)
+	return ret
 }
 
 

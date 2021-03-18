@@ -56,6 +56,7 @@ func NewImage(runtime *toolRuntime.TypeRuntime) *Image {
 func (i *Image) EnsureNotNil() *Image {
 	for range onlyOnce {
 		if i == nil {
+			//goland:noinspection ALL
 			i = NewImage(nil)
 		}
 		i.State = i.State.EnsureNotNil()
