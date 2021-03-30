@@ -94,6 +94,8 @@ func (c *Container) ContainerSsh(interactive bool, statusLine bool, mountPath st
 			GearName:    c.Name,
 			GearVersion: c.Version,
 			CmdArgs:     cmdArgs,
+			FsRemote:    c.Docker.Provider.Remote,
+
 			State:       ux.NewState(c.runtime.CmdName, c.runtime.Debug),
 		})
 
@@ -203,6 +205,10 @@ func (c *Container) SetMountPath(mp string) *ux.State {
 				}
 				c.State.SetOk()
 				c.Ssh.FsMount = mp
+		}
+
+		c.Ssh.FsRemote = c.Docker.Provider.Remote
+		if c.Docker.Provider.IsRemote() {
 		}
 	}
 

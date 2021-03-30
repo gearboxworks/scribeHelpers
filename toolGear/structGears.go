@@ -355,12 +355,71 @@ func (gears *Gears) AddGears(gc *gearConfig.GearConfig) *ux.State {
 	return gears.State
 }
 
-func (gears *Gears) Pull(version string) *ux.State {
+
+// ******************************************************************************** //
+
+func (gears *Gears) SelectedPull(version string) *ux.State {
 	if state := ux.IfNilReturnError(gears); state.IsError() {
 		return state
 	}
 
 	return gears.Selected.Pull(version)
+}
+
+func (gears *Gears) SelectedSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	return gears.Selected.ContainerSsh(interactive, statusLine, mountPath, cmdArgs)
+}
+
+func (gears *Gears) SelectedStart() *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	return gears.Selected.Start()
+}
+
+func (gears *Gears) SelectedStop() *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	return gears.Selected.Stop()
+}
+
+func (gears *Gears) SelectedLogs() *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	return gears.Selected.Logs()
+}
+
+func (gears *Gears) SelectedRemove() *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	return gears.Selected.Remove()
+}
+
+func (gears *Gears) SelectedImageRemove() *ux.State {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return state
+	}
+
+	return gears.Selected.ImageRemove()
+}
+
+func (gears *Gears) SelectedAddVolume(local string, remote string) bool {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return false
+	}
+
+	return gears.Selected.AddVolume(local, remote)
 }
 
 

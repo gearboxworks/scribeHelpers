@@ -108,8 +108,9 @@ func (s *Ssh) InitServer() error {
 	for range onlyOnce {
 		// An SSH server is represented by a ServerConfig, which holds
 		// certificate details and handles authentication of ServerConns.
-		s.ServerConfig = &ssh.ServerConfig{
+		s.ServerConfig = &ssh.ServerConfig {
 			PasswordCallback: SshAuthenticate,
+			//ServerVersion: "launch-" + s.GearName + ":" + s.GearVersion,
 		}
 
 		var privateBytes []byte
@@ -206,7 +207,8 @@ func (s *Ssh) StartServer() error {
 			var channel ssh.Channel
 			channel, requests, err = newChannel.Accept()
 			if err != nil {
-				log.Fatal("could not accept channel.", err)
+				s.State.SetError("could not accept channel.", err)
+				break
 			}
 			_, _ = fmt.Fprintf(debugStream, "Channel accepted\n")
 

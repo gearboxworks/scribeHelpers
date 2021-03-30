@@ -84,6 +84,9 @@ func (d *Docker) Connect() *ux.State {
 	for range onlyOnce {
 		//foo := os.Getenv("DOCKER_HOST")
 		//fmt.Printf("DOCKER_HOST:%s\n", foo)
+		if os.Getenv("DOCKER_HOST") != "" {
+			d.Provider.Remote = true
+		}
 
 		var err error
 		d.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

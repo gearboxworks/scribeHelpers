@@ -327,6 +327,13 @@ func (gear *Gear) Remove() *ux.State {
 	return gear.Container.Remove()
 }
 
+func (gear *Gear) ImageRemove() *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+	return gear.Image.Remove()
+}
+
 func (gear *Gear) Logs() *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state

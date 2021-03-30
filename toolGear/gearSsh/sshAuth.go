@@ -1,8 +1,12 @@
 package gearSsh
 
 import (
+	"fmt"
+	"github.com/newclarity/scribeHelpers/ux"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
+	"net"
+	"net/url"
 )
 
 type SshAuth struct {
@@ -49,6 +53,40 @@ func NewSshAuth(args ...SshAuth) *SshAuth {
 	return &_args
 }
 
+func (sa *SshAuth) IsNil() bool {
+	if state := ux.IfNilReturnError(sa); state.IsError() {
+		return false
+	}
+
+	return true
+}
+
+func (sa *SshAuth) GetHost() string {
+	if ok := sa.IsNil(); !ok {
+		return ""
+	}
+
+	return fmt.Sprintf("%s:%s", sa.Host, sa.Port)
+}
+
+func (sa *SshAuth) SetUrl(addr net.Addr) {
+	if ok := sa.IsNil(); !ok {
+		return
+	}
+
+	for range onlyOnce {
+		var u *url.URL
+		var err error
+		u, err = u.Parse("tcp://" + addr.String())
+		if err != nil {
+			break
+		}
+		sa.Host = u.Hostname()
+		sa.Port = u.Port()
+	}
+
+	return
+}
 
 func readPublicKeyFile(file string) (ssh.AuthMethod, error) {
 

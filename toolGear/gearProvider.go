@@ -17,6 +17,7 @@ type Provider struct {
 	Port    string  `json:"port"`
 	Url     url.URL `json:"url"`
 	Project string  `json:"project"`
+	Remote  bool    `json:"remote"`
 
 	runtime *toolRuntime.TypeRuntime
 	State   *ux.State
@@ -26,12 +27,14 @@ type Provider struct {
 func NewProvider(runtime *toolRuntime.TypeRuntime) *Provider {
 	runtime = runtime.EnsureNotNil()
 
-	p := &Provider{
+	p := &Provider {
 		Name:    ProviderDocker,
 		Host:    "",
 		Port:    "",
 		Url:     url.URL{},
 		Project: "",
+		Remote:  false,
+
 		runtime: runtime,
 		State:   ux.NewState(runtime.CmdName, runtime.Debug),
 	}
@@ -97,6 +100,8 @@ func (p *Provider) SetHost(host string, port string) *ux.State {
 				p.State.SetError(err)
 				break
 			}
+
+			p.Remote = true
 			p.State.SetOk()
 
 		default:
@@ -130,4 +135,9 @@ func (p *Provider) SetUrl(Url string) *ux.State {
 	}
 
 	return p.State
+}
+
+
+func (p *Provider) IsRemote() bool {
+	return p.Remote
 }
