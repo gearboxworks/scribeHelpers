@@ -294,6 +294,10 @@ func (gc *GearConfig) GetVersion(version string) *GearVersion {
 	return gc.Versions.GetVersion(version)
 }
 
+func (gc *GearConfig) GetVersions() *GearVersions {
+	return gc.Versions.GetVersions()
+}
+
 func (gc *GearConfig) IsBaseRef(version string) bool {
 	var ok bool
 	if state := gc.IsNil(); state.IsError() {

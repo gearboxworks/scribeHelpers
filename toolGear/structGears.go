@@ -22,7 +22,7 @@ type Gears struct {
 	Language    Language
 	Array		map[string]*Gear
 	Selected    *Gear
-	//Build		map[string]*Gear
+	Build		*gearConfig.GearConfig
 
 	Docker      *Docker
 
@@ -104,6 +104,9 @@ func (gears *Gears) IsNil() *ux.State {
 
 	return gears.State
 }
+
+
+// ******************************************************************************** //
 
 func (gears *Gears) SetLanguage(appName string, imageName string, containerName string) *ux.State {
 	if state := ux.IfNilReturnError(gears); state.IsError() {
@@ -420,6 +423,14 @@ func (gears *Gears) SelectedAddVolume(local string, remote string) bool {
 	}
 
 	return gears.Selected.AddVolume(local, remote)
+}
+
+func (gears *Gears) SelectedVersions() *gearConfig.GearVersions {
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return &gearConfig.GearVersions{}
+	}
+
+	return gears.Selected.GetVersions()
 }
 
 
@@ -1517,6 +1528,41 @@ func (gears *Gears) FindContainer(gearName string, gearVersion string) (bool, *u
 	return ok, gears.State
 }
 
+func (gears *Gears) FindContainers(gearName string) (map[string]*Gear, *ux.State) {
+	ret := make(map[string]*Gear)
+	if state := gears.IsNil(); state.IsError() {
+		return ret, state
+	}
+
+	for range onlyOnce {
+		if gearName == "" {
+			gears.State.SetError("empty gearname")
+			break
+		}
+
+		gearVersion := "all"
+
+		var ok bool
+		for k, v := range gears.Array {
+			ok, _ = MatchContainer(&v.Container.Summary,
+				TypeMatchContainer{Organization: DefaultOrganization, Name: gearName, Version: gearVersion})
+			if ok {
+				ret[k] = v
+				//break
+			}
+		}
+
+		if !ok {
+			gears.State.SetWarning("Containers '%s' don't exist.", gearName)
+			break
+		}
+
+		gears.State.SetOk("found %s", gears.Language.ContainerName)
+	}
+
+	return ret, gears.State
+}
+
 func MatchContainer(m *types.Container, match TypeMatchContainer) (bool, *gearConfig.GearConfig) {
 	var ok bool
 	gc := gearConfig.New(nil)
@@ -1558,6 +1604,11 @@ func MatchContainer(m *types.Container, match TypeMatchContainer) (bool, *gearCo
 			}
 
 			match.Name = gc.Meta.Name
+		}
+
+		if match.Version == "all" {
+			ok = true
+			break
 		}
 
 		if !gc.Versions.HasVersion(match.Version) {

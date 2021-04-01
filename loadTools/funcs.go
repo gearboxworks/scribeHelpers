@@ -335,9 +335,9 @@ func (at *TypeScribeArgs) ValidateArgs() *ux.State {
 		}
 
 		if at.Scribe.IsSet() {
-			at.Runtime.WorkingDir = at.Scribe.GetDirnameAbs()
+			at.Runtime.WorkingDir.Set(at.Scribe.GetDirnameAbs())
 		} else if at.Json.IsSet() {
-			at.Runtime.WorkingDir = at.Json.GetDirnameAbs()
+			at.Runtime.WorkingDir.Set(at.Json.GetDirnameAbs())
 		}
 
 

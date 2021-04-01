@@ -556,6 +556,13 @@ func (gear *Gear) GetVersion(version string) *gearConfig.GearVersion {
 	return gear.GearConfig.GetVersion(version)
 }
 
+func (gear *Gear) GetVersions() *gearConfig.GearVersions {
+	if state := gear.IsNil(); state.IsError() {
+		return nil
+	}
+	return gear.GearConfig.GetVersions()
+}
+
 func (gear *Gear) GetBuildRun() string {
 	if state := gear.IsNil(); state.IsError() {
 		return ""

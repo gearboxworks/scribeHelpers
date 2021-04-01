@@ -44,7 +44,7 @@ func (p *TypeOsPath) IsNil() *ux.State {
 func New(runtime *toolRuntime.TypeRuntime) *TypeOsPath {
 	runtime = runtime.EnsureNotNil()
 
-	p := &TypeOsPath{
+	p := &TypeOsPath {
 		Path:      "",
 		_Filename: "",
 		_Dirname:  "",

@@ -194,7 +194,7 @@ func (ports *GearPorts) String() string {
 
 	//ret += ux.SprintfCyan("# GearPorts: ")
 	for k, v := range *ports {
-		ret += ux.SprintfBlue("%s:%s ", k, v)
+		ret += ux.SprintfBlue("%s:%s\n", k, v)
 	}
 
 	return ret
@@ -278,6 +278,10 @@ func (vers *GearVersions) GetVersion(version string) *GearVersion {
 	}
 
 	return &ret
+}
+
+func (vers *GearVersions) GetVersions() *GearVersions {
+	return vers
 }
 
 func (vers *GearVersions) HasVersion(gearVersion string) bool {
