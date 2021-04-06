@@ -2,7 +2,10 @@ package gearConfig
 
 import (
 	"fmt"
+	"github.com/newclarity/scribeHelpers/toolNetwork"
 	"github.com/newclarity/scribeHelpers/ux"
+	//"github.com/docker/docker/api/types"
+	"strconv"
 )
 
 type GearMeta struct {
@@ -183,7 +186,12 @@ func (ga *GearArgs) String() string {
 	return ret
 }
 
-
+//type GearPort struct {
+//	Name string
+//	Value types.Port
+//	Available bool
+//}
+//type GearPortMap map[string]GearPort
 type GearPorts map[string]string
 
 func (ports *GearPorts) String() string {
@@ -192,9 +200,32 @@ func (ports *GearPorts) String() string {
 	//	return ux.SprintfRed("GearConfig is nil!\n")
 	//}
 
-	//ret += ux.SprintfCyan("# GearPorts: ")
-	for k, v := range *ports {
-		ret += ux.SprintfBlue("%s:%s\n", k, v)
+	for range onlyOnce {
+		scan := toolNetwork.New()
+		if scan.State.IsNotOk() {
+			break
+		}
+
+		scan.GetPorts()
+		if scan.State.IsNotOk() {
+			break
+		}
+
+		//ret += ux.SprintfCyan("# GearPorts: ")
+		for k, v := range *ports {
+			p, err := strconv.Atoi(v)
+			if err != nil {
+				continue
+			}
+
+			if scan.IsAvailable(uint16(p)) {
+				ret += ux.SprintfGreen("%s:%s\n", k, v)
+				continue
+			}
+			ret += ux.SprintfRed("%s:%s (USED)\n", k, v)
+
+			//ret += ux.SprintfBlue("%s:%s\n", k, v)
+		}
 	}
 
 	return ret
@@ -288,7 +319,7 @@ func (vers *GearVersions) HasVersion(gearVersion string) bool {
 	var ok bool
 
 	for range onlyOnce {
-		//if gearVersion == "latest" {
+		//if gearVersion == LatestName {
 		//	gl := vers.GetLatest()
 		//	if gl == "" {
 		//		break
@@ -296,7 +327,7 @@ func (vers *GearVersions) HasVersion(gearVersion string) bool {
 		//}
 
 		for v, r := range *vers {
-			if r.Latest && (gearVersion == "latest") {
+			if r.Latest && (gearVersion == LatestName) {
 				ok = true
 				break
 			}

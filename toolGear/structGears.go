@@ -557,7 +557,7 @@ func (gears *Gears) FindImage(gearName string, gearVersion string) *ux.State {
 		}
 
 		if gearVersion == "" {
-			gearVersion = "latest"
+			gearVersion = gearConfig.LatestName
 		}
 
 		for _, i := range gears.Array {
@@ -592,7 +592,7 @@ func (gears *Gears) CreateImage(gearName string, gearVersion string) *ux.State {
 		}
 
 		if gearVersion == "" {
-			gearVersion = "latest"
+			gearVersion = gearConfig.LatestName
 		}
 
 		var found bool
@@ -751,7 +751,7 @@ func MatchImage(m *types.ImageSummary, match TypeMatchImage) (bool, *gearConfig.
 			break
 		}
 
-		if match.Version == "latest" {
+		if match.Version == gearConfig.LatestName {
 			gl := gc.Versions.GetLatest()
 			if match.Version != "" {
 				match.Version = gl
@@ -851,7 +851,7 @@ func (gears *Gears) ContainerCreate(gearName string, gearVersion string) *ux.Sta
 		}
 
 		if gearVersion == "" {
-			gearVersion = "latest"
+			gearVersion = gearConfig.LatestName
 		}
 
 		var ok bool
@@ -977,7 +977,7 @@ func (gears *Gears) ContainerCreate(gearName string, gearVersion string) *ux.Sta
 		// 	TmpfsOptions:  nil,
 		// }
 
-		ports := gears.Selected.GetFixedPorts()
+		//ports := gears.Selected.GetFixedPorts()
 		//var ports nat.PortMap
 		//if len(gears.Selected.GearConfig.Build.FixedPorts) > 0 {
 		//	ports = make(nat.PortMap)
@@ -1002,7 +1002,7 @@ func (gears *Gears) ContainerCreate(gearName string, gearVersion string) *ux.Sta
 				Config: nil,
 			},
 			NetworkMode:     DefaultNetwork,
-			PortBindings:    ports,						// @TODO
+			PortBindings:    gears.Selected.GetFixedPortBindings(),
 			RestartPolicy:   container.RestartPolicy {
 				Name:              "",
 				MaximumRetryCount: 0,
@@ -1054,7 +1054,7 @@ func (gears *Gears) ContainerCreate(gearName string, gearVersion string) *ux.Sta
 		gears.Selected.Container.Name = gearName
 		gears.Selected.Container.Version = gearVersion
 		gears.Selected.Container.Docker = gears.Docker
-		if gearVersion == "latest" {
+		if gearVersion == gearConfig.LatestName {
 			gears.Selected.Container.IsLatest = true
 		}
 
@@ -1504,7 +1504,7 @@ func (gears *Gears) FindContainer(gearName string, gearVersion string) (bool, *u
 		}
 
 		if gearVersion == "" {
-			gearVersion = "latest"
+			gearVersion = gearConfig.LatestName
 		}
 
 		for _, c := range gears.Array {
@@ -1616,7 +1616,7 @@ func MatchContainer(m *types.Container, match TypeMatchContainer) (bool, *gearCo
 			break
 		}
 
-		if match.Version == "latest" {
+		if match.Version == gearConfig.LatestName {
 			gl := gc.Versions.GetLatest()
 			if match.Version != "" {
 				match.Version = gl

@@ -2,11 +2,9 @@ package toolGear
 
 import (
 	"github.com/docker/go-connections/nat"
-	"github.com/jedib0t/go-pretty/table"
 	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
-	"os"
 	"strconv"
 )
 
@@ -421,11 +419,18 @@ func (gear *Gear) GetVolumeMounts() []string {
 	return gear.Container.GetVolumeMounts()
 }
 
-func (gear *Gear) GetFixedPorts() nat.PortMap {
+func (gear *Gear) GetFixedPorts() *gearConfig.GearPorts {
 	if state := gear.IsNil(); state.IsError() {
 		return nil
 	}
 	return gear.GearConfig.GetFixedPorts()
+}
+
+func (gear *Gear) GetFixedPortBindings() nat.PortMap {
+	if state := gear.IsNil(); state.IsError() {
+		return nil
+	}
+	return gear.GearConfig.GetFixedPortBindings()
 }
 
 func (gear *Gear) AddVolume(local string, remote string) bool {
@@ -460,58 +465,69 @@ func (gear *Gear) ListContainerPorts() *ux.State {
 	if state := gear.IsNil(); state.IsError() {
 		return state
 	}
-
-	for range onlyOnce {
-		//var err error
-		if gear.IsNotRunning() {
-			break
-		}
-
-		ux.PrintfCyan("Open ports for Container: %s-%s\n", gear.Container.Name, gear.Container.Version)
-		t := table.NewWriter()
-		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{
-			"Container",
-			"Port Name",
-			"Host Port",
-			"Container Port",
-		})
-
-		ports, _ := gear.GetPorts()
-		for _, v := range ports {
-			if v.PrivatePort == 22 {
-				t.AppendRow([]interface{} {
-					ux.SprintfYellow("%s-%s\n", gear.Container.Name, gear.Container.Version),
-					ux.SprintfYellow("ssh"),
-					ux.SprintfYellow("%s:%d", v.IP, v.PublicPort),
-					ux.SprintfYellow("%d", v.PrivatePort),
-				})
-				continue
-			}
-
-			t.AppendRow([]interface{} {
-				ux.SprintfGreen("%s-%s\n", gear.Container.Name, gear.Container.Version),
-				ux.SprintfGreen(v.Name),
-				ux.SprintfGreen("%s:%d", v.IP, v.PublicPort),
-				ux.SprintfGreen("%d", v.PrivatePort),
-			})
-		}
-
-		count := t.Length()
-		if count == 0 {
-			ux.PrintfYellow("None found\n")
-			break
-		}
-
-		t.Render()
-		ux.PrintflnGreen("Ports found: %d", count)
-		ux.PrintflnBlue("")
-
-		gear.State.SetOk("")
-	}
-
-	return gear.State
+	return gear.Container.ListPorts()
 }
+
+//func (gear *Gear) ListContainerPorts() *ux.State {
+//	if state := gear.IsNil(); state.IsError() {
+//		return state
+//	}
+//
+//	for range onlyOnce {
+//		//var err error
+//		if gear.IsNotRunning() {
+//			break
+//		}
+//
+//		ports, _ := gear.GetPorts()
+//		if len(ports) == 0 {
+//			break
+//		}
+//
+//		ux.PrintfCyan("Open ports for Container: %s-%s\n", gear.Container.Name, gear.Container.Version)
+//		t := table.NewWriter()
+//		t.SetOutputMirror(os.Stdout)
+//		t.AppendHeader(table.Row{
+//			"Container",
+//			"Port Name",
+//			"Host Port",
+//			"Container Port",
+//		})
+//
+//		for _, v := range ports {
+//			if v.PrivatePort == 22 {
+//				t.AppendRow([]interface{} {
+//					ux.SprintfYellow("%s-%s\n", gear.Container.Name, gear.Container.Version),
+//					ux.SprintfYellow("ssh"),
+//					ux.SprintfYellow("%s:%d", v.IP, v.PublicPort),
+//					ux.SprintfYellow("%d", v.PrivatePort),
+//				})
+//				continue
+//			}
+//
+//			t.AppendRow([]interface{} {
+//				ux.SprintfGreen("%s-%s\n", gear.Container.Name, gear.Container.Version),
+//				ux.SprintfGreen(v.Name),
+//				ux.SprintfGreen("%s:%d", v.IP, v.PublicPort),
+//				ux.SprintfGreen("%d", v.PrivatePort),
+//			})
+//		}
+//
+//		count := t.Length()
+//		if count == 0 {
+//			ux.PrintfYellow("None found\n")
+//			break
+//		}
+//
+//		t.Render()
+//		ux.PrintflnGreen("Ports found: %d", count)
+//		ux.PrintflnBlue("")
+//
+//		gear.State.SetOk("")
+//	}
+//
+//	return gear.State
+//}
 
 func (gear *Gear) GetPorts() (Ports, *ux.State) {
 	ports := make(Ports)
@@ -521,6 +537,126 @@ func (gear *Gear) GetPorts() (Ports, *ux.State) {
 
 	for range onlyOnce {
 		ports = gear.Container.GetPorts()
+
+		//gcp := gear.gearConfig.Build.Ports
+		for _, p := range ports {
+			if p.PrivatePort == 22 {
+				p.Name = "ssh"
+				continue
+			}
+			if p.PrivatePort == 9970 {
+				p.Name = "gearbox"
+				continue
+			}
+
+			for k, v := range gear.GearConfig.Build.Ports {
+				if k == "" {
+					continue
+				}
+				i, _ := strconv.Atoi(v)
+				if uint16(i) == p.PrivatePort {
+					p.Name = k
+					break
+				}
+			}
+		}
+	}
+
+	return ports, gear.State
+}
+
+func (gear *Gear) ListImagePorts() *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+	return gear.Image.ListPorts()
+}
+
+//func (gear *Gear) ListImagePorts() *ux.State {
+//	if state := gear.IsNil(); state.IsError() {
+//		return state
+//	}
+//
+//	for range onlyOnce {
+//		//var err error
+//		//if gear.IsNotRunning() {
+//		//	break
+//		//}
+//
+//		ports, _ := gear.GetImagePorts()
+//		if len(ports) == 0 {
+//			break
+//		}
+//
+//		ux.PrintfCyan("Open ports for Image: %s:%s\n", gear.Image.Name, gear.Image.Version)
+//		t := table.NewWriter()
+//		t.SetOutputMirror(os.Stdout)
+//		t.AppendHeader(table.Row{
+//			"Container",
+//			"Port Name",
+//			"Host Port",
+//			"Free",
+//		})
+//
+//		used := 0
+//		for _, v := range ports {
+//			if v.PrivatePort == 22 {
+//				t.AppendRow([]interface{} {
+//					ux.SprintfYellow("%s:%s\n", gear.Image.Name, gear.Image.Version),
+//					ux.SprintfYellow("ssh"),
+//					ux.SprintfYellow("%s:%d", v.IP, v.PublicPort),
+//					ux.SprintfYellow("Yes"),
+//				})
+//				continue
+//			}
+//
+//			if v.Available {
+//				t.AppendRow([]interface{} {
+//					ux.SprintfGreen("%s:%s\n", gear.Image.Name, gear.Image.Version),
+//					ux.SprintfGreen(v.Name),
+//					ux.SprintfGreen("%s:%d", v.IP, v.PublicPort),
+//					ux.SprintfGreen("Yes"),
+//				})
+//				continue
+//			}
+//
+//			t.AppendRow([]interface{} {
+//				ux.SprintfRed("%s:%s\n", gear.Image.Name, gear.Image.Version),
+//				ux.SprintfRed(v.Name),
+//				ux.SprintfRed("%s:%d", v.IP, v.PublicPort),
+//				ux.SprintfRed("No"),
+//			})
+//			used++
+//		}
+//
+//		count := t.Length()
+//		if count == 0 {
+//			ux.PrintfYellow("None found\n")
+//			break
+//		}
+//
+//		t.Render()
+//		ux.PrintflnGreen("Ports found: %d", count)
+//
+//		if used > 0 {
+//			ux.PrintflnRed("Warning: There are ports that are being used.")
+//		}
+//		ux.PrintflnBlue("")
+//
+//		gear.State.SetOk("")
+//	}
+//
+//	return gear.State
+//}
+
+func (gear *Gear) GetImagePorts() (Ports, *ux.State) {
+	ports := make(Ports)
+	if state := gear.IsNil(); state.IsError() {
+		return ports, state
+	}
+
+	for range onlyOnce {
+		ports = gear.Image.GetPorts()
 
 		//gcp := gear.gearConfig.Build.Ports
 		for _, p := range ports {

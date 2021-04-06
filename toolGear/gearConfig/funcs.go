@@ -44,7 +44,7 @@ func (gc *GearConfig) ListLinks(version string) *ux.State {
 				}
 
 				if isLatest {
-					gc.State = gc.CheckFile("latest", name, fileName)
+					gc.State = gc.CheckFile(LatestName, name, fileName)
 				} else {
 					gc.State = gc.CheckFile(ver, name, fileName)
 				}
@@ -109,7 +109,7 @@ func (gc *GearConfig) CreateLinks(version string) *ux.State {
 
 		latest := gc.Versions.GetLatest()
 		if version == latest {
-			version = "latest"
+			version = LatestName
 		}
 
 		for name, fileName := range gc.Run.Commands {
@@ -121,7 +121,7 @@ func (gc *GearConfig) CreateLinks(version string) *ux.State {
 			//	k = filepath.Base(v)
 			//}
 			//
-			//if version == "latest" {
+			//if version == LatestName {
 			//	dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s", gc.Runtime.CmdDir, filepath.Separator, k))
 			//} else {
 			//	dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s-%s", gc.Runtime.CmdDir, filepath.Separator, k, version))
@@ -231,7 +231,7 @@ func (gc *GearConfig) RemoveLinks(version string) *ux.State {
 
 		latest := gc.Versions.GetLatest()
 		if version == latest {
-			version = "latest"
+			version = LatestName
 		}
 
 		for name, fileName := range gc.Run.Commands {
@@ -242,7 +242,7 @@ func (gc *GearConfig) RemoveLinks(version string) *ux.State {
 			//	k = filepath.Base(v)
 			//}
 			//
-			//if version == "latest" {
+			//if version == LatestName {
 			//	dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s", gc.Runtime.CmdDir, filepath.Separator, k))
 			//} else {
 			//	dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s-%s", gc.Runtime.CmdDir, filepath.Separator, k, version))
@@ -331,7 +331,7 @@ func (gc *GearConfig) getDstFile(version string, name string, fileName string) s
 			name = filepath.Base(fileName)
 		}
 
-		if version == "latest" {
+		if version == LatestName {
 			dstFile, _ = filepath.Abs(fmt.Sprintf("%s%c%s", gc.Runtime.CmdDir, filepath.Separator, name))
 		} else {
 			dstFile, _ = filepath.Abs(fmt.Sprintf("%s%c%s-%s", gc.Runtime.CmdDir, filepath.Separator, name, version))
@@ -352,7 +352,7 @@ func (gc *GearConfig) CheckFile(version string, name string, fileName string) *u
 		//	name = filepath.Base(fileName)
 		//}
 		//
-		//if version == "latest" {
+		//if version == LatestName {
 		//	dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s", gc.Runtime.CmdDir, filepath.Separator, name))
 		//} else {
 		//	dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s-%s", gc.Runtime.CmdDir, filepath.Separator, name, version))

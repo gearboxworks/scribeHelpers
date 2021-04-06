@@ -16,11 +16,16 @@ replace github.com/newclarity/scribeHelpers/toolPrompt => ../toolPrompt
 
 replace github.com/newclarity/scribeHelpers/toolTypes => ../toolTypes
 
+replace github.com/newclarity/scribeHelpers/toolNetwork => ../toolNetwork
+
+replace github.com/newclarity/scribeHelpers/toolExec => ../toolExec
+
+
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.14 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
-	github.com/cakturk/go-netstat v0.0.0-20200220111822-e5b49efee7a5
+	//github.com/cakturk/go-netstat v0.0.0-20200220111822-e5b49efee7a5
 	github.com/cavaliercoder/grab v2.0.0+incompatible
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v1.13.1
@@ -39,6 +44,7 @@ require (
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mitchellh/mapstructure v1.3.1
 	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/newclarity/scribeHelpers/toolNetwork v0.0.0
 	github.com/newclarity/scribeHelpers/toolPath v0.0.0-20200604000029-dbb313f0fedc
 	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200604000029-dbb313f0fedc
 	github.com/newclarity/scribeHelpers/ux v0.0.0-20200604000029-dbb313f0fedc

@@ -202,7 +202,14 @@ func (gc *GearConfig) GetPorts() *GearPorts {
 	return &gc.Build.Ports
 }
 
-func (gc *GearConfig) GetFixedPorts() nat.PortMap {
+func (gc *GearConfig) GetFixedPorts() *GearPorts {
+	if gc == nil {
+		return &GearPorts{}
+	}
+	return &gc.Build.FixedPorts
+}
+
+func (gc *GearConfig) GetFixedPortBindings() nat.PortMap {
 	var ports nat.PortMap
 	if state := gc.IsNil(); state.IsError() {
 		return nil
@@ -211,8 +218,7 @@ func (gc *GearConfig) GetFixedPorts() nat.PortMap {
 	for range onlyOnce {
 		if len(gc.Build.FixedPorts) > 0 {
 			ports = make(nat.PortMap)
-			for k, v := range gc.Build.FixedPorts {
-				fmt.Printf("%s => %v\n", k, v)
+			for _, v := range gc.Build.FixedPorts {
 				var bind []nat.PortBinding
 				bind = append(bind, nat.PortBinding {
 					HostIP: "0.0.0.0",
@@ -227,6 +233,32 @@ func (gc *GearConfig) GetFixedPorts() nat.PortMap {
 
 	return ports
 }
+
+//func (gc *GearConfig) GetFixedPorts() nat.PortMap {
+//	var ports nat.PortMap
+//	if state := gc.IsNil(); state.IsError() {
+//		return nil
+//	}
+//
+//	for range onlyOnce {
+//		if len(gc.Build.FixedPorts) > 0 {
+//			ports = make(nat.PortMap)
+//			for _, v := range gc.Build.FixedPorts {
+//				//fmt.Printf("%s => %v\n", k, v)
+//				var bind []nat.PortBinding
+//				bind = append(bind, nat.PortBinding {
+//					HostIP: "0.0.0.0",
+//					HostPort: v,
+//				})
+//				ports[(nat.Port)(v + "/tcp")] = bind
+//			}
+//		} else {
+//			ports = nil
+//		}
+//	}
+//
+//	return ports
+//}
 
 func (gc *GearConfig) GetBuildRun() string {
 	if gc == nil {

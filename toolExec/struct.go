@@ -356,6 +356,9 @@ func (e *TypeExecCommand) GetStdout() []byte {
 func (e *TypeExecCommand) GetStdoutString() string {
 	return string(e.stdout)
 }
+func (e *TypeExecCommand) GetStdoutArray(sep string) []string {
+	return strings.Split(string(e.stdout), sep)
+}
 
 
 func (e *TypeExecCommand) GetStderr() []byte {
@@ -363,6 +366,9 @@ func (e *TypeExecCommand) GetStderr() []byte {
 }
 func (e *TypeExecCommand) GetStderrString() string {
 	return string(e.stderr)
+}
+func (e *TypeExecCommand) GetStderrArray(sep string) []string {
+	return strings.Split(string(e.stderr), sep)
 }
 
 

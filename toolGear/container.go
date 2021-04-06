@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
-	"github.com/docker/go-connections/nat"
+	"github.com/jedib0t/go-pretty/table"
 	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/toolGear/gearSsh"
+	"github.com/newclarity/scribeHelpers/toolNetwork"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
+	"os"
 	"strings"
 	"time"
 )
@@ -361,16 +363,73 @@ func (c *Container) GetVolumeMounts() []string {
 	return ret
 }
 
-func (c *Container) GetFixedPorts() nat.PortMap {
+func (c *Container) GetFixedPorts() *gearConfig.GearPorts {
 	if state := c.IsNil(); state.IsError() {
 		return nil
 	}
 	return c.GearConfig.GetFixedPorts()
 }
 
+func (c *Container) ListPorts() *ux.State {
+	if state := c.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		ports := c.GetPorts()
+		if len(ports) == 0 {
+			break
+		}
+
+		ux.PrintfCyan("Open ports for Container: %s-%s\n", c.Name, c.Version)
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{
+			"Container",
+			"Port Name",
+			"Host Port",
+			"Container Port",
+		})
+
+		for _, v := range ports {
+			if v.PrivatePort == 22 {
+				t.AppendRow([]interface{} {
+					ux.SprintfYellow("%s-%s\n", c.Name, c.Version),
+					ux.SprintfYellow("ssh"),
+					ux.SprintfYellow("%s:%d", v.IP, v.PublicPort),
+					ux.SprintfYellow("%d", v.PrivatePort),
+				})
+				continue
+			}
+
+			t.AppendRow([]interface{} {
+				ux.SprintfGreen("%s-%s\n", c.Name, c.Version),
+				ux.SprintfGreen(v.Name),
+				ux.SprintfGreen("%s:%d", v.IP, v.PublicPort),
+				ux.SprintfGreen("%d", v.PrivatePort),
+			})
+		}
+
+		count := t.Length()
+		if count == 0 {
+			ux.PrintfYellow("None found\n")
+			break
+		}
+
+		t.Render()
+		ux.PrintflnGreen("Ports found: %d", count)
+		ux.PrintflnBlue("")
+
+		c.State.SetOk("")
+	}
+
+	return c.State
+}
+
 
 type Port struct {
 	Name string
+	Available bool
 	types.Port
 }
 type Ports map[uint16]*Port
@@ -381,17 +440,28 @@ func (c *Container) GetPorts() Ports {
 		//if c.Summary == nil {
 		//	break
 		//}
-		var found bool
+		scan := toolNetwork.New()
+		if scan.State.IsNotOk() {
+			c.State = scan.State
+			break
+		}
+		c.State = scan.GetPorts()
+		if c.State.IsNotOk() {
+			break
+		}
+
+		//var found bool
 		for _, p := range c.Summary.Ports {
 			ports[p.PrivatePort] = &Port {
 				Name: "",
+				Available: scan.IsAvailable(p.PublicPort),
 				Port: p,
 			}
 		}
 
-		if !found {
-			c.State.SetError("no ports")
-		}
+		//if !found {
+		//	c.State.SetError("no ports")
+		//}
 	}
 
 	return ports

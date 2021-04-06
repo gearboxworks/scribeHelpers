@@ -18,6 +18,8 @@ const (
 	DefaultNetwork = "gearboxnet"
 	DefaultUnitTestCmd = "/etc/gearbox/unit-tests/run.sh"
 	DefaultCommandName = "default"
+
+	//LatestName = "latest"
 )
 
 type ExecCommand struct {

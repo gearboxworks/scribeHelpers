@@ -7,11 +7,14 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/jedib0t/go-pretty/table"
 	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
+	"github.com/newclarity/scribeHelpers/toolNetwork"
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -272,4 +275,138 @@ func (i *Image) GetSize() uint64 {
 
 func (i *Image) GetLabels() map[string]string {
 	return i.Summary.Labels
+}
+
+//type GearPort struct {
+//	Name string
+//	Value types.Port
+//	Available bool
+//}
+//type GearPortMap map[string]GearPort
+
+func (i *Image) GetPorts() Ports {
+	ports := make(Ports)
+
+	for range onlyOnce {
+		scan := toolNetwork.New()
+		if scan.State.IsNotOk() {
+			i.State = scan.State
+			break
+		}
+		i.State = scan.GetPorts()
+		if i.State.IsNotOk() {
+			break
+		}
+
+		for k, v := range *i.GearConfig.GetFixedPorts() {
+			p, err := strconv.Atoi(v)
+			if err != nil {
+				continue
+			}
+
+			ports[uint16(p)] = &Port {
+				Name: k,
+				Available: scan.IsAvailable(uint16(p)),
+				Port: types.Port {
+					IP:          "0.0.0.0",
+					PrivatePort: 0,
+					PublicPort:  uint16(p),
+					Type:        "tcp",
+				},
+			}
+		}
+
+		//for p := range i.Details.ContainerConfig.ExposedPorts {
+		//	ports[uint16(p.Int())] = &Port {
+		//		Name: "",
+		//		Available: scan.IsAvailable(uint16(p.Int())),
+		//		Port: types.Port{
+		//			IP:          "",
+		//			PrivatePort: 0,
+		//			PublicPort:  0,
+		//			Type:        "",
+		//		},
+		//	}
+		//}
+
+	}
+
+	return ports
+}
+
+func (i *Image) ListPorts() *ux.State {
+	if state := i.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		//var err error
+		//if gear.IsNotRunning() {
+		//	break
+		//}
+
+		ports := i.GetPorts()
+		if len(ports) == 0 {
+			break
+		}
+
+		ux.PrintfCyan("Open ports for Image: %s:%s\n", i.Name, i.Version)
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{
+			"Container",
+			"Port Name",
+			"Host Port",
+			"Free",
+		})
+
+		used := 0
+		for _, v := range ports {
+			if v.PrivatePort == 22 {
+				t.AppendRow([]interface{} {
+					ux.SprintfYellow("%s:%s\n", i.Name, i.Version),
+					ux.SprintfYellow("ssh"),
+					ux.SprintfYellow("%s:%d", v.IP, v.PublicPort),
+					ux.SprintfYellow("Yes"),
+				})
+				continue
+			}
+
+			if v.Available {
+				t.AppendRow([]interface{} {
+					ux.SprintfGreen("%s:%s\n", i.Name, i.Version),
+					ux.SprintfGreen(v.Name),
+					ux.SprintfGreen("%s:%d", v.IP, v.PublicPort),
+					ux.SprintfGreen("Yes"),
+				})
+				continue
+			}
+
+			t.AppendRow([]interface{} {
+				ux.SprintfRed("%s:%s\n", i.Name, i.Version),
+				ux.SprintfRed(v.Name),
+				ux.SprintfRed("%s:%d", v.IP, v.PublicPort),
+				ux.SprintfRed("No"),
+			})
+			used++
+		}
+
+		count := t.Length()
+		if count == 0 {
+			ux.PrintfYellow("None found\n")
+			break
+		}
+
+		t.Render()
+		ux.PrintflnGreen("Ports found: %d", count)
+
+		if used > 0 {
+			ux.PrintflnRed("Warning: There are ports that are being used.")
+		}
+		ux.PrintflnBlue("")
+
+		i.State.SetOk("")
+	}
+
+	return i.State
 }
