@@ -16,6 +16,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -28,6 +29,7 @@ type Docker struct {
 	Containers []types.Container
 	Images     []types.ImageSummary
 	Networks   []types.NetworkResource
+	Registry   []registry.SearchResult
 
 	Provider    *Provider
 	Client    	*client.Client
@@ -203,10 +205,9 @@ func (d *Docker) ImageInspectWithRaw(imageID string) (types.ImageInspect, *ux.St
 	return resp, d.State
 }
 
-func (d *Docker) ImageSearch(repo string, options *types.ImageSearchOptions) ([]registry.SearchResult, *ux.State) {
-	var resp []registry.SearchResult
+func (d *Docker) ImageSearch(repo string, options ...types.ImageSearchOptions) *ux.State {
 	if state := d.IsNil(); state.IsError() {
-		return resp, state
+		return state
 	}
 
 	for range onlyOnce {
@@ -219,19 +220,32 @@ func (d *Docker) ImageSearch(repo string, options *types.ImageSearchOptions) ([]
 
 		df := filters.NewArgs()
 		//df.Add("name", "*")
-		options = &types.ImageSearchOptions{Filters: df, Limit: 100}
-
-		resp, err = d.Client.ImageSearch(ctx, repo, *options)
-		if err != nil {
-			d.State.SetError("gear image search error: %s", err)
-			break
+		if len(options) == 0 {
+			options = append(options, types.ImageSearchOptions{Filters: df, Limit: 100})
 		}
 
+		d.Registry, err = d.Client.ImageSearch(ctx, repo, (options[0]))
+		if err != nil {
+			d.State.SetError("search error: %s", err)
+			break
+		}
+		if len(d.Registry) == 0 {
+			d.State.SetWarning("'%s' not found in registry", repo)
+			break
+		}
+		sort.Sort(NameSorter(d.Registry))
+
+		d.State.SetResponse(len(d.Registry))
 		d.State.SetOk()
 	}
 
-	return resp, d.State
+	return d.State
 }
+
+type NameSorter []registry.SearchResult
+func (a NameSorter) Len() int           { return len(a) }
+func (a NameSorter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a NameSorter) Less(i, j int) bool { return a[i].Name < a[j].Name }
 
 func (d *Docker) ImageRemove(imageID string, options *types.ImageRemoveOptions) *ux.State {
 	if state := d.IsNil(); state.IsError() {

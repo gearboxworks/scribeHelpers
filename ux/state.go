@@ -448,8 +448,15 @@ func (state *State) SprintError() string {
 func (state *State) SprintResponse() string {
 	return state.SprintSimple()
 }
+
+var _lastResponse = ""	// Avoid doubling up on same response.
 func (state *State) PrintResponse() {
-	_, _ = fmt.Fprintf(os.Stdout, state.SprintSimple() + "\n")
+	thisResponse := state.SprintSimple()
+	if thisResponse == _lastResponse {
+		return
+	}
+	_lastResponse = thisResponse
+	_, _ = fmt.Fprintf(os.Stdout, thisResponse + "\n")
 }
 
 

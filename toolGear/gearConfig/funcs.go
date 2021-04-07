@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 
@@ -181,7 +182,18 @@ func (gc *GearConfig) CreateLinks(version string) *ux.State {
 				err = os.Symlink(gc.Runtime.CmdFile, dstFile)
 				if err != nil {
 					failed = true
-					ux.PrintflnError("Failed to create command link %s -> %s", gc.Runtime.CmdFile, dstFile)
+
+					//err = err.(*os.LinkError).Err
+					//switch err {
+					//	case syscall.EWINDOWS, syscall.ERROR_PRIVILEGE_NOT_HELD:
+					//		ux.PrintflnError("Failed to create command link %s -> %s (%s)", gc.Runtime.CmdFile, dstFile, err)
+					//}
+
+					ux.PrintflnError("Failed to create command link %s -> %s (%s)", gc.Runtime.CmdFile, dstFile, err)
+					if gc.Runtime.IsWindows() {
+						ux.PrintflnError("Check your Windows permissions for creating links.")
+					}
+
 					continue
 				}
 
@@ -335,6 +347,10 @@ func (gc *GearConfig) getDstFile(version string, name string, fileName string) s
 			dstFile, _ = filepath.Abs(fmt.Sprintf("%s%c%s", gc.Runtime.CmdDir, filepath.Separator, name))
 		} else {
 			dstFile, _ = filepath.Abs(fmt.Sprintf("%s%c%s-%s", gc.Runtime.CmdDir, filepath.Separator, name, version))
+		}
+
+		if gc.Runtime.IsWindows() {
+			dstFile = strings.TrimSuffix(dstFile, ".exe") + ".exe"
 		}
 	}
 

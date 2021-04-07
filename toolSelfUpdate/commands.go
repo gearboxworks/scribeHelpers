@@ -213,7 +213,8 @@ func (su *TypeSelfUpdate) VersionUpdate() *ux.State {
 		}
 
 		su.State = su.CreateDummyBinary()
-		if su.State.IsNotOk() {
+		if su.State.IsError() {
+			// Only break on error, NOT warning.
 			break
 		}
 

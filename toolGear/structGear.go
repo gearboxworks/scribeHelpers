@@ -238,53 +238,6 @@ func (gear *Gear) Refresh() *ux.State {
 		return state
 	}
 
-	//for range onlyOnce {
-	//	//var found bool
-	//
-	//	//found, gear.State = gear.FindContainer(gear.GearConfig.Meta.Name)
-	//	//found, gear.State = gear.FindImage()
-	//	gear.State = gear.Image.Status()
-	//
-	//	//gear.Image.Name = name
-	//	//gear.Image.Version = version
-	//	//gear.Image.Status()
-	//	//
-	//	//gear.Container.Name = name
-	//	//gear.Container.Version = version
-	//	//gear.Container.Status()
-	//
-	//	gear.State = gear.Container.Status()
-	//	//gear.State = gear.Docker.Status()
-	//	if gear.State.IsError() {
-	//		break
-	//	}
-	//
-	//	if gear.Image.GearConfig != nil {
-	//		gear.GearConfig = gear.Image.GearConfig
-	//	}
-	//	if gear.Container.GearConfig != nil {
-	//		gear.GearConfig = gear.Container.GearConfig
-	//	}
-	//
-	//	if gear.Image.ID == "" {
-	//		gear.Image.ID = strings.TrimPrefix(gear.Container.Details.Image, "sha256:")
-	//		gear.Image.Name = gear.Container.Name
-	//		gear.Image.Version = gear.Container.Version
-	//	}
-	//
-	//	state2 := gear.Image.Status()
-	//	if state2.IsError() {
-	//		break
-	//	}
-	//
-	//	//state = runState
-	//
-	//	//state = gear.Docker.Image.State()
-	//	//if state.IsError() {
-	//	//	break
-	//	//}
-	//}
-
 	for range onlyOnce {
 		gear.State = gear.Image.Refresh()
 		if gear.State.IsError() {
@@ -301,6 +254,7 @@ func (gear *Gear) Refresh() *ux.State {
 			break
 		}
 	}
+
 	return gear.State
 }
 

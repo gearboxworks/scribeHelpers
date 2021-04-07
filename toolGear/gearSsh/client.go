@@ -122,7 +122,9 @@ func (s *Ssh) Connect() error {
 
 			s.StatusLine.TermWidth, s.StatusLine.TermHeight, err = terminal.GetSize(fileDescriptor)
 			if err != nil {
-				break
+				//break	- IGNORE for now.
+				s.StatusLine.TermWidth = 80
+				s.StatusLine.TermHeight = 25
 			}
 
 			// xterm-256color

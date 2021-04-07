@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/user"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -340,7 +339,7 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 			break
 		}
 
-		ret = &TypeRuntime{
+		ret = &TypeRuntime {
 			CmdName:    binary,
 			CmdVersion: version,
 
@@ -401,9 +400,12 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 			ret.State.SetError(err)
 			break
 		}
-		ret.Cmd =     exe
-		ret.CmdDir =  path.Dir(exe)
-		ret.CmdFile = path.Base(exe)
+		//if ret.GoRuntime.Os == "windows" {
+		//	exe = strings.TrimSuffix(exe,".exe")
+		//}
+		ret.Cmd = exe
+		ret.CmdDir = filepath.Dir(exe)
+		ret.CmdFile = filepath.Base(exe)
 
 		ret.User.User, err = user.Current()
 		if err != nil {
@@ -418,17 +420,17 @@ func New(binary string, version string, debugFlag bool) *TypeRuntime {
 		}
 		ret.WorkingDir.Set(p)
 
-		if runtime.GOOS == "windows" {
-			ret.BaseDir = ""
-		} else {
+		//if runtime.GOOS == "windows" {
+		//	ret.BaseDir = ""
+		//} else {
 			ret.BaseDir.Set(ret.User.HomeDir, "." + ret.CmdName)
-		}
+		//}
 
-		if runtime.GOOS == "windows" {
-			ret.BinDir = ""
-		} else {
+		//if runtime.GOOS == "windows" {
+		//	ret.BinDir = ""
+		//} else {
 			ret.BinDir = ret.BaseDir.Join("bin")
-		}
+		//}
 
 		p, err = os.UserConfigDir()
 		if err != nil {
@@ -491,4 +493,26 @@ func (r *TypeRuntime) EnsureNotNil() *TypeRuntime {
 		return New("binary", "version", false)
 	}
 	return r
+}
+
+func (r *TypeRuntime) IsWindows() bool {
+	var ok bool
+	if r.GoRuntime.Os == "windows" {
+		ok = true
+	}
+	return ok
+}
+func (r *TypeRuntime) IsMac() bool {
+	var ok bool
+	if r.GoRuntime.Os == "darwin" {
+		ok = true
+	}
+	return ok
+}
+func (r *TypeRuntime) IsOsx() bool {
+	var ok bool
+	if r.GoRuntime.Os == "darwin" {
+		ok = true
+	}
+	return ok
 }

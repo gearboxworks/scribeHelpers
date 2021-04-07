@@ -13,7 +13,6 @@ import (
 	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"os"
-	"sort"
 	"strings"
 )
 
@@ -665,35 +664,103 @@ func (gears *Gears) Search(gearName string, gearVersion string) *ux.State {
 	}
 
 	for range onlyOnce {
-		var repo string
-		if gearVersion == "" {
-			repo = fmt.Sprintf("gearboxworks/%s", gearName)
-		} else {
-			repo = fmt.Sprintf("gearboxworks/%s:%s", gearName, gearVersion)
+		//var repo string
+		//for range onlyOnce {
+		//	if gearName == "" {
+		//		repo = DefaultOrganization
+		//		break
+		//	}
+		//	if gearVersion == "" {
+		//		repo = fmt.Sprintf("%s/%s", DefaultOrganization, gearName)
+		//		break
+		//	}
+		//	repo = fmt.Sprintf("%s/%s:%s", DefaultOrganization, gearName, gearVersion)
+		//}
+
+		gears.State = gears.Docker.ImageSearch(DefaultOrganization)
+		if gears.State.IsNotOk() {
+			break
 		}
-		repo = gearName
 
-		var resp []registry.SearchResult
-		resp, gears.State = gears.Docker.ImageSearch(repo, nil)
-
-		sort.Sort(NameSorter(resp))
-		for _, v := range resp {
-			if !strings.HasPrefix(v.Name, "gearboxworks/") {
+		var ok bool
+		//var tmp []registry.SearchResult
+		for _, r := range gears.Docker.Registry {
+			if !strings.HasPrefix(r.Name, DefaultOrganization + "/") {
 				continue
 			}
-			ux.PrintfCyan("%s", v.Name)
-			ux.PrintfWhite("\t- ")
-			ux.PrintfBlue("%s\n", v.Description)
+
+			if gearName != "" {
+				if r.Name != fmt.Sprintf("%s/%s", DefaultOrganization, gearName) {
+					continue
+				}
+			}
+
+			ok = true
+			//tmp = append(tmp, r)
+		}
+
+		//gears.Docker.Registry = tmp
+		gears.State.SetResponse(ok)
+		if !ok {
+			gears.State.SetWarning("%s '%s' not found in registry.", gears.Language.ImageName, gearName)
 		}
 	}
 
 	return gears.State
 }
 
-type NameSorter []registry.SearchResult
-func (a NameSorter) Len() int           { return len(a) }
-func (a NameSorter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a NameSorter) Less(i, j int) bool { return a[i].Name < a[j].Name }
+// Search for an image in remote registry and print.
+func (gears *Gears) SearchPrint(gearName string, gearVersion string) *ux.State {
+	if state := gears.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		gears.State = gears.Search(gearName, gearVersion)
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		ux.PrintfCyan("Available %s %ss: ", gears.Language.AppName, gears.Language.ImageName)
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{gears.Language.ImageName, "Description"})
+
+		for _, v := range gears.Docker.Registry {
+			if !strings.HasPrefix(v.Name, "gearboxworks/") {
+				continue
+			}
+
+			t.AppendRow([]interface{}{
+				ux.SprintfWhite("%s", v.Name),
+				ux.SprintfBlue("%s", v.Description),
+			})
+		}
+
+		gears.State.ClearError()
+		count := t.Length()
+		if count == 0 {
+			ux.PrintfYellow("None found\n")
+			break
+		}
+
+		ux.PrintflnGreen("%d found", count)
+		t.Render()
+		gears.State.SetResponse(count)
+
+		ux.PrintflnBlue("")
+	}
+
+	return gears.State
+}
+
+func (gears *Gears) GetRegistry() []registry.SearchResult {
+	if state := gears.IsNil(); state.IsError() {
+		return []registry.SearchResult{}
+	}
+
+	return gears.Docker.Registry
+}
 
 
 func MatchImage(m *types.ImageSummary, match TypeMatchImage) (bool, *gearConfig.GearConfig) {

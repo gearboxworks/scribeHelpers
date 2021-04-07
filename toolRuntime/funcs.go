@@ -1,13 +1,9 @@
 package toolRuntime
 
 import (
-	"fmt"
 	"github.com/blang/semver"
 	"github.com/newclarity/scribeHelpers/ux"
-	"os"
-	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -134,8 +130,8 @@ func (r *TypeRuntime) SetCmd(a ...string) error {
 			break
 		}
 
-		r.CmdDir = path.Dir(r.Cmd)
-		r.CmdFile = path.Base(r.Cmd)
+		r.CmdDir = filepath.Dir(r.Cmd)
+		r.CmdFile = filepath.Base(r.Cmd)
 	}
 
 	return err
@@ -143,9 +139,21 @@ func (r *TypeRuntime) SetCmd(a ...string) error {
 
 
 func (r *TypeRuntime) IsRunningAs(run string) bool {
+	var ok bool
 	// If OK - running executable file matches the string 'run'.
 	//ok, err := regexp.MatchString("^" + run, r.CmdFile)
-	ok := strings.HasPrefix(run, r.CmdFile)
+
+	if r.IsWindows() {
+		//fmt.Printf("DEBUG: WINDOWS!\n")
+		ok = strings.HasPrefix(run, strings.TrimSuffix(r.CmdFile, ".exe"))
+		//run = strings.TrimSuffix(run, ".exe")
+	} else {
+		ok = strings.HasPrefix(run, r.CmdFile)
+	}
+	//fmt.Printf("DEBUG: Cmd.Runtime.IsRunningAs?? %s\n", ok)
+	//fmt.Printf("DEBUG: run: %s\n", run)
+	//fmt.Printf("DEBUG: r.CmdName: %s\n", r.CmdName)
+	//fmt.Printf("DEBUG: r.CmdFile: %s\n", r.CmdFile)
 	return ok
 }
 func (r *TypeRuntime) IsRunningAsFile() bool {
@@ -159,10 +167,10 @@ func (r *TypeRuntime) IsRunningAsLink() bool {
 }
 
 
-func foo() {
-	fmt.Printf("Go runs OK!\n")
-	fmt.Printf("PPID: %d -> PID:%d\n", os.Getppid(), os.Getpid())
-	fmt.Printf("Compiler: %s v%s\n", runtime.Compiler, runtime.Version())
-	fmt.Printf("Architecture: %s v%s\n", runtime.GOARCH, runtime.GOOS)
-	fmt.Printf("GOROOT: %s\n", runtime.GOROOT())
-}
+//func foo() {
+//	fmt.Printf("Go runs OK!\n")
+//	fmt.Printf("PPID: %d -> PID:%d\n", os.Getppid(), os.Getpid())
+//	fmt.Printf("Compiler: %s v%s\n", runtime.Compiler, runtime.Version())
+//	fmt.Printf("Architecture: %s v%s\n", runtime.GOARCH, runtime.GOOS)
+//	fmt.Printf("GOROOT: %s\n", runtime.GOROOT())
+//}

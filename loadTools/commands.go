@@ -254,20 +254,27 @@ func (at *TypeScribeArgs) DiscoverConfigDir() *ux.State {
 	}
 
 	for range onlyOnce {
+		//cfg := ""
+		//if at.Runtime.IsWindows() {
+		//	cfg = strings.TrimSuffix(at.Runtime.CmdFile,".exe")
+		//}
+		//fmt.Printf("%s",cfg)
+		//fmt.Printf("%s",at.Runtime.CmdName)
+
 		var files []string
-		files = append(files, filepath.Join(at.Runtime.CmdDir, at.Runtime.CmdFile + "-config.json"))
+		files = append(files, filepath.Join(at.Runtime.CmdDir, at.Runtime.CmdName + "-config.json"))
 		//files = append(files, filepath.Join(at.Runtime.CmdDir, "scribe-config.json"))
 		files = append(files, filepath.Join(at.Runtime.CmdDir, "scribe.json"))
 
-		files = append(files, filepath.Join(at.Runtime.User.HomeDir, ".gearbox", at.Runtime.CmdFile + "-config.json"))
+		files = append(files, filepath.Join(at.Runtime.User.HomeDir, ".gearbox", at.Runtime.CmdName + "-config.json"))
 		//files = append(files, filepath.Join(at.Runtime.User.HomeDir, ".gearbox", "scribe-config.json"))
 		files = append(files, filepath.Join(at.Runtime.User.HomeDir, ".gearbox", "scribe.json"))
 
-		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("usr", "local", "gearbox", "etc", at.Runtime.CmdFile + "-config.json")))
+		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("usr", "local", "gearbox", "etc", at.Runtime.CmdName + "-config.json")))
 		//files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("usr", "local", "gearbox", "etc", "scribe-config.json")))
 		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("usr", "local", "gearbox", "etc", "scribe.json")))
 
-		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("opt", "gearbox", "etc", at.Runtime.CmdFile + "-config.json")))
+		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("opt", "gearbox", "etc", at.Runtime.CmdName + "-config.json")))
 		//files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("opt", "gearbox", "etc", "scribe-config.json")))
 		files = append(files, fmt.Sprintf("%c%s", filepath.Separator, filepath.Join("opt", "gearbox", "etc", "scribe.json")))
 
