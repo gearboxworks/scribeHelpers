@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/blang/semver"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 )
 
 

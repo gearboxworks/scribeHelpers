@@ -3,8 +3,8 @@ package toolRuntime
 import (
 	"bufio"
 	"errors"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/kardianos/osext"
-	"github.com/newclarity/scribeHelpers/ux"
 	"io/ioutil"
 	"os"
 	"os/user"

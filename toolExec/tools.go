@@ -1,7 +1,7 @@
 package toolExec
 
 import (
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 )
 
 

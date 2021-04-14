@@ -1,7 +1,7 @@
 package pages
 
 import (
-	"github.com/newclarity/scribeHelpers/toolCrawler/global"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/global"
 	"strings"
 )
 

@@ -21,7 +21,7 @@ package loadTools
 import (
 	"bytes"
 	"fmt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"go/ast"
 	"go/parser"
 	"go/token"

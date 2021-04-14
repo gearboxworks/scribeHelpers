@@ -1,8 +1,8 @@
 package loadTools
 
 import (
-	"github.com/newclarity/scribeHelpers/toolRuntime"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolRuntime"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"text/template"
 )

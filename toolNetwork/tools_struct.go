@@ -1,6 +1,6 @@
 package toolNetwork
 
-import "github.com/newclarity/scribeHelpers/ux"
+import "github.com/gearboxworks/scribeHelpers/ux"
 
 
 type ToolNetwork TypeNetwork

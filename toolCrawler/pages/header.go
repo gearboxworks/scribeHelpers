@@ -2,7 +2,7 @@ package pages
 
 import (
 	"encoding/json"
-	"github.com/newclarity/scribeHelpers/toolCrawler/global"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/global"
 	"github.com/sirupsen/logrus"
 )
 

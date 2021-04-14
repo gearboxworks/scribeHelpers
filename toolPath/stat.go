@@ -2,7 +2,7 @@ package toolPath
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"os"
 	"os/user"
 	"path/filepath"

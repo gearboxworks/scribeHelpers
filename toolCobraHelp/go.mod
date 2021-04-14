@@ -1,23 +1,23 @@
-module github.com/newclarity/scribeHelpers/toolCobraHelp
+module github.com/gearboxworks/scribeHelpers/toolCobraHelp
 
 go 1.14
 
-replace github.com/newclarity/scribeHelpers/ux => ../ux
+replace github.com/gearboxworks/scribeHelpers/ux => ../ux
 
-replace github.com/newclarity/scribeHelpers/toolRuntime => ../toolRuntime
+replace github.com/gearboxworks/scribeHelpers/toolRuntime => ../toolRuntime
 
-replace github.com/newclarity/scribeHelpers/toolPath => ../toolPath
+replace github.com/gearboxworks/scribeHelpers/toolPath => ../toolPath
 
-replace github.com/newclarity/scribeHelpers/toolPrompt => ../toolPrompt
+replace github.com/gearboxworks/scribeHelpers/toolPrompt => ../toolPrompt
 
-replace github.com/newclarity/scribeHelpers/toolTypes => ../toolTypes
+replace github.com/gearboxworks/scribeHelpers/toolTypes => ../toolTypes
 
 require (
-	github.com/newclarity/scribeHelpers/toolPath v0.0.0-20200621234507-ba6f08c6b68d
-	github.com/newclarity/scribeHelpers/toolPrompt v0.0.0-20200621234507-ba6f08c6b68d // indirect
-	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200621234507-ba6f08c6b68d
-	github.com/newclarity/scribeHelpers/toolTypes v0.0.0-20200621234507-ba6f08c6b68d // indirect
-	github.com/newclarity/scribeHelpers/ux v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/gearboxworks/scribeHelpers/toolPath v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/gearboxworks/scribeHelpers/toolPrompt v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/gearboxworks/scribeHelpers/toolTypes v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/gearboxworks/scribeHelpers/ux v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9 // indirect

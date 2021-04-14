@@ -2,10 +2,10 @@ package algolia
 
 import (
 	"github.com/algolia/algoliasearch-client-go/algoliasearch"
-	"github.com/newclarity/scribeHelpers/toolCrawler/config"
-	"github.com/newclarity/scribeHelpers/toolCrawler/global"
-	"github.com/newclarity/scribeHelpers/toolCrawler/hosters"
-	"github.com/newclarity/scribeHelpers/toolCrawler/pages"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/config"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/global"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/hosters"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/pages"
 	"github.com/sirupsen/logrus"
 )
 

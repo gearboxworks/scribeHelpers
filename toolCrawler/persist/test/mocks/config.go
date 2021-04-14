@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"github.com/gearboxworks/go-status/only"
 	"testing"
-	"github.com/newclarity/scribeHelpers/toolCrawler/config"
-	"github.com/newclarity/scribeHelpers/toolCrawler/persist/test"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/config"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/persist/test"
 )
 
 func NewConfig(t *testing.T) *config.Config {

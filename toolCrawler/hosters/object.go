@@ -1,6 +1,6 @@
 package hosters
 
-import "github.com/newclarity/scribeHelpers/toolCrawler/global"
+import "github.com/gearboxworks/scribeHelpers/toolCrawler/global"
 
 type Object struct {
 	global.Object

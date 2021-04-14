@@ -3,8 +3,8 @@ package toolGitHub
 import (
 	"context"
 	"github.com/google/go-github/v31/github"
-	"github.com/newclarity/scribeHelpers/toolPrompt"
-	"github.com/newclarity/scribeHelpers/toolTypes"
+	"github.com/gearboxworks/scribeHelpers/toolPrompt"
+	"github.com/gearboxworks/scribeHelpers/toolTypes"
 	"reflect"
 	"strings"
 )

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/newclarity/scribeHelpers/toolNetwork/netstat"
+	"github.com/gearboxworks/scribeHelpers/toolNetwork/netstat"
 )
 
 var (

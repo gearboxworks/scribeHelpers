@@ -25,10 +25,10 @@ github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 h1:DpOJ2HYzC
 github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7/go.mod h1:ZXFpozHsX6DPmq2I0TCekCxypsnAUbP2oI0UX1GXzOo=
 github.com/mitchellh/go-wordwrap v1.0.0 h1:6GlHJ/LTGMrIJbwgdqdl2eEH8o+Exx/0m8ir9Gns0u4=
 github.com/mitchellh/go-wordwrap v1.0.0/go.mod h1:ZXFpozHsX6DPmq2I0TCekCxypsnAUbP2oI0UX1GXzOo=
-github.com/newclarity/scribeHelpers v0.0.0-20200604000029-dbb313f0fedc h1:J7gNuv9TzPMWBsroQMjO2nQ+Z/EBV+Gzk9PIKRhClT8=
-github.com/newclarity/scribeHelpers/toolPath v0.0.0-20200604000029-dbb313f0fedc h1:NKUrsftpmxqgNC22owIqWHP1A6YDC1FQPvLUfsrj1Mc=
-github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200604000029-dbb313f0fedc h1:/9s/cT2q6s80uPpraXUBJONqJQ1NHQYVQxchmYy0LT8=
-github.com/newclarity/scribeHelpers/toolTypes v0.0.0-20200604000029-dbb313f0fedc h1:TJPbMvwcFTgaF1SkE1l3jcbhmlEsaRSMUH3k7N/4fMk=
+github.com/gearboxworks/scribeHelpers v0.0.0-20200604000029-dbb313f0fedc h1:J7gNuv9TzPMWBsroQMjO2nQ+Z/EBV+Gzk9PIKRhClT8=
+github.com/gearboxworks/scribeHelpers/toolPath v0.0.0-20200604000029-dbb313f0fedc h1:NKUrsftpmxqgNC22owIqWHP1A6YDC1FQPvLUfsrj1Mc=
+github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0-20200604000029-dbb313f0fedc h1:/9s/cT2q6s80uPpraXUBJONqJQ1NHQYVQxchmYy0LT8=
+github.com/gearboxworks/scribeHelpers/toolTypes v0.0.0-20200604000029-dbb313f0fedc h1:TJPbMvwcFTgaF1SkE1l3jcbhmlEsaRSMUH3k7N/4fMk=
 github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d h1:x3S6kxmy49zXVVyhcnrFqxvNVCBPb2KZ9hV2RBdS840=
 github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d/go.mod h1:IuKpRQcYE1Tfu+oAQqaLisqDeXgjyyltCfsaoYN18NQ=
 github.com/nsf/termbox-go v0.0.0-20200418040025-38ba6e5628f1 h1:lh3PyZvY+B9nFliSGTn5uFuqQQJGuNrD0MLCokv09ag=

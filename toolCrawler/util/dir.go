@@ -1,7 +1,7 @@
 package util
 
 import (
-	"github.com/newclarity/scribeHelpers/toolCrawler/global"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/global"
 	"log"
 	"os"
 	"path/filepath"

@@ -2,7 +2,7 @@ package gearSsh
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"net"

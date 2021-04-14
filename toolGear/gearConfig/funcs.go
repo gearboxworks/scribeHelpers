@@ -2,8 +2,8 @@ package gearConfig
 
 import (
 	"fmt"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"os/exec"
 	"path/filepath"

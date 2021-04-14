@@ -1,8 +1,8 @@
 package toolPath
 
 import (
-	"github.com/newclarity/scribeHelpers/toolPrompt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolPrompt"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"os"
 )
 

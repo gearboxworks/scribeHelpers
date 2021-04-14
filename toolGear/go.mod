@@ -1,24 +1,24 @@
-module github.com/newclarity/scribeHelpers/toolGear
+module github.com/gearboxworks/scribeHelpers/toolGear
 
 go 1.14
 
 replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.20190717161051-705d9623b7c1
 
-replace github.com/newclarity/scribeHelpers/ux => ../ux
+replace github.com/gearboxworks/scribeHelpers/ux => ../ux
 
-replace github.com/newclarity/scribeHelpers/toolRuntime => ../toolRuntime
+replace github.com/gearboxworks/scribeHelpers/toolRuntime => ../toolRuntime
 
-replace github.com/newclarity/scribeHelpers/toolGear/gearConfig => ./gearConfig
+replace github.com/gearboxworks/scribeHelpers/toolGear/gearConfig => ./gearConfig
 
-replace github.com/newclarity/scribeHelpers/toolPath => ../toolPath
+replace github.com/gearboxworks/scribeHelpers/toolPath => ../toolPath
 
-replace github.com/newclarity/scribeHelpers/toolPrompt => ../toolPrompt
+replace github.com/gearboxworks/scribeHelpers/toolPrompt => ../toolPrompt
 
-replace github.com/newclarity/scribeHelpers/toolTypes => ../toolTypes
+replace github.com/gearboxworks/scribeHelpers/toolTypes => ../toolTypes
 
-replace github.com/newclarity/scribeHelpers/toolNetwork => ../toolNetwork
+replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../toolNetwork
 
-replace github.com/newclarity/scribeHelpers/toolExec => ../toolExec
+replace github.com/gearboxworks/scribeHelpers/toolExec => ../toolExec
 
 
 require (
@@ -44,10 +44,10 @@ require (
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mitchellh/mapstructure v1.3.1
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/newclarity/scribeHelpers/toolNetwork v0.0.0
-	github.com/newclarity/scribeHelpers/toolPath v0.0.0-20200604000029-dbb313f0fedc
-	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200604000029-dbb313f0fedc
-	github.com/newclarity/scribeHelpers/ux v0.0.0-20200604000029-dbb313f0fedc
+	github.com/gearboxworks/scribeHelpers/toolNetwork v0.0.0
+	github.com/gearboxworks/scribeHelpers/toolPath v0.0.0-20200604000029-dbb313f0fedc
+	github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0-20200604000029-dbb313f0fedc
+	github.com/gearboxworks/scribeHelpers/ux v0.0.0-20200604000029-dbb313f0fedc
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

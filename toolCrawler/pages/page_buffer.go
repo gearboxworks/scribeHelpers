@@ -2,7 +2,7 @@ package pages
 
 //import (
 //	"github.com/gearboxworks/go-status/only"
-//	"github.com/newclarity/scribeHelpers/toolCrawler/global"
+//	"github.com/gearboxworks/scribeHelpers/toolCrawler/global"
 //)
 //
 //type Buffer struct {

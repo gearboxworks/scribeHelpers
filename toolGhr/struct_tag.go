@@ -2,8 +2,8 @@ package toolGhr
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/toolGhr/github"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolGhr/github"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"net/http"
 	"strings"
 )

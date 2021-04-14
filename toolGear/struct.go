@@ -1,10 +1,10 @@
 package toolGear
 
 import (
-	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
-	"github.com/newclarity/scribeHelpers/toolGear/gearSsh"
-	"github.com/newclarity/scribeHelpers/toolRuntime"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolGear/gearConfig"
+	"github.com/gearboxworks/scribeHelpers/toolGear/gearSsh"
+	"github.com/gearboxworks/scribeHelpers/toolRuntime"
+	"github.com/gearboxworks/scribeHelpers/ux"
 )
 
 

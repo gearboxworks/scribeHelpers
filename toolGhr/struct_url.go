@@ -2,7 +2,7 @@ package toolGhr
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 )
 
 const (

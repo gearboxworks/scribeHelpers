@@ -1,19 +1,19 @@
-module github.com/newclarity/scribeHelpers/toolExample
+module github.com/gearboxworks/scribeHelpers/toolExample
 
 go 1.14
 
-replace github.com/newclarity/scribeHelpers/ux => ../ux
+replace github.com/gearboxworks/scribeHelpers/ux => ../ux
 
-replace github.com/newclarity/scribeHelpers/toolRuntime => ../toolRuntime
+replace github.com/gearboxworks/scribeHelpers/toolRuntime => ../toolRuntime
 
-replace github.com/newclarity/scribeHelpers/toolPath => ../toolPath
+replace github.com/gearboxworks/scribeHelpers/toolPath => ../toolPath
 
-replace github.com/newclarity/scribeHelpers/toolPrompt => ../toolPrompt
+replace github.com/gearboxworks/scribeHelpers/toolPrompt => ../toolPrompt
 
-replace github.com/newclarity/scribeHelpers/toolTypes => ../toolTypes
+replace github.com/gearboxworks/scribeHelpers/toolTypes => ../toolTypes
 
 require (
-	github.com/newclarity/scribeHelpers/toolPath v0.0.0-20200604000029-dbb313f0fedc
-	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200604000029-dbb313f0fedc
-	github.com/newclarity/scribeHelpers/ux v0.0.0-20200604000029-dbb313f0fedc
+	github.com/gearboxworks/scribeHelpers/toolPath v0.0.0-20200604000029-dbb313f0fedc
+	github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0-20200604000029-dbb313f0fedc
+	github.com/gearboxworks/scribeHelpers/ux v0.0.0-20200604000029-dbb313f0fedc
 )

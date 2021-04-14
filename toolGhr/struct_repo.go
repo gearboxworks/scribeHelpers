@@ -2,10 +2,10 @@ package toolGhr
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/toolGhr/github"
-	"github.com/newclarity/scribeHelpers/toolPath"
-	"github.com/newclarity/scribeHelpers/toolRuntime"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolGhr/github"
+	"github.com/gearboxworks/scribeHelpers/toolPath"
+	"github.com/gearboxworks/scribeHelpers/toolRuntime"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"net/url"
 	"os"
 	"strings"

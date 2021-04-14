@@ -1,6 +1,6 @@
 package hosters
 
-import "github.com/newclarity/scribeHelpers/toolCrawler/pages"
+import "github.com/gearboxworks/scribeHelpers/toolCrawler/pages"
 
 type IndexHoster interface {
 	Initialize() error

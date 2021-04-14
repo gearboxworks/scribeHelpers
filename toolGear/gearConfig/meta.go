@@ -2,8 +2,8 @@ package gearConfig
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/toolNetwork"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolNetwork"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	//"github.com/docker/docker/api/types"
 	"strconv"
 )

@@ -8,10 +8,10 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/dustin/go-humanize"
+	"github.com/gearboxworks/scribeHelpers/toolGear/gearConfig"
+	"github.com/gearboxworks/scribeHelpers/toolRuntime"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
-	"github.com/newclarity/scribeHelpers/toolRuntime"
-	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"strings"
 )

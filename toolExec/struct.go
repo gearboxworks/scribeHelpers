@@ -2,10 +2,10 @@ package toolExec
 
 import (
 	"bytes"
-	"github.com/newclarity/scribeHelpers/toolPath"
-	"github.com/newclarity/scribeHelpers/toolRuntime"
-	"github.com/newclarity/scribeHelpers/toolTypes"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolPath"
+	"github.com/gearboxworks/scribeHelpers/toolRuntime"
+	"github.com/gearboxworks/scribeHelpers/toolTypes"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"io"
 	"os"
 	"os/exec"

@@ -3,7 +3,7 @@ package toolGo
 import (
 	"errors"
 	"fmt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"net/url"
 	"strings"
 )

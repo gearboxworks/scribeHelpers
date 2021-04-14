@@ -6,7 +6,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/dustin/go-humanize"
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"os"
 	"strings"
 )

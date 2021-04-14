@@ -1,8 +1,8 @@
 package toolGear
 
 import (
-	"github.com/newclarity/scribeHelpers/toolGear/gearSsh"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolGear/gearSsh"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"golang.org/x/crypto/ssh"
 	"net/url"
 	"os"

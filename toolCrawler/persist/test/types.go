@@ -1,5 +1,5 @@
 package test
 
-import "github.com/newclarity/scribeHelpers/toolCrawler/config"
+import "github.com/gearboxworks/scribeHelpers/toolCrawler/config"
 
 type Config = config.Config

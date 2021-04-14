@@ -1,6 +1,6 @@
 package toolGit
 
-import "github.com/newclarity/scribeHelpers/ux"
+import "github.com/gearboxworks/scribeHelpers/ux"
 
 type ToolGit TypeGit
 func (g *ToolGit) IsNil() *ux.State {

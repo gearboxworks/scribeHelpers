@@ -3,7 +3,7 @@ package toolTypes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"regexp"
 	"strings"
 )

@@ -1,7 +1,7 @@
 package toolGit
 
 import (
-	"github.com/newclarity/scribeHelpers/toolPath"
+	"github.com/gearboxworks/scribeHelpers/toolPath"
 	"github.com/tsuyoshiwada/go-gitcmd"
 )
 

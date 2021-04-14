@@ -1,8 +1,8 @@
 package toolGoReleaser
 
 import (
-	"github.com/newclarity/scribeHelpers/toolExec"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolExec"
+	"github.com/gearboxworks/scribeHelpers/ux"
 )
 
 

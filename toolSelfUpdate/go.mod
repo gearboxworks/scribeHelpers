@@ -1,25 +1,25 @@
-module github.com/newclarity/scribeHelpers/toolSelfUpdate
+module github.com/gearboxworks/scribeHelpers/toolSelfUpdate
 
 go 1.14
 
-replace github.com/newclarity/scribeHelpers/ux => ../ux
+replace github.com/gearboxworks/scribeHelpers/ux => ../ux
 
-replace github.com/newclarity/scribeHelpers/toolRuntime => ../toolRuntime
+replace github.com/gearboxworks/scribeHelpers/toolRuntime => ../toolRuntime
 
-replace github.com/newclarity/scribeHelpers/toolPath => ../toolPath
+replace github.com/gearboxworks/scribeHelpers/toolPath => ../toolPath
 
-replace github.com/newclarity/scribeHelpers/toolPrompt => ../toolPrompt
+replace github.com/gearboxworks/scribeHelpers/toolPrompt => ../toolPrompt
 
-replace github.com/newclarity/scribeHelpers/toolTypes => ../toolTypes
+replace github.com/gearboxworks/scribeHelpers/toolTypes => ../toolTypes
 
-replace github.com/newclarity/scribeHelpers/toolGhr => ../toolGhr
+replace github.com/gearboxworks/scribeHelpers/toolGhr => ../toolGhr
 
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-github/v30 v30.1.0
-	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200623081955-45abb1cbefe9
-	github.com/newclarity/scribeHelpers/ux v0.0.0-20200623081955-45abb1cbefe9
+	github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0-20200623081955-45abb1cbefe9
+	github.com/gearboxworks/scribeHelpers/ux v0.0.0-20200623081955-45abb1cbefe9
 	github.com/rhysd/go-github-selfupdate v1.2.2
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5

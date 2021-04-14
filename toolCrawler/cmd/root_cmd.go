@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/newclarity/scribeHelpers/toolCrawler/global"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/global"
 	"github.com/spf13/cobra"
 )
 

@@ -2,8 +2,8 @@ package toolGitHub
 
 import (
 	"github.com/google/go-github/v31/github"
-	"github.com/newclarity/scribeHelpers/toolRuntime"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolRuntime"
+	"github.com/gearboxworks/scribeHelpers/ux"
 )
 
 

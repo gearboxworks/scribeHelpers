@@ -5,7 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"golang.org/x/oauth2"
 	"io"

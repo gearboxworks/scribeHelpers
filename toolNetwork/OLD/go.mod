@@ -1,4 +1,4 @@
-module github.com/newclarity/scribeHelpers/toolNetwork
+module github.com/gearboxworks/scribeHelpers/toolNetwork
 
 go 1.14
 

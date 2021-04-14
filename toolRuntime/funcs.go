@@ -2,7 +2,7 @@ package toolRuntime
 
 import (
 	"github.com/blang/semver"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"path/filepath"
 	"strings"
 )

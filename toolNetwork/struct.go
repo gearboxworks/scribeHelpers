@@ -1,9 +1,9 @@
 package toolNetwork
 
 import (
-	"github.com/newclarity/scribeHelpers/toolExec"
-	"github.com/newclarity/scribeHelpers/toolRuntime"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolExec"
+	"github.com/gearboxworks/scribeHelpers/toolRuntime"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"net"
 	"strconv"
 	"strings"

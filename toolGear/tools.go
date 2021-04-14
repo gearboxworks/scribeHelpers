@@ -3,8 +3,8 @@ package toolGear
 import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
-	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolGear/gearConfig"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"os"
 )
 

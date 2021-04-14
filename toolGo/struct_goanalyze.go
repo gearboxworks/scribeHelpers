@@ -1,7 +1,7 @@
 package toolGo
 
 import (
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"go/ast"
 	"go/token"
 	"sort"

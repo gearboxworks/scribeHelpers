@@ -7,7 +7,7 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/jedib0t/go-pretty/table"
 	//"launch/defaults"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"os"
 )
 

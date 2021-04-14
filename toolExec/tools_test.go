@@ -2,7 +2,7 @@ package toolExec
 
 import (
 	"github.com/davecgh/go-spew/spew"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"testing"
 )
 

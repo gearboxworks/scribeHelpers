@@ -5,8 +5,8 @@ import (
 	"github.com/gearboxworks/go-status/only"
 	"os"
 	"testing"
-	"github.com/newclarity/scribeHelpers/toolCrawler/global"
-	"github.com/newclarity/scribeHelpers/toolCrawler/util"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/global"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/util"
 )
 
 func FmtDir(t *testing.T, p global.Path) (d global.Dir, err error) {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/go-github/v30/github"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/tcnksm/go-gitconfig"

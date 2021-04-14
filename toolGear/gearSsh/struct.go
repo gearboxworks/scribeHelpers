@@ -1,7 +1,7 @@
 package gearSsh
 
 import (
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"golang.org/x/crypto/ssh"
 	//"io"
 	"net"

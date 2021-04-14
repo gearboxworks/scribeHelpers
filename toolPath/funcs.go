@@ -1,7 +1,7 @@
 package toolPath
 
 import (
-	"github.com/newclarity/scribeHelpers/toolTypes"
+	"github.com/gearboxworks/scribeHelpers/toolTypes"
 	"os"
 	"path/filepath"
 	"reflect"

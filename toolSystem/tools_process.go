@@ -1,8 +1,8 @@
 package toolSystem
 
 import (
-	"github.com/newclarity/scribeHelpers/toolTypes"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolTypes"
+	"github.com/gearboxworks/scribeHelpers/ux"
 )
 
 

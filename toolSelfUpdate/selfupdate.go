@@ -2,8 +2,8 @@ package toolSelfUpdate
 
 import (
 	"fmt"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/google/go-github/v30/github"
-	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"path/filepath"
 	"runtime"
@@ -16,7 +16,6 @@ func (su *TypeSelfUpdate) Update() *ux.State {
 		if su.IsNotValid() {
 			break
 		}
-
 
 		ux.PrintflnBlue("Checking '%s' for version greater than v%s", su.useRepo.GetUrl(), su.OldVersion.String())
 		previous := su.OldVersion.ToSemVer()

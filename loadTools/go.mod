@@ -1,40 +1,40 @@
-module github.com/newclarity/scribeHelpers/loadTools
+module github.com/gearboxworks/scribeHelpers/loadTools
 
 go 1.14
 
-replace github.com/newclarity/scribeHelpers/ux => ../ux
+replace github.com/gearboxworks/scribeHelpers/ux => ../ux
 
-replace github.com/newclarity/scribeHelpers/toolRuntime => ../toolRuntime
+replace github.com/gearboxworks/scribeHelpers/toolRuntime => ../toolRuntime
 
-replace github.com/newclarity/scribeHelpers/toolCopy => ../toolCopy
+replace github.com/gearboxworks/scribeHelpers/toolCopy => ../toolCopy
 
 replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.20190717161051-705d9623b7c1
 
-replace github.com/newclarity/scribeHelpers/toolDocker => ../toolDocker
+replace github.com/gearboxworks/scribeHelpers/toolDocker => ../toolDocker
 
-replace github.com/newclarity/scribeHelpers/toolExec => ../toolExec
+replace github.com/gearboxworks/scribeHelpers/toolExec => ../toolExec
 
-replace github.com/newclarity/scribeHelpers/toolGear => ../toolGear
+replace github.com/gearboxworks/scribeHelpers/toolGear => ../toolGear
 
-replace github.com/newclarity/scribeHelpers/toolGit => ../toolGit
+replace github.com/gearboxworks/scribeHelpers/toolGit => ../toolGit
 
-replace github.com/newclarity/scribeHelpers/toolGitHub => ../toolGitHub
+replace github.com/gearboxworks/scribeHelpers/toolGitHub => ../toolGitHub
 
-replace github.com/newclarity/scribeHelpers/toolPath => ../toolPath
+replace github.com/gearboxworks/scribeHelpers/toolPath => ../toolPath
 
-replace github.com/newclarity/scribeHelpers/toolPrompt => ../toolPrompt
+replace github.com/gearboxworks/scribeHelpers/toolPrompt => ../toolPrompt
 
-replace github.com/newclarity/scribeHelpers/toolService => ../toolService
+replace github.com/gearboxworks/scribeHelpers/toolService => ../toolService
 
-replace github.com/newclarity/scribeHelpers/toolSystem => ../toolSystem
+replace github.com/gearboxworks/scribeHelpers/toolSystem => ../toolSystem
 
-replace github.com/newclarity/scribeHelpers/toolTypes => ../toolTypes
+replace github.com/gearboxworks/scribeHelpers/toolTypes => ../toolTypes
 
-replace github.com/newclarity/scribeHelpers/toolUx => ../toolUx
+replace github.com/gearboxworks/scribeHelpers/toolUx => ../toolUx
 
-replace github.com/newclarity/scribeHelpers/toolGhr => ../toolGhr
+replace github.com/gearboxworks/scribeHelpers/toolGhr => ../toolGhr
 
-//replace github.com/newclarity/scribeHelpers/toolCobraHelp => ../toolCobraHelp
+//replace github.com/gearboxworks/scribeHelpers/toolCobraHelp => ../toolCobraHelp
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
@@ -44,18 +44,18 @@ require (
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
-	github.com/newclarity/scribeHelpers/toolCopy v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/toolExec v0.0.0-20200604000029-dbb313f0fedc
-	github.com/newclarity/scribeHelpers/toolGhr v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/toolGit v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/toolGitHub v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/toolPath v0.0.0-20200621234507-ba6f08c6b68d
-	github.com/newclarity/scribeHelpers/toolPrompt v0.0.0-20200621234507-ba6f08c6b68d
-	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200621234507-ba6f08c6b68d
-	github.com/newclarity/scribeHelpers/toolService v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/toolSystem v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/toolTypes v0.0.0-20200621234507-ba6f08c6b68d
-	github.com/newclarity/scribeHelpers/toolUx v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/ux v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/gearboxworks/scribeHelpers/toolCopy v0.0.0-00010101000000-000000000000
+	github.com/gearboxworks/scribeHelpers/toolExec v0.0.0-20200604000029-dbb313f0fedc
+	github.com/gearboxworks/scribeHelpers/toolGhr v0.0.0-00010101000000-000000000000
+	github.com/gearboxworks/scribeHelpers/toolGit v0.0.0-00010101000000-000000000000
+	github.com/gearboxworks/scribeHelpers/toolGitHub v0.0.0-00010101000000-000000000000
+	github.com/gearboxworks/scribeHelpers/toolPath v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/gearboxworks/scribeHelpers/toolPrompt v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/gearboxworks/scribeHelpers/toolService v0.0.0-00010101000000-000000000000
+	github.com/gearboxworks/scribeHelpers/toolSystem v0.0.0-00010101000000-000000000000
+	github.com/gearboxworks/scribeHelpers/toolTypes v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/gearboxworks/scribeHelpers/toolUx v0.0.0-00010101000000-000000000000
+	github.com/gearboxworks/scribeHelpers/ux v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/spf13/cobra v1.0.0
 )

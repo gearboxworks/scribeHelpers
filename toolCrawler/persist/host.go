@@ -3,7 +3,7 @@ package persist
 import (
 	"fmt"
 	"github.com/gearboxworks/go-status/only"
-	"github.com/newclarity/scribeHelpers/toolCrawler/global"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/global"
 	"net/url"
 )
 

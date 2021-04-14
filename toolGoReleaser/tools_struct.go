@@ -1,6 +1,6 @@
 package toolGoReleaser
 
-import "github.com/newclarity/scribeHelpers/ux"
+import "github.com/gearboxworks/scribeHelpers/ux"
 
 
 type ToolGoReleaser TypeGoReleaser

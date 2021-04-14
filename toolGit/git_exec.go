@@ -1,7 +1,7 @@
 package toolGit
 
 import (
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 )
 
 

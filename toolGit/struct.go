@@ -1,10 +1,10 @@
 package toolGit
 
 import (
-	"github.com/newclarity/scribeHelpers/toolExec"
-	"github.com/newclarity/scribeHelpers/toolPath"
-	"github.com/newclarity/scribeHelpers/toolRuntime"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/toolExec"
+	"github.com/gearboxworks/scribeHelpers/toolPath"
+	"github.com/gearboxworks/scribeHelpers/toolRuntime"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/tsuyoshiwada/go-gitcmd"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"

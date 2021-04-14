@@ -2,7 +2,7 @@ package test
 
 import (
 	"testing"
-	"github.com/newclarity/scribeHelpers/toolCrawler/persist"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/persist"
 )
 
 var hostTestCases = []struct {

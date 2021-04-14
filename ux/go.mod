@@ -1,4 +1,4 @@
-module github.com/newclarity/scribeHelpers/ux
+module github.com/gearboxworks/scribeHelpers/ux
 
 go 1.14
 

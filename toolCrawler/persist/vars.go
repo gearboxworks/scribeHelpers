@@ -2,7 +2,7 @@ package persist
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/toolCrawler/global"
+	"github.com/gearboxworks/scribeHelpers/toolCrawler/global"
 )
 
 var tables = []global.Tablename{

@@ -1,6 +1,6 @@
 package toolGo
 
-import "github.com/newclarity/scribeHelpers/ux"
+import "github.com/gearboxworks/scribeHelpers/ux"
 
 
 type ToolGo TypeGo

@@ -1,7 +1,7 @@
 package toolSystem
 
 import (
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/shirou/gopsutil/process"
 	"strings"
 )

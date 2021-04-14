@@ -1,6 +1,6 @@
 package persist
 
-import "github.com/newclarity/scribeHelpers/toolCrawler/global"
+import "github.com/gearboxworks/scribeHelpers/toolCrawler/global"
 
 type Request struct {
 	HostUrl global.Url

@@ -1,6 +1,6 @@
 package toolExample
 
-import "github.com/newclarity/scribeHelpers/ux"
+import "github.com/gearboxworks/scribeHelpers/ux"
 
 
 type ToolExample TypeExample

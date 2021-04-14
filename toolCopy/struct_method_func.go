@@ -2,7 +2,7 @@ package toolCopy
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/zloylos/grsync"
 	"path/filepath"
 	"time"

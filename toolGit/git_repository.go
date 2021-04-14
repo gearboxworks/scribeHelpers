@@ -1,7 +1,7 @@
 package toolGit
 
 import (
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"gopkg.in/src-d/go-git.v4"
 	"net/url"
 	"strings"
