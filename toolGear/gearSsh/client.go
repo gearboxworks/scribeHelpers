@@ -110,6 +110,7 @@ func (s *Ssh) Connect() error {
 			ssh.ISIG: 1,
 		}
 
+
 		// Request pseudo terminal
 		fileDescriptor := int(os.Stdin.Fd())
 		if terminal.IsTerminal(fileDescriptor) {
@@ -143,12 +144,37 @@ func (s *Ssh) Connect() error {
 			s.SshFsTunnel()
 		}
 
+
+		// Determine if the current shell is a pipe or terminal.
+		//var shLvl string
+		//shLvl, err = strconv.Atoi(os.Getenv("SHLVL"))
+		// SHLVL is really a reliable way. So we're going to set a new env variable.
+		// Any containers built prior to 2021/05/04 (May) will need to be rebuilt to avoid the shell level warning.
+		fi, _ := os.Stdin.Stat()
+		if (fi.Mode() & os.ModeCharDevice) == 0 {
+			s.Env["GB_PIPE"] = "YES"
+			delete(s.Env, "GB_TERMINAL")
+			//_ = os.Setenv("GB_PIPE", "YES")
+			//_ = os.Unsetenv("GB_TERMINAL")
+		} else {
+			delete(s.Env, "GB_PIPE")
+			s.Env["GB_TERMINAL"] = "YES"
+			//_ = os.Unsetenv("GB_PIPE")
+			//_ = os.Setenv("GB_TERMINAL", "YES")
+		}
+
+
+		// Assign all shell variables to outgoing SSH.
 		for k, v := range s.Env {
+			if s.Debug {
+				fmt.Printf("DEBUG: ENV %s => %s\r\n", k, v)
+			}
 			err = s.ClientSession.Setenv(k, v)
 			if err != nil {
 				break
 			}
 		}
+
 
 		// Start remote shell
 		if len(s.CmdArgs) == 0 {
@@ -164,9 +190,24 @@ func (s *Ssh) Connect() error {
 
 		} else {
 			cmd := ""
-			for _, v := range s.CmdArgs {
+			if s.Debug {
+				fmt.Printf("DEBUG: s.CmdArgs == %s\r\n", strings.Join(s.CmdArgs, " "))
+			}
+			for i, v := range s.CmdArgs {
+				if s.Debug {
+					fmt.Printf("DEBUG: Command arg[%d] %s\r\n", i, v)
+				}
+
+				if strings.Contains(v, " ") {
+					v = `'` + v + `'`
+				}
 				cmd = fmt.Sprintf("%s %s", cmd, v)
 			}
+
+			if s.Debug {
+				fmt.Printf("DEBUG: Command %s\r\n", cmd)
+			}
+
 			err = s.ClientSession.Run(cmd)
 			if err != nil {
 				break

@@ -3,10 +3,10 @@ package toolGear
 import (
 	"fmt"
 	"github.com/cavaliercoder/grab"
-	"github.com/google/go-github/github"
 	"github.com/gearboxworks/scribeHelpers/toolPath"
 	"github.com/gearboxworks/scribeHelpers/toolRuntime"
 	"github.com/gearboxworks/scribeHelpers/ux"
+	"github.com/google/go-github/github"
 	"golang.org/x/net/context"
 	"os"
 	"strings"
@@ -14,6 +14,7 @@ import (
 )
 
 
+//goland:noinspection SpellCheckingInspection
 const (
 	Brandname = "Gearbox"
 )
@@ -73,7 +74,7 @@ func NewRepo(runtime *toolRuntime.TypeRuntime) *GitHubRepo {
 	return &repo
 }
 
-
+//goland:noinspection SpellCheckingInspection
 func (ghr *GitHubRepo) ShowReleases() *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
@@ -138,8 +139,6 @@ func (r *Release) ShowRelease() *ux.State {
 			ux.Printf("	DownloadCount:		%v\n", asset.GetDownloadCount())
 			ux.Printf("	NodeID:				%v\n", asset.GetNodeID())
 		}
-
-		//eblog.Debug(entity.VmBoxEntityName, "Showing ISO release for v%s", *r.Instance.Name)
 	}
 
 	return r.State
@@ -152,6 +151,7 @@ func (ghr *GitHubRepo) UpdateReleases() *ux.State {
 	}
 
 	for range onlyOnce {
+		//goland:noinspection SpellCheckingInspection
 		if ghr.BaseDir == nil {
 			ghr.BaseDir = toolPath.ToolNewPath("")
 			_ = ghr.BaseDir.AppendPath("iso")
@@ -166,6 +166,7 @@ func (ghr *GitHubRepo) UpdateReleases() *ux.State {
 		//ctx := context.Background()
 		opt := &github.ListOptions{}
 
+		//goland:noinspection SpellCheckingInspection
 		releases, _, err := client.Repositories.ListReleases(context.Background(), "gearboxworks", "docker-os", opt)
 		if err != nil {
 			ghr.State.SetError("can't fetch GitHub releases")
@@ -214,8 +215,6 @@ func (ghr *GitHubRepo) UpdateReleases() *ux.State {
 		//}
 
 		ghr.Map = rm
-
-		//eblog.Debug(entity.VmBoxEntityName, "Fetching ISO releases. Latest == %s", ghr.Latest)
 	}
 
 	return ghr.State
@@ -258,12 +257,12 @@ func (r *Release) GetIso() *ux.State {
 
 	for range onlyOnce {
 		if r.File.GetPath() == "" {
-			r.State.SetError(fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath()))
+			r.State.SetError(fmt.Sprintf("no %s OS iso file defined VmIsoUrl:%s VmIsoFile:%s", Brandname, r.Url, r.File.GetPath()))
 			break
 		}
 
 		if r.Url == "" {
-			r.State.SetError(fmt.Sprintf("no Gearbox OS iso url defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath()))
+			r.State.SetError(fmt.Sprintf("no %s OS iso url defined VmIsoUrl:%s VmIsoFile:%s", Brandname, r.Url, r.File.GetPath()))
 			break
 		}
 
@@ -323,7 +322,6 @@ func (r *Release) GetIso() *ux.State {
 		)
 
 
-		//eblog.Debug(entity.VmBoxEntityName, "ISO fetched from '%s' and saved to '%s'. Size:%d", r.Url, r.TypeFile.GetPath(), resp.Size)
 		r.DlIndex = 100
 		//r.publishDownloadState()
 		r.IsDownloading = false
@@ -357,7 +355,7 @@ func (r *Release) IsIsoFilePresent() (int, *ux.State) {
 
 	for range onlyOnce {
 		if r.File.GetPath() == "" {
-			r.State.SetError( fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.GetPath()))
+			r.State.SetError( fmt.Sprintf("no %s OS iso file defined VmIsoUrl:%s VmIsoFile:%s", Brandname, r.Url, r.File.GetPath()))
 			break
 		}
 
@@ -388,7 +386,6 @@ func (r *Release) IsIsoFilePresent() (int, *ux.State) {
 
 		ret = IsoFileDownloaded
 		r.DlIndex = 100
-		//eblog.Debug(entity.VmBoxEntityName, "ISO already fetched from '%s' and saved to '%s'", r.Url, r.TypeFile.GetPath())
 	}
 
 	return ret, r.State

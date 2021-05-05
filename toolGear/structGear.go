@@ -200,6 +200,31 @@ func (gear *Gear) IsNotStopped() bool {
 	return !gear.IsStopped()
 }
 
+func (gear *Gear) ReadJsonFile(jsonFile string) *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+
+	return gear.GearConfig.ReadJsonFile(jsonFile)
+}
+
+func (gear *Gear) Tag(src string, targets ...string) *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		for _, t := range targets {
+			gear.State = gear.Docker.Tag(src, t)
+			if gear.State.IsNotOk() {
+				break
+			}
+		}
+	}
+
+	return gear.State
+}
+
 //func (gear *Gear) IsNotRunning() bool {
 //	var ok bool
 //	if state := ux.IfNilReturnError(gear); state.IsError() {
@@ -386,6 +411,13 @@ func (gear *Gear) GetFixedPortBindings() nat.PortMap {
 	}
 	return gear.GearConfig.GetFixedPortBindings()
 }
+
+//func (gear *Gear) GetTags() []string {
+//	if state := gear.IsNil(); state.IsError() {
+//		return []string{}
+//	}
+//	return gear.GearConfig.
+//}
 
 func (gear *Gear) AddVolume(local string, remote string) bool {
 	if gear.Container.VolumeMounts == nil {

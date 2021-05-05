@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/jedib0t/go-pretty/table"
 	"github.com/gearboxworks/scribeHelpers/toolGear/gearConfig"
 	"github.com/gearboxworks/scribeHelpers/toolNetwork"
 	"github.com/gearboxworks/scribeHelpers/toolRuntime"
 	"github.com/gearboxworks/scribeHelpers/ux"
+	"github.com/jedib0t/go-pretty/table"
 	"io"
 	"os"
 	"strconv"
@@ -115,7 +115,7 @@ func (i *Image) Refresh() *ux.State {
 
 	for range onlyOnce {
 		if i.Summary.ID == "" {
-			ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+			ctx, cancel := context.WithTimeout(context.Background(), i.Docker.Provider.Timeout)
 			//noinspection GoDeferInLoop
 			defer cancel()
 
@@ -172,6 +172,7 @@ func (i *Image) Pull() *ux.State {
 	}
 
 	for range onlyOnce {
+		//goland:noinspection SpellCheckingInspection
 		i.State = i.Docker.Pull("gearboxworks", i.Name, i.Version)
 	}
 
@@ -199,7 +200,7 @@ func (i *Image) ImageAuthPull() *ux.State {
 		}
 		authStr := base64.URLEncoding.EncodeToString(encodedJSON)
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), i.Docker.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 

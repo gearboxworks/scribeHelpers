@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
-	"github.com/jedib0t/go-pretty/table"
 	"github.com/gearboxworks/scribeHelpers/toolGear/gearConfig"
 	"github.com/gearboxworks/scribeHelpers/toolGear/gearSsh"
 	"github.com/gearboxworks/scribeHelpers/toolNetwork"
 	"github.com/gearboxworks/scribeHelpers/toolRuntime"
 	"github.com/gearboxworks/scribeHelpers/ux"
+	"github.com/jedib0t/go-pretty/table"
 	"os"
 	"strings"
 	"time"
@@ -66,7 +66,7 @@ func NewContainer(runtime *toolRuntime.TypeRuntime) *Container {
 func (c *Container) EnsureNotNil() *Container {
 	for range onlyOnce {
 		if c == nil {
-			//goland:noinspection ALL
+			//goland:noinspection GoAssignmentToReceiver
 			c = NewContainer(nil)
 		}
 		c.State = c.State.EnsureNotNil()
@@ -173,7 +173,7 @@ func (c *Container) WaitForState(s string, t time.Duration) *ux.State {
 }
 
 // Run a container in the background
-// You can also run containers in the background, the equivalent of typing docker run -d bfirsh/reticulate-splines:
+// You can also run containers in the background, the equivalent of typing docker run -d beer/reticulate-splines:
 func (c *Container) Start() *ux.State {
 	if state := c.IsNil(); state.IsError() {
 		return state
@@ -198,7 +198,7 @@ func (c *Container) Start() *ux.State {
 			break
 		}
 
-		c.State = c.WaitForState(ux.StateRunning, DefaultTimeout)
+		c.State = c.WaitForState(ux.StateRunning, c.Docker.Provider.Timeout)
 		if c.State.IsError() {
 			break
 		}

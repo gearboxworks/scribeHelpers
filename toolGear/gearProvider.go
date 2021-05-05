@@ -5,6 +5,7 @@ import (
 	"github.com/gearboxworks/scribeHelpers/ux"
 	"net/url"
 	"os"
+	"time"
 )
 
 const (
@@ -18,6 +19,7 @@ type Provider struct {
 	Url     url.URL `json:"url"`
 	Project string  `json:"project"`
 	Remote  bool    `json:"remote"`
+	Timeout time.Duration    `json:"timeout"`
 
 	runtime *toolRuntime.TypeRuntime
 	State   *ux.State
@@ -27,6 +29,10 @@ type Provider struct {
 func NewProvider(runtime *toolRuntime.TypeRuntime) *Provider {
 	runtime = runtime.EnsureNotNil()
 
+	if runtime.Timeout == 0 {
+		runtime.Timeout = DefaultTimeout
+	}
+
 	p := &Provider {
 		Name:    ProviderDocker,
 		Host:    "",
@@ -34,6 +40,7 @@ func NewProvider(runtime *toolRuntime.TypeRuntime) *Provider {
 		Url:     url.URL{},
 		Project: "",
 		Remote:  false,
+		Timeout: runtime.Timeout,
 
 		runtime: runtime,
 		State:   ux.NewState(runtime.CmdName, runtime.Debug),

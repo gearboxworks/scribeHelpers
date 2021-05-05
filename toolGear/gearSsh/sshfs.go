@@ -14,6 +14,7 @@ import (
 // Handle local client connections and tunnel data to the remote server
 // Will use io.Copy - http://golang.org/pkg/io/#Copy
 func (s *Ssh) handleClient(client net.Conn, remote net.Conn) {
+	//goland:noinspection GoUnhandledErrorResult
 	defer client.Close()
 	chDone := make(chan bool)
 

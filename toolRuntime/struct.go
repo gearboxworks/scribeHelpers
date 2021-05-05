@@ -41,6 +41,7 @@ type TypeRuntime struct {
 	EnvMap         Environment	`json:"env_map" mapstructure:"env_map"`
 
 	TimeStamp      time.Time	`json:"timestamp" mapstructure:"timestamp"`
+	Timeout        time.Duration `json:"timeout" mapstructure:"timeout"`
 
 	GoRuntime      GoRuntime	`json:"go_runtime" mapstructure:"go_runtime"`
 
@@ -215,7 +216,7 @@ func (p *Path) Move(fp string) error {
 	return err
 }
 
-
+//goland:noinspection SpellCheckingInspection
 var RcFiles = []Path {
 	// BASH
 	"/etc/profile",
@@ -247,6 +248,7 @@ var RcFiles = []Path {
 	"~/.logout",
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func GrepFiles(search string, fps ...Path) ([]string, error) {
 	var files []string
 	var err error

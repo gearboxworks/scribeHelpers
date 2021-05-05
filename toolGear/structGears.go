@@ -7,21 +7,25 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/registry"
+	"github.com/docker/docker/pkg/archive"
 	"github.com/dustin/go-humanize"
 	"github.com/gearboxworks/scribeHelpers/toolGear/gearConfig"
+	"github.com/gearboxworks/scribeHelpers/toolPath"
 	"github.com/gearboxworks/scribeHelpers/toolRuntime"
 	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/jedib0t/go-pretty/table"
+	"io"
 	"os"
 	"strings"
+	"time"
 )
 
 
 type Gears struct {
-	Language    Language
+	Language    Language			// Allows for the arbitrary change of container names.
 	Array		map[string]*Gear
-	Selected    *Gear
-	Build		*gearConfig.GearConfig
+	Selected    *Gear				// Currently selected gear.
+	Build		*Gear				// Gear that is being built.
 
 	Docker      *Docker
 
@@ -172,6 +176,30 @@ func (gears *Gears) SetProviderHost(host string, port string) *ux.State {
 	return gears.State
 }
 
+func (gears *Gears) DetermineTimeout(from int, to int, fudgePercent int) time.Duration {
+	var val time.Duration
+	if state := ux.IfNilReturnError(gears); state.IsError() {
+		return val
+	}
+
+	if from == 0 {
+		from = DefaultMinTimeout
+	}
+
+	if to == 0 {
+		to = DefaultMaxTimeout
+	}
+
+	ret := gears.Docker.DetermineTimeout(from, to)
+
+	if fudgePercent > 100 {
+		foo := ret.Milliseconds() * int64(fudgePercent * 10)
+		ret = time.Duration(foo * 1000)
+	}
+
+	return ret
+}
+
 func (gears *Gears) Get() *ux.State {
 	if state := gears.IsNil(); state.IsError() {
 		return state
@@ -205,6 +233,7 @@ func (gears *Gears) Refresh() *ux.State {
 	return state
 }
 
+//goland:noinspection GoUnusedParameter
 func (gears *Gears) ListContainers(name string) *ux.State {
 	if state := gears.IsNil(); state.IsError() {
 		return state
@@ -425,16 +454,26 @@ func (gears *Gears) SelectedAddVolume(local string, remote string) bool {
 }
 
 func (gears *Gears) SelectedVersions() *gearConfig.GearVersions {
+	ret := &gearConfig.GearVersions{}
 	if state := ux.IfNilReturnError(gears); state.IsError() {
-		return &gearConfig.GearVersions{}
+		return ret
 	}
 
-	return gears.Selected.GetVersions()
+	for range onlyOnce {
+		if gears.Selected == nil {
+			break
+		}
+
+		ret = gears.Selected.GetVersions()
+	}
+
+	return ret
 }
 
 
 // ******************************************************************************** //
 
+//goland:noinspection GoUnusedParameter
 func (gears *Gears) ListImages(f string) *ux.State {
 	if state := gears.IsNil(); state.IsError() {
 		return state
@@ -579,7 +618,7 @@ func (gears *Gears) FindImage(gearName string, gearVersion string) *ux.State {
 	return gears.State
 }
 
-func (gears *Gears) CreateImage(gearName string, gearVersion string) *ux.State {
+func (gears *Gears) CreateImage(gearJsonFile string, gearOrg string, gearName string, gearVersion string) *ux.State {
 	if state := gears.IsNil(); state.IsError() {
 		return state
 	}
@@ -594,6 +633,8 @@ func (gears *Gears) CreateImage(gearName string, gearVersion string) *ux.State {
 			gearVersion = gearConfig.LatestName
 		}
 
+
+		// 1. Check for existing image.
 		var found bool
 		gears.State = gears.FindImage(gearName, gearVersion)
 		if gears.State.IsError() {
@@ -601,63 +642,191 @@ func (gears *Gears) CreateImage(gearName string, gearVersion string) *ux.State {
 		}
 		found = gears.State.GetResponseAsBool()
 		if found {
-			//gears.State = gears.Selected.Remove()
-			//if gears.State.IsError() {
-			//	break
-			//}
 			gears.State.SetWarning("Already exists.")
 			break
 		}
 
-		//gears.State = gears.Docker.Pull("gearboxworks", gearName, gearVersion)
-		//if gears.State.IsNotOk() {
-		//	break
-		//}
 
+		// 2. Create new gear config.
+		gears.Selected = NewGear(gears.Runtime, gears.Docker)
+		gears.Selected.BuildFlag = true
+
+		gears.State = gears.Selected.ReadJsonFile(gearJsonFile)
+		if gears.State.IsNotOk() {
+			break
+		}
+
+
+		// 3. Fetch ref images, if required.
+		var buildSquash bool
+		var run string
+		var args string
 		vers := gears.Selected.GetVersion(gearVersion)
 		//var DockerArgs string
 		if vers.IsBaseRef() {
-			//DockerArgs = "--squash"
+			buildSquash = true
 		} else {
+			// Pull base reference.
 			// docker pull "${GB_REF}"
-			run := gears.Selected.GetBuildRun()
-			if run == "" {
-				//GEARBOX_ENTRYPOINT="$(docker inspect --format '{{ with }}{{ else }}{{ with .ContainerConfig.Entrypoint}}{{ index . 0 }}{{ end }}' "${GB_REF}")"
-				//export GEARBOX_ENTRYPOINT
-				//GEARBOX_ENTRYPOINT_ARGS="$(docker inspect --format '{{ join .ContainerConfig.Entrypoint " " }}' "${GB_REF}")"
-				//export GEARBOX_ENTRYPOINT_ARGS
-			} else {
-				//GEARBOX_ENTRYPOINT="${GB_RUN}"
-				//export GEARBOX_ENTRYPOINT
-				//GEARBOX_ENTRYPOINT_ARGS="${GB_ARGS}"
-				//export GEARBOX_ENTRYPOINT_ARGS
-
-				//
+			gears.State = gears.Docker.PullRepo(vers.Ref)
+			if gears.State.IsNotOk() {
+				break
 			}
 
-			// docker build -t ${GB_IMAGENAME}:${GB_VERSION} -f ${GB_DOCKERFILE} --build-arg GEARBOX_ENTRYPOINT
-			// --build-arg GEARBOX_ENTRYPOINT_ARGS ${DOCKER_ARGS} .
+			var is types.ImageSummary
+			var ii types.ImageInspect
+			is, ii, gears.State = gears.Docker.FindImage(vers.Ref)
 
-			//if [ "${GB_MAJORVERSION}" != "" ]
-			//then
-			//	docker tag ${GB_IMAGENAME}:${GB_VERSION} ${GB_IMAGENAME}:${GB_MAJORVERSION}
-			//fi
-			//
-			//if [ "${GB_LATEST}" == "true" ]
-			//then
-			//	docker tag ${GB_IMAGENAME}:${GB_VERSION} ${GB_IMAGENAME}:latest
-			//fi
+			run = gears.Selected.GetBuildRun()
+			if run == "" {
+				run = strings.Join(ii.ContainerConfig.Entrypoint, " ")
+				//run2 := strings.Join(ii.ContainerConfig.Cmd, " ")
+				//fmt.Printf("%s -> %s\n", is.ID, run2)
+
+			}
+			args = gears.Selected.GetBuildArgs()
+
+			os.Setenv("GEARBOX_ENTRYPOINT", run)
+			os.Setenv("GEARBOX_ENTRYPOINT_ARGS", args)
+
+			fmt.Printf("%s\n", is.ID)
 		}
 
-		//if gears.Selected.GearConfig.Versions.HasVersion(gearVersion) == "" {
-		//	//
-		//}
+
+		// 4. Check Dockerfile.
+		// @TODO - Need to create Dockerfile if not exists.
+		dockerFile := toolPath.New(gears.Runtime)
+		dockerFile.SetPath("versions/" + gearVersion + "/DockerfileRuntime")
+		gears.State = dockerFile.StatPath()
+		if gears.State.IsNotOk() {
+			break
+		}
+		if dockerFile.NotExists() {
+			break
+		}
+
+
+		// 5. Create tarball.
+		buildContext := gears.getContext(".")
+		var b []byte
+		buildContext.Read(b)
+
+
+		// 6. Set build args and options.
+		buildArgs := make(map[string]*string)
+		var es string
+		buildArgs["GEARBOX_ENTRYPOINT"] = &es
+		buildArgs["GEARBOX_ENTRYPOINT_ARGS"] = &es
+
+		tagPrimary := gearOrg + "/" + gearName + ":" + gearVersion
+		var tagsSecondary []string
+		if vers.Latest {
+			tagsSecondary = append(tagsSecondary, gearOrg + "/" + gearName + ":latest")
+		}
+		if vers.MajorVersion != "" {
+			tagsSecondary = append(tagsSecondary, gearOrg + "/" + gearName + ":" + vers.MajorVersion)
+		}
+
+		options := types.ImageBuildOptions {
+			Tags:           append(tagsSecondary, tagPrimary),
+			SuppressOutput: false,
+			RemoteContext:  "",
+			NoCache:        true,
+			Remove:         true,
+			ForceRemove:    true,
+			PullParent:     true,
+			Isolation:      "",
+			CPUSetCPUs:     "",
+			CPUSetMems:     "",
+			CPUShares:      0,
+			CPUQuota:       0,
+			CPUPeriod:      0,
+			Memory:         0,
+			MemorySwap:     0,
+			CgroupParent:   "",
+			NetworkMode:    "",
+			ShmSize:        0,
+			Dockerfile:     dockerFile.GetPath(),
+			Ulimits:        nil,
+			BuildArgs:      buildArgs,
+			AuthConfigs:    nil,
+			Context:        nil,
+			Labels:         nil,
+			Squash:         buildSquash,
+			CacheFrom:      nil,
+			SecurityOpt:    nil,
+			ExtraHosts:     nil,
+			Target:         "",
+			SessionID:      "",
+			Platform:       "",
+			Version:        "",
+			BuildID:        "",
+			Outputs:        nil,
+		}
+
+		gears.State = gears.Docker.ImageBuild(buildContext, options)
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		gears.State = gears.Selected.Tag(tagPrimary, tagsSecondary...)
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		// docker build -t ${GB_IMAGENAME}:${GB_VERSION} -f ${GB_DOCKERFILE} --build-arg GEARBOX_ENTRYPOINT
+		// --build-arg GEARBOX_ENTRYPOINT_ARGS ${DOCKER_ARGS} .
 	}
 
 	return gears.State
 }
 
+func (gears *Gears) Tag(src string, target string) *ux.State {
+	if state := gears.IsNil(); state.IsError() {
+		return state
+	}
+
+	return gears.Selected.Tag(src, target)
+}
+
+func (gears *Gears) getContext(filePath string) io.Reader {
+	var ctx io.Reader
+	if state := gears.IsNil(); state.IsError() {
+		return ctx
+	}
+
+	for range onlyOnce {
+		var err error
+
+		fp := toolPath.New(gears.Runtime)
+		fp.SetPath(filePath)
+		gears.State = fp.StatPath()
+		if gears.State.IsNotOk() {
+			break
+		}
+
+		to := &archive.TarOptions {
+			ExcludePatterns: []string {
+				"Makefile",
+				"README.md",
+				"TEMPLATE",
+				"bin",
+			},
+		}
+		ctx, err = archive.TarWithOptions(fp.GetDirnameAbs(), to)
+		if err != nil {
+			gears.State.SetError(err)
+			break
+		}
+
+		gears.State.SetOk()
+	}
+	return ctx
+}
+
+
 // Search for an image in remote registry.
+//goland:noinspection GoUnusedParameter
 func (gears *Gears) Search(gearName string, gearVersion string) *ux.State {
 	if state := gears.IsNil(); state.IsError() {
 		return state

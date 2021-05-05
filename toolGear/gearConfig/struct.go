@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/docker/go-connections/nat"
+	"github.com/gearboxworks/scribeHelpers/toolPath"
 	"github.com/gearboxworks/scribeHelpers/toolRuntime"
 	"github.com/gearboxworks/scribeHelpers/ux"
 )
@@ -95,8 +96,36 @@ func (gc *GearConfig) IsNotValid() bool {
 }
 
 
+func (gc *GearConfig) ReadJsonFile(jsonFile string) *ux.State {
+	if gc == nil {
+		//goland:noinspection GoAssignmentToReceiver
+		gc = gc.EnsureNotNil()
+		ux.PrintfRed("GearConfig is nil!\n")
+		return gc.State
+	}
+
+	for range onlyOnce {
+		gc.State = gc.State.EnsureNotNil()
+
+		jf := toolPath.New(gc.Runtime)
+		jf.SetPath(jsonFile)
+
+		gc.State = jf.ReadFile()
+		if gc.State.IsNotOk() {
+			break
+		}
+
+		gc.State = gc.ParseJson(jf.GetContentString())
+
+	}
+
+	return gc.State
+}
+
+
 func (gc *GearConfig) ParseJson(cs string) *ux.State {
 	if gc == nil {
+		//goland:noinspection GoAssignmentToReceiver
 		gc = gc.EnsureNotNil()
 		ux.PrintfRed("GearConfig is nil!\n")
 		return gc.State

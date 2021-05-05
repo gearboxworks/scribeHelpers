@@ -2,9 +2,9 @@ package toolGear
 
 import (
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"github.com/gearboxworks/scribeHelpers/toolGear/gearConfig"
 	"github.com/gearboxworks/scribeHelpers/ux"
+	"github.com/mitchellh/mapstructure"
 	"os"
 )
 
@@ -134,7 +134,7 @@ func ToolShowGear(gc interface{}) string {
 	return ret
 }
 
-
+//goland:noinspection GoUnusedExportedFunction
 func ToolNewGear() *Gear {
 	ret := NewGear(nil, nil)
 

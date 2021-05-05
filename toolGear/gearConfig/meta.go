@@ -240,19 +240,19 @@ type GearVersion struct {
 	Base         string `json:"base"`
 }
 
-func (v *GearVersion) String() string {
+func (vers *GearVersion) String() string {
 	var ret string
-	//if state := ux.IfNilReturnError(v); state.IsError() {
+	//if state := ux.IfNilReturnError(vers); state.IsError() {
 	//	return ux.SprintfRed("GearConfig is nil!\n")
 	//}
 
 	for range onlyOnce {
 		//ret += ux.SprintfCyan("# GearVersion\n")
-		//ret += ux.SprintfBlue("Version: %-8s", v)
-		ret += ux.SprintfBlue("MajorVersion: %-8s", v.MajorVersion)
-		ret += ux.SprintfBlue("\tLatest: %v", v.Latest)
-		ret += ux.SprintfBlue("\tRef: %-16s", v.Ref)
-		ret += ux.SprintfBlue("\tBase: %s", v.Base)
+		//ret += ux.SprintfBlue("Version: %-8s", vers)
+		ret += ux.SprintfBlue("MajorVersion: %-8s", vers.MajorVersion)
+		ret += ux.SprintfBlue("\tLatest: %vers", vers.Latest)
+		ret += ux.SprintfBlue("\tRef: %-16s", vers.Ref)
+		ret += ux.SprintfBlue("\tBase: %s", vers.Base)
 	}
 
 	return ret
@@ -351,7 +351,7 @@ func (vers *GearVersion) IsBaseRef() bool {
 	var ok bool
 
 	for range onlyOnce {
-		if vers.Base == "base" {
+		if vers.Ref == "base" {
 			ok = true
 		}
 	}

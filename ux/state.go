@@ -508,6 +508,47 @@ func (state *State) IsNotOk() bool {
 	return ok
 }
 
+func (state *State) OkHas(s string) bool {
+	var ok bool
+
+	if strings.Contains(state._Ok.Error(), s) {
+		ok = true
+	}
+
+	return ok
+}
+
+func (state *State) WarningHas(s string) bool {
+	var ok bool
+
+	if strings.Contains(state._Warning.Error(), s) {
+		ok = true
+	}
+
+	return ok
+}
+
+func (state *State) ErrorHas(s string) bool {
+	var ok bool
+
+	if strings.Contains(state._Error.Error(), s) {
+		ok = true
+	}
+
+	return ok
+}
+
+func (state *State) DebugHas(s string) bool {
+	var ok bool
+
+	if strings.Contains(state._Debug.Error(), s) {
+		ok = true
+	}
+
+	return ok
+}
+
+
 func (state *State) SetExitCode(e int) {
 	if state == nil {
 		return

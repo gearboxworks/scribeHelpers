@@ -1,6 +1,7 @@
 package toolGear
 
 import (
+	"fmt"
 	"github.com/gearboxworks/scribeHelpers/toolGear/gearSsh"
 	"github.com/gearboxworks/scribeHelpers/ux"
 	"golang.org/x/crypto/ssh"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -51,6 +53,15 @@ func (gear *Gear) SetSshShell(s bool) {
 
 	gear.Container.SetSshShell(s)
 }
+
+//func (gear *Gear) SetDebug(s bool) {
+//	if state := gear.IsNil(); state.IsError() {
+//		return
+//	}
+//
+//	//gear.Container.Ssh.Debug = s
+//	//gear.Container.SetDebug(s)
+//}
 
 
 func (c *Container) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) *ux.State {
@@ -96,6 +107,7 @@ func (c *Container) ContainerSsh(interactive bool, statusLine bool, mountPath st
 			CmdArgs:     cmdArgs,
 			FsRemote:    c.Docker.Provider.Remote,
 
+			Debug:       c.runtime.Debug,
 			State:       ux.NewState(c.runtime.CmdName, c.runtime.Debug),
 		})
 
@@ -130,6 +142,11 @@ func (c *Container) ContainerSsh(interactive bool, statusLine bool, mountPath st
 		c.State = c.Ssh.GetEnv()
 		if err != nil {
 			break
+		}
+
+		if c.runtime.Debug {
+			fmt.Printf("DEBUG: c.runtime.Args == %s\r\n", strings.Join(c.runtime.Args, " "))
+			fmt.Printf("DEBUG: c.runtime.FullArgs == %s\r\n", strings.Join(c.runtime.FullArgs, " "))
 		}
 
 

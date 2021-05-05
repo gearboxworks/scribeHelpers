@@ -11,6 +11,8 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/docker/docker/pkg/term"
 	"github.com/gearboxworks/scribeHelpers/toolRuntime"
 	"github.com/gearboxworks/scribeHelpers/ux"
 	"io"
@@ -93,19 +95,16 @@ func (d *Docker) Connect() *ux.State {
 		var err error
 		d.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 		//cli.DockerClient, err = client.NewEnvClient()
-		if err != nil {
-			d.State.SetError("Docker client error: %s", err)
+		if d.inspectError(err,"Docker client error") {
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		_, err = d.Client.Ping(ctx)
-		if err != nil {
-			//gears.State.SetError("Docker client error: %s", err)
-			d.State.SetError("can not connect to Docker service provider - maybe you haven't set DOCKER_HOST, or Docker not running on this host")
+		if d.inspectError(err, "can not connect to Docker service provider - maybe you haven't set DOCKER_HOST, or Docker not running on this host") {
 			break
 		}
 	}
@@ -142,6 +141,116 @@ func (d *Docker) IsNil() *ux.State {
 	return d.State
 }
 
+func (d *Docker) inspectError(err error, msg string, args ...interface{}) bool {
+	failed := true
+	if state := d.IsNil(); state.IsError() {
+		//goland:noinspection GoBoolExpressions
+		return failed
+	}
+
+	for range onlyOnce {
+		if err == nil {
+			failed = false
+			d.State.SetOk()
+			break
+		}
+
+		msg = fmt.Sprintf(msg, args...)
+		d.State.SetError(msg + " (%s)", err)
+
+		if d.State.ErrorHas(ErrorDockerTimeout) {
+			d.State.SetError("timeout contacting provider - currently set to %s, trying increasing", d.Provider.Timeout.String())
+			break
+		}
+	}
+
+	return failed
+}
+
+func (d *Docker) DetermineTimeout(from int, to int) time.Duration {
+	var val time.Duration
+	if state := d.IsNil(); state.IsError() {
+		return val
+	}
+
+	for range onlyOnce {
+		var da []time.Duration
+		for cd := from; cd < to; cd++ {
+			foo := time.Duration(cd) * time.Second
+			da = append(da, foo)
+		}
+
+		//da := []time.Duration {
+		//	1 * time.Second,
+		//	2 * time.Second,
+		//	3 * time.Second,
+		//	4 * time.Second,
+		//	5 * time.Second,
+		//	6 * time.Second,
+		//	7 * time.Second,
+		//	8 * time.Second,
+		//	9 * time.Second,
+		//	10 * time.Second,
+		//	11 * time.Second,
+		//	12 * time.Second,
+		//	13 * time.Second,
+		//	14 * time.Second,
+		//}
+
+		for _, i := range da {
+			//ux.PrintfBlue("\tTesting timeout -> %s", i.String())
+			fmt.Printf(".")
+			if !d.testIsTimeout(i) {
+				val = i
+				//ux.PrintflnGreen(" OK")
+				break
+			}
+		}
+		fmt.Printf("\n")
+
+		if val == 0 {
+			d.State.SetError("Timeout while attempting to connect to server - cannot determine max timeout value.")
+			break
+		}
+	}
+
+	return val
+}
+
+func (d *Docker) testIsTimeout(to time.Duration) bool {
+	ok := true
+	if state := d.IsNil(); state.IsError() {
+		//goland:noinspection GoBoolExpressions
+		return ok
+	}
+
+	for range onlyOnce {
+		var err error
+
+		ctx, cancel := context.WithTimeout(context.Background(), to)
+		//noinspection GoDeferInLoop
+		defer cancel()
+
+		options := &types.ImageListOptions{All: true, Filters: filters.NewArgs()}
+		d.Images, err = d.Client.ImageList(ctx, *options)
+		if err == nil {
+			ok = false
+			break
+		}
+
+		d.State.SetError(err)
+
+		if d.State.ErrorHas(ErrorDockerTimeout) {
+			break
+		}
+
+		// Only report timeout errors.
+		ok = true
+	}
+
+	return ok
+}
+
 
 // ******************************************************************************** //
 
@@ -158,14 +267,13 @@ func (d *Docker) ImageList(filter *filters.Args) *ux.State {
 			filter = &f
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		options := &types.ImageListOptions{All: true, Filters: *filter}
 		d.Images, err = d.Client.ImageList(ctx, *options)
-		if err != nil {
-			d.State.SetError("image list error: %s", err)
+		if d.inspectError(err, "image list error") {
 			break
 		}
 
@@ -180,6 +288,58 @@ func (d *Docker) ImageList(filter *filters.Args) *ux.State {
 	return d.State
 }
 
+func (d *Docker) FindImage(repo string) (types.ImageSummary, types.ImageInspect, *ux.State) {
+	var is types.ImageSummary
+	var ii types.ImageInspect
+	if state := d.IsNil(); state.IsError() {
+		return is, ii, state
+	}
+
+	for range onlyOnce {
+		var err error
+		filter := filters.NewArgs()
+		//filter.Add("image_name", repo)
+
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
+		//noinspection GoDeferInLoop
+		defer cancel()
+
+		options := &types.ImageListOptions{All: false, Filters: filter}
+		var isa []types.ImageSummary
+		isa, err = d.Client.ImageList(ctx, *options)
+		if d.inspectError(err, "image list error") {
+			break
+		}
+
+
+		if len(isa) == 0 {
+			d.State.SetWarning("no images found")
+			break
+		}
+
+		for _, i := range isa {
+			for _, rt := range i.RepoTags {
+				if rt == repo {
+					is = i
+					break
+				}
+			}
+			if is.ID != "" {
+				break
+			}
+		}
+
+		ii, d.State = d.ImageInspectWithRaw(is.ID)
+		if d.State.IsNotOk() {
+			break
+		}
+
+		d.State.SetOk()
+	}
+
+	return is, ii, d.State
+}
+
 func (d *Docker) ImageInspectWithRaw(imageID string) (types.ImageInspect, *ux.State) {
 	var resp types.ImageInspect
 	if state := d.IsNil(); state.IsError() {
@@ -189,13 +349,12 @@ func (d *Docker) ImageInspectWithRaw(imageID string) (types.ImageInspect, *ux.St
 	for range onlyOnce {
 		var err error
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		resp, _, err = d.Client.ImageInspectWithRaw(ctx, imageID)
-		if err != nil {
-			d.State.SetError("error inspecting image: %s", err)
+		if d.inspectError(err, "error inspecting image") {
 			break
 		}
 
@@ -214,7 +373,7 @@ func (d *Docker) ImageSearch(repo string, options ...types.ImageSearchOptions) *
 		var err error
 
 		//ctx := context.Background()
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
@@ -225,8 +384,7 @@ func (d *Docker) ImageSearch(repo string, options ...types.ImageSearchOptions) *
 		}
 
 		d.Registry, err = d.Client.ImageSearch(ctx, repo, (options[0]))
-		if err != nil {
-			d.State.SetError("search error: %s", err)
+		if d.inspectError(err, "search error") {
 			break
 		}
 		if len(d.Registry) == 0 {
@@ -260,13 +418,12 @@ func (d *Docker) ImageRemove(imageID string, options *types.ImageRemoveOptions) 
 			PruneChildren: true,
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		_, err = d.Client.ImageRemove(ctx, imageID, *options)
-		if err != nil {
-			d.State.SetError("error removing: %s", err)
+		if d.inspectError(err,"error removing") {
 			break
 		}
 
@@ -305,12 +462,11 @@ func (d *Docker) Pull(user string, name string, version string) *ux.State {
 		var out io.ReadCloser
 		var err error
 		out, err = d.Client.ImagePull(ctx, repo, types.ImagePullOptions{All: false})
-		if err != nil {
-			d.State.SetError("Error pulling Gear %s:%s - %s", name, version, err)
+		if d.inspectError(err, "Error pulling Gear %s:%s", name, version) {
 			break
 		}
 
-		//goland:noinspection ALL
+		//goland:noinspection GoDeferInLoop
 		defer out.Close()
 
 		ux.PrintflnNormal("Pulling Gear %s:%s.", name, version)
@@ -353,15 +509,174 @@ func (d *Docker) Pull(user string, name string, version string) *ux.State {
 		}
 		//ux.Printf("\nGear d pull OK: %+v\n", event)
 		//ux.Printf("%s\n", event.Status)
-
-		//buf := new(bytes.Buffer)
-		//_, err = buf.ReadFrom(out)
-		//fmt.Printf("%s", buf.String())
-		//_, _ = io.Copy(os.Stdout, out)
 	}
 
 	return d.State
 }
+
+func (d *Docker) ImageBuild(buildContext io.Reader, options types.ImageBuildOptions) *ux.State {
+	if state := d.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		var err error
+
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout * 40)
+		//noinspection GoDeferInLoop
+		defer cancel()
+
+		var out types.ImageBuildResponse
+		out, err = d.Client.ImageBuild(ctx, buildContext, options)
+		if d.inspectError(err,"error building") {
+			break
+		}
+		if out.Body == nil {
+			d.State.SetError("Invalid ersponse from Docker build")
+			break
+		}
+		//goland:noinspection GoDeferInLoop
+		defer out.Body.Close()
+
+		ux.PrintflnNormal("Building image")
+		termFd, isTerm := term.GetFdInfo(os.Stderr)
+		err = jsonmessage.DisplayJSONMessagesStream(out.Body, os.Stderr, termFd, isTerm, nil)
+		if err != nil {
+			d.State.SetError(err)
+			break
+		}
+
+		////////////////////////////////////////
+		//buf := new(bytes.Buffer)
+		//var i int64
+		//i, err = io.Copy(buf, out.Body)
+		//d.State.SetOutput(buf.String())
+		//_, _ = io.Copy(os.Stdout, buf)
+		//if err != nil {
+		//	d.State.SetError(err)
+		//	break
+		//}
+		//fmt.Printf("INT:%d\n", i)
+
+
+		////////////////////////////////////////
+		//dj := json.NewDecoder(out.Body)
+		//var event *PullEvent
+		//for {
+		//	err = dj.Decode(&event)
+		//	if err != nil {
+		//		if err == io.EOF {
+		//			break
+		//		}
+		//
+		//		d.State.SetError("Error creating image - %s", err)
+		//		break
+		//	}
+		//
+		//	// fmt.Printf("EVENT: %+v\n", event)
+		//	ux.Printf("%+v - %+v - %+v\n",
+		//		event.Status,
+		//		event.Progress,
+		//		event.ProgressDetail,
+		//		)
+		//}
+		//ux.Printf("\n")
+		//if d.State.IsError() {
+		//	break
+		//}
+		//// Latest event for new d
+		//// EVENT: {Status:Status: Downloaded newer d for busybox:latest Error: Progress:[==================================================>]  699.2kB/699.2kB ProgressDetail:{Current:699243 Total:699243}}
+		//// Latest event for up-to-date d
+		//// EVENT: {Status:Status: Image is up to date for busybox:latest Error: Progress: ProgressDetail:{Current:0 Total:0}}
+		//if event != nil {
+		//	if strings.HasPrefix(event.Status, "Status: Downloaded newer") {
+		//		// new
+		//		ux.PrintflnOk("Creating image - OK.")
+		//	} else if strings.HasPrefix(event.Status, "Status: Image is up to date for") {
+		//		// up-to-date
+		//		ux.PrintflnOk("Creating image - updated.")
+		//	} else {
+		//		ux.PrintflnWarning("Creating image - unknown state.")
+		//	}
+		//}
+		////ux.Printf("\nGear d pull OK: %+v\n", event)
+		////ux.Printf("%s\n", event.Status)
+
+		d.State.SetOk()
+	}
+
+	return d.State
+}
+
+//func (d *Docker) PullRef(repo string) *ux.State {
+//	if state := d.IsNil(); state.IsError() {
+//		return state
+//	}
+//
+//	for range onlyOnce {
+//		ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+//		//noinspection GoDeferInLoop
+//		defer cancel()
+//
+//		var out io.ReadCloser
+//		var err error
+//		out, err = d.Client.ImagePull(ctx, repo, types.ImagePullOptions{All: false})
+//		if d.inspectError(err, "Error pulling image %s", repo) {
+//			break
+//		}
+//
+//		//goland:noinspection GoDeferInLoop
+//		defer out.Close()
+//
+//		ux.PrintflnNormal("Pulling image %s.", repo)
+//		dj := json.NewDecoder(out)
+//		var event *PullEvent
+//		for {
+//			err = dj.Decode(&event)
+//			if err != nil {
+//				if err == io.EOF {
+//					break
+//				}
+//
+//				d.State.SetError("Error pulling image %s - %s", repo, err)
+//				break
+//			}
+//
+//			// fmt.Printf("EVENT: %+v\n", event)
+//			ux.Printf("%+v\r", event.Progress)
+//		}
+//		ux.Printf("\n")
+//
+//		if d.State.IsError() {
+//			break
+//		}
+//
+//		// Latest event for new d
+//		// EVENT: {Status:Status: Downloaded newer d for busybox:latest Error: Progress:[==================================================>]  699.2kB/699.2kB ProgressDetail:{Current:699243 Total:699243}}
+//		// Latest event for up-to-date d
+//		// EVENT: {Status:Status: Image is up to date for busybox:latest Error: Progress: ProgressDetail:{Current:0 Total:0}}
+//		if event != nil {
+//			if strings.HasPrefix(event.Status, "Status: Downloaded newer") {
+//				// new
+//				ux.PrintfOk("Pulling image %s - OK.\n", repo)
+//			} else if strings.HasPrefix(event.Status, "Status: Image is up to date for") {
+//				// up-to-date
+//				ux.PrintfOk("Pulling image %s - updated.\n", repo)
+//			} else {
+//				ux.PrintfWarning("Pulling image %s - unknown state.\n", repo)
+//			}
+//		}
+//		//ux.Printf("\nGear d pull OK: %+v\n", event)
+//		//ux.Printf("%s\n", event.Status)
+//
+//		//buf := new(bytes.Buffer)
+//		//_, err = buf.ReadFrom(out)
+//		//fmt.Printf("%s", buf.String())
+//		//_, _ = io.Copy(os.Stdout, out)
+//	}
+//
+//	return d.State
+//}
 
 func (d *Docker) PullRepo(repo string) *ux.State {
 	if state := d.IsNil(); state.IsError() {
@@ -373,7 +688,7 @@ func (d *Docker) PullRepo(repo string) *ux.State {
 		var name string
 		var version string
 
-		re := regexp.MustCompile("([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)")
+		re := regexp.MustCompile("([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)")
 		match := re.FindStringSubmatch(repo)
 		if len(match) >= 4 {
 			version = match[3]
@@ -386,6 +701,28 @@ func (d *Docker) PullRepo(repo string) *ux.State {
 		}
 
 		d.State = d.Pull(user, name, version)
+	}
+
+	return d.State
+}
+
+func (d *Docker) Tag(src string, target string) *ux.State {
+	if state := d.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout * 40)
+		//noinspection GoDeferInLoop
+		defer cancel()
+
+		err := d.Client.ImageTag(ctx, src, target)
+		if err != nil {
+			d.State.SetError(err)
+			break
+		}
+
+		d.State.SetOk()
 	}
 
 	return d.State
@@ -404,13 +741,12 @@ func (d *Docker) GetContainerById(containerID string) (types.Container, *ux.Stat
 		df := filters.NewArgs()
 		df.Add("id", containerID)
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		containers, err := d.Client.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: df})
-		if err != nil {
-			d.State.SetError("gear list error: %s", err)
+		if d.inspectError(err,"gear list error") {
 			break
 		}
 		if len(containers) == 0 {
@@ -464,15 +800,14 @@ func (d *Docker) ContainerList(filter *filters.Args, force bool) *ux.State {
 			filter = &f
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		var err error
 		options := types.ContainerListOptions{Size: true, All: true, Filters: *filter}
 		d.Containers, err = d.Client.ContainerList(ctx, options)
-		if err != nil {
-			d.State.SetError("container list error: %s", err)
+		if d.inspectError(err,"container list error") {
 			break
 		}
 
@@ -500,7 +835,7 @@ func (d *Docker) ContainerStart(containerID string, options *types.ContainerStar
 			options = &types.ContainerStartOptions{}
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
@@ -522,8 +857,7 @@ func (d *Docker) ContainerStart(containerID string, options *types.ContainerStar
 		// fmt.Printf("SC: %s\n", err)
 
 		err := d.Client.ContainerStart(ctx, containerID, *options)
-		if err != nil {
-			d.State.SetError("Container start error - %s", err)
+		if d.inspectError(err,"Container start error") {
 			break
 		}
 	}
@@ -542,13 +876,12 @@ func (d *Docker) ContainerStop(containerID string, timeout *time.Duration) *ux.S
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		err := d.Client.ContainerStop(ctx, containerID, timeout)
-		if err != nil {
-			d.State.SetError("container stop error: %s", err)
+		if d.inspectError(err,"container stop error") {
 			break
 		}
 	}
@@ -571,13 +904,12 @@ func (d *Docker) ContainerRemove(containerID string, options *types.ContainerRem
 			options = &types.ContainerRemoveOptions{}
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		err := d.Client.ContainerRemove(ctx, containerID, *options)
-		if err != nil {
-			d.State.SetError("container remove error: %s", err)
+		if d.inspectError(err,"container remove error") {
 			break
 		}
 	}
@@ -597,24 +929,19 @@ func (d *Docker) ContainerLogs(containerID string, options types.ContainerLogsOp
 		}
 		options = types.ContainerLogsOptions{ShowStdout: true}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		// Replace this ID with a container that really exists
 		out, err := d.Client.ContainerLogs(ctx, containerID, options)
-		if err != nil {
-			d.State.SetError("container logs error: %s", err)
+		if d.inspectError(err,"container logs error") {
 			break
 		}
 
 		buf := new(bytes.Buffer)
 		_, _ = io.Copy(buf, out)
-		//_, _ = buf.ReadFrom(out)
-		//foo := buf.String()
-		//fmt.Printf("DEBUG: %s", foo)
 		d.State.SetOutput(buf.String())
-
 		_, _ = io.Copy(os.Stdout, buf)
 
 		d.State.SetOk()
@@ -634,7 +961,7 @@ func (d *Docker) ContainerCommit() *ux.State {
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
@@ -642,26 +969,27 @@ func (d *Docker) ContainerCommit() *ux.State {
 			Image: "alpine",
 			Cmd:   []string{"touch", "/helloworld"},
 		}, nil, nil, "")
-		if err != nil {
+		if d.inspectError(err,"container create error") {
 			break
 		}
 
-		if err := d.Client.ContainerStart(ctx, createResp.ID, types.ContainerStartOptions{}); err != nil {
+		err = d.Client.ContainerStart(ctx, createResp.ID, types.ContainerStartOptions{})
+		if d.inspectError(err,"container start error") {
 			break
 		}
 
 		statusCh, errCh := d.Client.ContainerWait(ctx, createResp.ID, container.WaitConditionNotRunning)
 		select {
-		case err := <-errCh:
-			if err != nil {
-				//response.State.SetError("gear stop error: %s", err)
-				break
-			}
-		case <-statusCh:
+			case err := <-errCh:
+				if err != nil {
+					//response.State.SetError("gear stop error: %s", err)
+					break
+				}
+			case <-statusCh:
 		}
 
 		commitResp, err := d.Client.ContainerCommit(ctx, createResp.ID, types.ContainerCommitOptions{Reference: "helloworld"})
-		if err != nil {
+		if d.inspectError(err,"container commit error") {
 			break
 		}
 
@@ -685,14 +1013,13 @@ func (d *Docker) ContainerInspect(containerID string) (*types.ContainerJSON, *ux
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		var err error
 		ret, err = d.Client.ContainerInspect(ctx, containerID)
-		if err != nil {
-			d.State.SetError("container inspect error: %s", err)
+		if d.inspectError(err,"container inspect error") {
 			break
 		}
 
@@ -715,15 +1042,14 @@ func (d *Docker) ContainerCreate(config *container.Config, hostConfig *container
 		//	break
 		//}
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		//var resp container.ContainerCreateCreatedBody
 		var err error
 		resp, err = d.Client.ContainerCreate(ctx, config, hostConfig, netConfig, containerName)
-		if err != nil {
-			d.State.SetError("error creating container: %s", err)
+		if d.inspectError(err,"error creating container") {
 			break
 		}
 
@@ -753,7 +1079,7 @@ func (d *Docker) NetworkList(name string) *ux.State {
 
 		var err error
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
@@ -761,8 +1087,7 @@ func (d *Docker) NetworkList(name string) *ux.State {
 		df.Add("name", name)
 
 		d.Networks, err = d.Client.NetworkList(ctx, types.NetworkListOptions{Filters: df})
-		if err != nil {
-			d.State.SetError("error listing networks")
+		if d.inspectError(err,"error listing networks") {
 			break
 		}
 
@@ -787,13 +1112,12 @@ func (d *Docker) NetworkCreate(name string, options types.NetworkCreate) *ux.Sta
 	for range onlyOnce {
 		var err error
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		resp, err := d.Client.NetworkCreate(ctx, name, options)
-		if err != nil {
-			d.State.SetError(err)
+		if d.inspectError(err,"error creating network") {
 			break
 		}
 

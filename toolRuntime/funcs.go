@@ -1,35 +1,46 @@
 package toolRuntime
 
 import (
+	"fmt"
 	"github.com/blang/semver"
 	"github.com/gearboxworks/scribeHelpers/ux"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 
 type VersionValue semver.Version
-
 
 func (r *TypeRuntime) GetSemVer() *VersionValue {
 	v := (VersionValue)(semver.MustParse(r.CmdVersion))
 	return &v
 }
 
-
 func (r *TypeRuntime) PrintNameVersion() {
 	ux.PrintfBlue("%s ", r.CmdName)
 	ux.PrintflnCyan("v%s", r.CmdVersion)
 }
 
-
 func (r *TypeRuntime) TimeStampString() string {
 	return r.TimeStamp.Format("2006-01-02T15:04:05-0700")
 }
 
-
 func (r *TypeRuntime) TimeStampEpoch() int64 {
 	return r.TimeStamp.Unix()
+}
+
+func (r *TypeRuntime) GetTimeout() string {
+	//d := r.Timeout.Round(time.Second)
+	d := r.Timeout
+	h := d / time.Hour
+	d -= h * time.Hour
+
+	m := d / time.Minute
+
+	s := m / time.Second
+
+	return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
 }
 
 
@@ -83,10 +94,12 @@ func (r *TypeRuntime) SprintfArgsFrom(lower int) string {
 	return r.Args.SprintfFrom(lower)
 }
 
+//goland:noinspection SpellCheckingInspection
 func (r *TypeRuntime) GetNargs(begin int, size int) []string {
 	return r.Args.GetFromSize(begin, size)
 }
 
+//goland:noinspection SpellCheckingInspection
 func (r *TypeRuntime) SprintfNargs(lower int, upper int) string {
 	return r.Args.SprintfFromSize(lower, upper)
 }
@@ -165,12 +178,3 @@ func (r *TypeRuntime) IsRunningAsFile() bool {
 func (r *TypeRuntime) IsRunningAsLink() bool {
 	return !r.IsRunningAsFile()
 }
-
-
-//func foo() {
-//	fmt.Printf("Go runs OK!\n")
-//	fmt.Printf("PPID: %d -> PID:%d\n", os.Getppid(), os.Getpid())
-//	fmt.Printf("Compiler: %s v%s\n", runtime.Compiler, runtime.Version())
-//	fmt.Printf("Architecture: %s v%s\n", runtime.GOARCH, runtime.GOOS)
-//	fmt.Printf("GOROOT: %s\n", runtime.GOROOT())
-//}

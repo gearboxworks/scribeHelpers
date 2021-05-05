@@ -2,9 +2,9 @@ package toolGear
 
 import "time"
 
-
+//goland:noinspection SpellCheckingInspection
 const (
-	DefaultTimeout = time.Second * 2
+	DefaultTimeout = time.Second * 10
 	DefaultOrganization = "gearboxworks"
 	DefaultPathNone = "none"
 	DefaultPathCwd = "cwd"
@@ -20,6 +20,12 @@ const (
 	DefaultCommandName = "default"
 
 	//LatestName = "latest"
+)
+
+const (
+	ErrorDockerTimeout = "context deadline exceeded"
+	DefaultMinTimeout = 5
+	DefaultMaxTimeout = 30
 )
 
 type ExecCommand struct {

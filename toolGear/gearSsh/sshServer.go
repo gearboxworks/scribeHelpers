@@ -2,9 +2,9 @@ package gearSsh
 
 import (
 	"fmt"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"io"
 	"io/ioutil"
-	"github.com/gearboxworks/scribeHelpers/ux"
 	"log"
 	"net"
 	"os"
