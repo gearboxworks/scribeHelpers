@@ -3,7 +3,6 @@ module github.com/gearboxworks/scribeHelpers/toolNetwork
 go 1.14
 
 replace github.com/gearboxworks/scribeHelpers/ux => ../ux
-
 replace github.com/gearboxworks/scribeHelpers/toolExec => ../toolExec
 replace github.com/gearboxworks/scribeHelpers/toolPath => ../toolPath
 replace github.com/gearboxworks/scribeHelpers/toolRuntime => ../toolRuntime

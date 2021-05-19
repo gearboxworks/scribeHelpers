@@ -4,22 +4,15 @@ go 1.14
 
 // replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.20190717161051-705d9623b7c1
 //replace github.com/docker/docker => github.com/docker/engine v1.13.1
-replace github.com/docker/docker => github.com/docker/engine v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible
+//replace github.com/docker/docker => github.com/docker/engine v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible
 
 replace github.com/gearboxworks/scribeHelpers/ux => ../ux
-
 replace github.com/gearboxworks/scribeHelpers/toolRuntime => ../toolRuntime
-
 replace github.com/gearboxworks/scribeHelpers/toolGear/gearConfig => ./gearConfig
-
 replace github.com/gearboxworks/scribeHelpers/toolPath => ../toolPath
-
 replace github.com/gearboxworks/scribeHelpers/toolPrompt => ../toolPrompt
-
 replace github.com/gearboxworks/scribeHelpers/toolTypes => ../toolTypes
-
 replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../toolNetwork
-
 replace github.com/gearboxworks/scribeHelpers/toolExec => ../toolExec
 
 require (
