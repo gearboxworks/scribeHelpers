@@ -208,6 +208,8 @@ func (s *Ssh) Connect() error {
 				fmt.Printf("DEBUG: Command %s\r\n", cmd)
 			}
 
+			// https://unix.stackexchange.com/questions/444946/how-can-we-run-a-command-stored-in-a-variable
+
 			err = s.ClientSession.Run(cmd)
 			if err != nil {
 				break

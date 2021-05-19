@@ -8,7 +8,8 @@ replace github.com/gearboxworks/scribeHelpers/toolRuntime => ../toolRuntime
 
 replace github.com/gearboxworks/scribeHelpers/toolCopy => ../toolCopy
 
-replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.20190717161051-705d9623b7c1
+// replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.20190717161051-705d9623b7c1
+replace github.com/docker/docker => github.com/docker/engine v1.13.1
 
 replace github.com/gearboxworks/scribeHelpers/toolDocker => ../toolDocker
 
