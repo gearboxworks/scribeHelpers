@@ -115,8 +115,8 @@ func Test_GhrCopy() {
 	state = Src.SetAuth(toolGhr.TypeAuth{ Token: "", AuthUser: "" })
 	PrintTestResult(state, test, "IsNil()")
 	//state = Src.Set(toolGhr.TypeRepo{ Organization: "gearboxworks", Name: "launch" })
-	state = Src.OpenUrl("https://github.com/newclarity/launch")
-	PrintTestResult(state, test, "OpenUrl(\"https://github.com/newclarity/launch\")")
+	state = Src.OpenUrl("https://github.com/gearboxworks/launch")
+	PrintTestResult(state, test, "OpenUrl(\"https://github.com/gearboxworks/launch\")")
 
 
 	Dest := toolGhr.New(nil)
