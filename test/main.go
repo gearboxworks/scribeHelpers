@@ -1,5 +1,5 @@
 /*
-The sole purpose of this file's existence is for unit testing all the package modules.
+The sole purpose of this file's existence is for unit test all the package modules.
 Additionally, it helps within the GoLand IDE for entity mapping and checking.
 
 This file is not to be used for any production related code.
@@ -31,7 +31,7 @@ package test
 //const onlyOnce = "1"
 //
 //func init() {
-//	_, _ = ux.Open("testing", true)
+//	_, _ = ux.Open("test", true)
 //}
 //
 //var globalDebug bool
@@ -181,14 +181,14 @@ package test
 //	state = Test.Create( toolGhr.TypeRepo{TagName: "1.0.1", Overwrite: true })
 //	PrintTestResult(state, test, "Create(\"1.0.1\", true)")
 //
-//	//state = Test.Upload(true, "testing", "")
-//	//PrintTestResult(state, test, "Upload(\"testing\", \"\", true)")
+//	//state = Test.Upload(true, "test", "")
+//	//PrintTestResult(state, test, "Upload(\"test\", \"\", true)")
 //
-//	state = Test.UploadMultiple(true, "../testing/Testing2", "pkgreflect.go", "init.go")
-//	PrintTestResult(state, test, "Upload(\"testing\", \"\", true)")
+//	state = Test.UploadMultiple(true, "../test/Testing2", "pkgreflect.go", "init.go")
+//	PrintTestResult(state, test, "Upload(\"test\", \"\", true)")
 //
 //	state = Test.Download(true, "testing2")
-//	PrintTestResult(state, test, "Download(\"testing\")")
+//	PrintTestResult(state, test, "Download(\"test\")")
 //
 //	relData := toolGhr.TypeRepo{
 //		Organization: "mickmake",
@@ -199,11 +199,11 @@ package test
 //		Prerelease:   false,
 //		Target:       "",
 //		Overwrite:    true,
-//		//Go:        []string{"../testing/testing", "pkgreflect.go", "init.go"},
+//		//Go:        []string{"../test/test", "pkgreflect.go", "init.go"},
 //		Auth:         &toolGhr.TypeAuth{ Token: "", AuthUser: "" },
 //	}
-//	state = Test.SetFilePath(".*\\.go", "../testing")
-//	PrintTestResult(state, test, "Download(\"testing\")")
+//	state = Test.SetFilePath(".*\\.go", "../test")
+//	PrintTestResult(state, test, "Download(\"test\")")
 //
 //	state = Test.Create(relData)
 //	PrintTestResult(state, test, "CreateRelease(relData)")
@@ -219,8 +219,8 @@ package test
 //	test := "ux"
 //	PrintTestStart(test)
 //
-//	Test := ux.NewState("testing", globalDebug)
-//	PrintTestResult(Test, test, "NewState(\"testing\", %v)", globalDebug)
+//	Test := ux.NewState("test", globalDebug)
+//	PrintTestResult(Test, test, "NewState(\"test\", %v)", globalDebug)
 //	var response *ux.TypeResponse
 //
 //
