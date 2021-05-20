@@ -13,8 +13,7 @@ import (
 	"path/filepath"
 )
 
-
-// Copy repo release from source to destination.
+// CopyReleases copies repo release from source to destination.
 func CopyReleases(srcRepoUrl string, srcTag string, destRepoUrl string, cacheDir ...string) *ux.State {
 	state := ux.NewState("CopyReleases", false)
 
@@ -25,6 +24,7 @@ func CopyReleases(srcRepoUrl string, srcTag string, destRepoUrl string, cacheDir
 			state = Src.State
 			break
 		}
+
 		//state = Src.SetAuth(TypeAuth{ Token: "", AuthUser: "" })
 		//if state.IsNotOk() {
 		//	break
@@ -33,7 +33,6 @@ func CopyReleases(srcRepoUrl string, srcTag string, destRepoUrl string, cacheDir
 		if state.IsNotOk() {
 			break
 		}
-
 
 		// Setup destination repo.
 		Dest := New(nil)
@@ -54,7 +53,6 @@ func CopyReleases(srcRepoUrl string, srcTag string, destRepoUrl string, cacheDir
 			break
 		}
 
-
 		// Now sync the release in the destination repo.
 		state = Dest.CopyReleasesFrom(Src.Repo, srcTag, cacheDir...)
 	}
@@ -62,8 +60,8 @@ func CopyReleases(srcRepoUrl string, srcTag string, destRepoUrl string, cacheDir
 	return state
 }
 
-
-// Return asset for current architecture.
+// GetAsset returns asset for current architecture.
+// TODO Describe more what an asset is and how you specific the architecture
 func GetAsset(repoUrl string, tag string) (string, *ux.State) {
 	state := ux.NewState("GetAsset", false)
 	var ret string
@@ -75,6 +73,7 @@ func GetAsset(repoUrl string, tag string) (string, *ux.State) {
 			state = repo.State
 			break
 		}
+
 		//state = repo.SetAuth(TypeAuth{ Token: "", AuthUser: "" })
 		//if state.IsNotOk() {
 		//	break
@@ -100,8 +99,7 @@ func GetAsset(repoUrl string, tag string) (string, *ux.State) {
 	return ret, state
 }
 
-
-// Show repo information
+// Info Show repo information
 func (ghr *TypeGhr) Info() *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
 		return state
@@ -137,7 +135,6 @@ func (ghr *TypeGhr) Info() *ux.State {
 	return ghr.State
 }
 
-
 // Show repo information
 func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir ...string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
@@ -150,7 +147,6 @@ func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir 
 		if ghr.State.IsNotOk() {
 			break
 		}
-
 
 		// Setup cache dir.
 		if len(cacheDir) == 0 {
@@ -166,7 +162,6 @@ func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir 
 		if ghr.State.IsError() {
 			break
 		}
-
 
 		// Setup src repo.
 		ghr.message("Setting up source repo '%s' ...", srcRepo.GetUrl())
@@ -187,7 +182,6 @@ func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir 
 			break
 		}
 
-
 		// Setup destination repo.
 		dstRepo := ghr.Repo
 		ghr.message("Setup destination repo '%s' ...", dstRepo.GetUrl())
@@ -199,11 +193,11 @@ func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir 
 		//dstRepo.Organization = "",
 		//dstRepo.Name =         "",
 		//dstRepo.Auth =         dstRepo.Auth,
-		dstRepo.TagName     = srcRef.TagName
+		dstRepo.TagName = srcRef.TagName
 		dstRepo.Description = srcRef.Description
-		dstRepo.Draft       = srcRef.Draft
-		dstRepo.Prerelease  = srcRef.Prerelease
-		dstRepo.Target      = srcRepo.Target
+		dstRepo.Draft = srcRef.Draft
+		dstRepo.Prerelease = srcRef.Prerelease
+		dstRepo.Target = srcRepo.Target
 		//dstRepo.Go       = srcRepo.Go
 		//dstRepo.Overwrite     = srcRepo.Overwrite
 
@@ -212,14 +206,12 @@ func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir 
 			dstRepo.Files = append(dstRepo.Files, filepath.Join(filepath.Join(cacheDir...), file))
 		}
 
-
 		// Copy src files to cache.
 		ghr.message("Download %d files from source repo to cache dir '%s' ...", len(srcRepo.Files), dir.GetPath())
 		ghr.State = srcRepo.DownloadAssets(false, cacheDir...)
 		if ghr.State.IsError() {
 			break
 		}
-
 
 		// Create release on destination repo.
 		ghr.message("Creating release on destination repo...")
@@ -228,7 +220,6 @@ func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir 
 			ghr.State.SetError("could not create release '%s'", ghr.Repo.TagName)
 			break
 		}
-
 
 		// Upload files
 		ghr.message("Uploading assets to destination repo...")
@@ -241,12 +232,10 @@ func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir 
 			}
 		}
 
-
 		ghr.State = dstRepo.Fetch(true)
 		if ghr.State.IsError() {
 			break
 		}
-
 
 		ghr.message("Destination repo now in sync for Release '%s'.", dstRepo.TagName)
 		//srcRepo.PrintRelease()
@@ -257,7 +246,6 @@ func (ghr *TypeGhr) CopyReleasesFrom(srcRepo *TypeRepo, srcTag string, cacheDir 
 
 	return ghr.State
 }
-
 
 // Upload multiple files to a repo Release.
 func (ghr *TypeGhr) UploadMultiple(overwrite bool, files ...string) *ux.State {
@@ -284,7 +272,6 @@ func (ghr *TypeGhr) UploadMultiple(overwrite bool, files ...string) *ux.State {
 
 	return ghr.State
 }
-
 
 // Upload a file to a repo Release.
 func (ghr *TypeGhr) Upload(overwrite bool, label string, path ...string) *ux.State {
@@ -315,7 +302,6 @@ func (ghr *TypeGhr) Upload(overwrite bool, label string, path ...string) *ux.Sta
 	return ghr.State
 }
 
-
 // Download a file from a repo Release.
 func (ghr *TypeGhr) Download(overwrite bool, name string, path ...string) *ux.State {
 	if state := ghr.IsNil(); state.IsError() {
@@ -344,7 +330,6 @@ func (ghr *TypeGhr) Download(overwrite bool, name string, path ...string) *ux.St
 
 	return ghr.State
 }
-
 
 // Upload multiple files to a repo Release.
 func (ghr *TypeGhr) DeleteAssets(labels ...string) *ux.State {
@@ -375,7 +360,6 @@ func (ghr *TypeGhr) DeleteAssets(labels ...string) *ux.State {
 	return ghr.State
 }
 
-
 // Show repo information
 func (ghr *TypeGhr) GetAsset() (string, *ux.State) {
 	var ret string
@@ -398,7 +382,7 @@ func (ghr *TypeGhr) GetAsset() (string, *ux.State) {
 		label := fmt.Sprintf("(?i).*%s_%s.*",
 			ghr.runtime.GoRuntime.Os,
 			ghr.runtime.GoRuntime.Arch,
-			)
+		)
 
 		asset := ghr.Repo.SelectRegexpAsset(label)
 		if asset == nil {
@@ -411,7 +395,6 @@ func (ghr *TypeGhr) GetAsset() (string, *ux.State) {
 
 	return ret, ghr.State
 }
-
 
 // Create a repo Release.
 func (ghr *TypeGhr) Create(rel TypeRepo) *ux.State {
@@ -436,7 +419,6 @@ func (ghr *TypeGhr) Create(rel TypeRepo) *ux.State {
 			break
 		}
 
-
 		// Create release
 		ghr.State = ghr.Repo.CreateRelease(&rel)
 		if ghr.State.IsNotOk() {
@@ -458,7 +440,6 @@ func (ghr *TypeGhr) Create(rel TypeRepo) *ux.State {
 
 	return ghr.State
 }
-
 
 // Update a repo Release.
 func (ghr *TypeGhr) Update(tag string) *ux.State {
@@ -483,7 +464,6 @@ func (ghr *TypeGhr) Update(tag string) *ux.State {
 			ghr.State.SetError("no valid release found")
 			break
 		}
-
 
 		ghr.message("Release %s has id %d", ghr.Repo.TagName, rel.Id)
 		// Check if we need to read the description from stdin.
@@ -511,7 +491,6 @@ func (ghr *TypeGhr) Update(tag string) *ux.State {
 			ghr.State.SetError("can't encode Release creation params, %v", err)
 			break
 		}
-
 
 		ghr.message("Updating Release '%s' ...", ghr.Repo.TagName)
 		URL := ghr.Repo.generateApiUrl(releaseIdUri, rel.Id)
@@ -548,7 +527,6 @@ func (ghr *TypeGhr) Update(tag string) *ux.State {
 
 	return ghr.State
 }
-
 
 // Delete a repo Release.
 func (ghr *TypeGhr) Delete(tag string) *ux.State {

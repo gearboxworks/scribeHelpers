@@ -18,8 +18,7 @@ import (
 	"time"
 )
 
-
-// Get the Release assets associated with a repo.
+// FetchAssets gets the Release assets associated with a repo.
 func (repo *TypeRepo) FetchAssets(force bool) *ux.State {
 	if state := ux.IfNilReturnError(repo); state.IsError() {
 		return state
@@ -217,7 +216,6 @@ func (repo *TypeRepo) UploadAsset(overwrite bool, label string, path ...string) 
 		}
 		rel := repo.releases.selected
 
-
 		file := NewFile(repo.runtime)
 		if file.state.IsNotOk() {
 			repo.state = file.state
@@ -255,11 +253,10 @@ func (repo *TypeRepo) UploadAsset(overwrite bool, label string, path ...string) 
 		defer file.Close()
 
 		v := url.Values{}
-		v.Set("name", strings.ToLower(file.Name))	// @TODO - selfupdate lowercase workaround.
+		v.Set("name", strings.ToLower(file.Name)) // @TODO - selfupdate lowercase workaround.
 		if file.Label != "" {
 			v.Set("label", file.Label)
 		}
-
 
 		// Everything set - begin upload.
 		repo.message("Uploading Release asset '%s' as label '%s' ...", file.Name, file.Label)
@@ -349,7 +346,6 @@ func (repo *TypeRepo) DownloadAsset(overwrite bool, label string, path ...string
 			break
 		}
 
-
 		asset := repo.assets.findAsset(label)
 		if asset == nil {
 			repo.state.SetError("could not find asset named %s", file.Label)
@@ -363,7 +359,6 @@ func (repo *TypeRepo) DownloadAsset(overwrite bool, label string, path ...string
 		//noinspection ALL
 		defer file.Close()
 
-
 		// Everything set - begin download.
 		repo.message("Downloading Release asset '%s' (bytes:%d) ...", asset.Name, asset.Size)
 		var resp *http.Response
@@ -374,7 +369,7 @@ func (repo *TypeRepo) DownloadAsset(overwrite bool, label string, path ...string
 			resp, err = http.Get(URL)
 		} else {
 			URL := repo.generateApiUrl(AssetUri, asset.Id)
-			resp, err = github.DoAuthRequest("GET", URL, "", repo.Auth.Token, map[string]string{"Accept": "application/octet-stream",}, nil)
+			resp, err = github.DoAuthRequest("GET", URL, "", repo.Auth.Token, map[string]string{"Accept": "application/octet-stream"}, nil)
 		}
 		//noinspection ALL
 		defer resp.Body.Close()
@@ -423,7 +418,6 @@ func (repo *TypeRepo) DownloadAssets(overwrite bool, path ...string) *ux.State {
 			break
 		}
 
-
 		// Setup destination path.
 		file := toolPath.New(repo.runtime)
 		if file.State.IsNotOk() {
@@ -447,7 +441,6 @@ func (repo *TypeRepo) DownloadAssets(overwrite bool, path ...string) *ux.State {
 			break
 		}
 
-
 		savedFail := repo.state
 		for _, asset := range repo.Assets() {
 			repo.state = repo.DownloadAsset(overwrite, asset.Name, filepath.Join(filepath.Join(path...), asset.Name))
@@ -469,7 +462,6 @@ func (repo *TypeRepo) DownloadAssets(overwrite bool, path ...string) *ux.State {
 	}
 	return repo.state
 }
-
 
 type Asset struct {
 	Url         string    `json:"url"`
@@ -501,13 +493,11 @@ func (a *Asset) Print() {
 	fmt.Print(a.String())
 }
 
-
 type assets struct {
 	all      []*Asset
 	selected *Asset
 	latest   *Asset
 }
-
 
 func (a *assets) GetAll() []*Asset {
 	return a.all
@@ -550,19 +540,19 @@ func (a *assets) CountAll() int {
 func (a *assets) Sprint() string {
 	var ret string
 	switch {
-		case a.all == nil:
-			ret += ux.SprintfWarning("No assets found.")
+	case a.all == nil:
+		ret += ux.SprintfWarning("No assets found.")
 
-		case a.selected == nil:
-			// Print all assets.
-			ret += ux.SprintfWarning("Found %d assets.", a.CountAll())
-			for _, release := range a.all {
-				ret += fmt.Sprintf("\n####\n%v", release)
-			}
+	case a.selected == nil:
+		// Print all assets.
+		ret += ux.SprintfWarning("Found %d assets.", a.CountAll())
+		for _, release := range a.all {
+			ret += fmt.Sprintf("\n####\n%v", release)
+		}
 
-		default:
-			// Print selected Release.
-			ret += fmt.Sprintf("\n####\n%v", a.selected.Name)
+	default:
+		// Print selected Release.
+		ret += fmt.Sprintf("\n####\n%v", a.selected.Name)
 	}
 	return ret
 }
