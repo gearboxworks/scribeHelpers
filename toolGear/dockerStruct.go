@@ -1139,5 +1139,4 @@ func (d *Docker) NetworkCreate(name string, options types.NetworkCreate) *ux.Sta
 
 func _close(c io.Closer) {
 	_ = c.Close()
-
 }
