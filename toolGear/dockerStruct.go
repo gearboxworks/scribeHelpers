@@ -26,18 +26,17 @@ import (
 //"github.com/docker/docker/integration-cli/cli"
 // DOCKER_HOST=tcp://macpro:2375
 
-
 type Docker struct {
 	Containers []types.Container
 	Images     []types.ImageSummary
 	Networks   []types.NetworkResource
 	Registry   []registry.SearchResult
 
-	Provider    *Provider
-	Client    	*client.Client
+	Provider *Provider
+	Client   *client.Client
 
-	Runtime     *toolRuntime.TypeRuntime
-	State       *ux.State
+	Runtime *toolRuntime.TypeRuntime
+	State   *ux.State
 }
 
 type PullEvent struct {
@@ -50,7 +49,6 @@ type PullEvent struct {
 	} `json:"progressDetail"`
 }
 
-
 func NewDocker(runtime *toolRuntime.TypeRuntime) *Docker {
 	var d Docker
 
@@ -58,14 +56,14 @@ func NewDocker(runtime *toolRuntime.TypeRuntime) *Docker {
 		runtime = runtime.EnsureNotNil()
 
 		d = Docker{
-			Containers:     nil,
-			Images:         nil,
+			Containers: nil,
+			Images:     nil,
 
-			Provider:       NewProvider(runtime),
-			Client:         nil,
+			Provider: NewProvider(runtime),
+			Client:   nil,
 
-			Runtime:        runtime,
-			State:          ux.NewState(runtime.CmdName, runtime.Debug),
+			Runtime: runtime,
+			State:   ux.NewState(runtime.CmdName, runtime.Debug),
 		}
 
 		d.State.SetPackage("")
@@ -95,7 +93,7 @@ func (d *Docker) Connect() *ux.State {
 		var err error
 		d.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 		//cli.DockerClient, err = client.NewEnvClient()
-		if d.inspectError(err,"Docker client error") {
+		if d.inspectError(err, "Docker client error") {
 			break
 		}
 
@@ -156,7 +154,7 @@ func (d *Docker) inspectError(err error, msg string, args ...interface{}) bool {
 		}
 
 		msg = fmt.Sprintf(msg, args...)
-		d.State.SetError(msg + " (%s)", err)
+		d.State.SetError(msg+" (%s)", err)
 
 		if d.State.ErrorHas(ErrorDockerTimeout) {
 			d.State.SetError("timeout contacting provider - currently set to %s, trying increasing", d.Provider.Timeout.String())
@@ -251,7 +249,6 @@ func (d *Docker) testIsTimeout(to time.Duration) bool {
 	return ok
 }
 
-
 // ******************************************************************************** //
 
 //func (d *Docker) ImageList(options *types.ImageListOptions) *ux.State {
@@ -310,7 +307,6 @@ func (d *Docker) FindImage(repo string) (types.ImageSummary, types.ImageInspect,
 		if d.inspectError(err, "image list error") {
 			break
 		}
-
 
 		if len(isa) == 0 {
 			d.State.SetWarning("no images found")
@@ -401,6 +397,7 @@ func (d *Docker) ImageSearch(repo string, options ...types.ImageSearchOptions) *
 }
 
 type NameSorter []registry.SearchResult
+
 func (a NameSorter) Len() int           { return len(a) }
 func (a NameSorter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a NameSorter) Less(i, j int) bool { return a[i].Name < a[j].Name }
@@ -413,7 +410,7 @@ func (d *Docker) ImageRemove(imageID string, options *types.ImageRemoveOptions) 
 	for range onlyOnce {
 		var err error
 
-		options = &types.ImageRemoveOptions {
+		options = &types.ImageRemoveOptions{
 			Force:         true,
 			PruneChildren: true,
 		}
@@ -423,7 +420,7 @@ func (d *Docker) ImageRemove(imageID string, options *types.ImageRemoveOptions) 
 		defer cancel()
 
 		_, err = d.Client.ImageRemove(ctx, imageID, *options)
-		if d.inspectError(err,"error removing") {
+		if d.inspectError(err, "error removing") {
 			break
 		}
 
@@ -467,7 +464,7 @@ func (d *Docker) Pull(user string, name string, version string) *ux.State {
 		}
 
 		//goland:noinspection GoDeferInLoop
-		defer out.Close()
+		defer _close(out)
 
 		ux.PrintflnNormal("Pulling Gear %s:%s.", name, version)
 		dj := json.NewDecoder(out)
@@ -522,21 +519,21 @@ func (d *Docker) ImageBuild(buildContext io.Reader, options types.ImageBuildOpti
 	for range onlyOnce {
 		var err error
 
-		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout * 40)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout*40)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		var out types.ImageBuildResponse
 		out, err = d.Client.ImageBuild(ctx, buildContext, options)
-		if d.inspectError(err,"error building") {
+		if d.inspectError(err, "error building") {
 			break
 		}
 		if out.Body == nil {
-			d.State.SetError("Invalid ersponse from Docker build")
+			d.State.SetError("Invalid response from Docker build")
 			break
 		}
 		//goland:noinspection GoDeferInLoop
-		defer out.Body.Close()
+		defer _close(out.Body)
 
 		ux.PrintflnNormal("Building image")
 		termFd, isTerm := term.GetFdInfo(os.Stderr)
@@ -557,7 +554,6 @@ func (d *Docker) ImageBuild(buildContext io.Reader, options types.ImageBuildOpti
 		//	break
 		//}
 		//fmt.Printf("INT:%d\n", i)
-
 
 		////////////////////////////////////////
 		//dj := json.NewDecoder(out.Body)
@@ -712,7 +708,7 @@ func (d *Docker) Tag(src string, target string) *ux.State {
 	}
 
 	for range onlyOnce {
-		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout * 40)
+		ctx, cancel := context.WithTimeout(context.Background(), d.Provider.Timeout*40)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
@@ -727,7 +723,6 @@ func (d *Docker) Tag(src string, target string) *ux.State {
 
 	return d.State
 }
-
 
 // ******************************************************************************** //
 
@@ -746,7 +741,7 @@ func (d *Docker) GetContainerById(containerID string) (types.Container, *ux.Stat
 		defer cancel()
 
 		containers, err := d.Client.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: df})
-		if d.inspectError(err,"gear list error") {
+		if d.inspectError(err, "gear list error") {
 			break
 		}
 		if len(containers) == 0 {
@@ -807,7 +802,7 @@ func (d *Docker) ContainerList(filter *filters.Args, force bool) *ux.State {
 		var err error
 		options := types.ContainerListOptions{Size: true, All: true, Filters: *filter}
 		d.Containers, err = d.Client.ContainerList(ctx, options)
-		if d.inspectError(err,"container list error") {
+		if d.inspectError(err, "container list error") {
 			break
 		}
 
@@ -857,7 +852,7 @@ func (d *Docker) ContainerStart(containerID string, options *types.ContainerStar
 		// fmt.Printf("SC: %s\n", err)
 
 		err := d.Client.ContainerStart(ctx, containerID, *options)
-		if d.inspectError(err,"Container start error") {
+		if d.inspectError(err, "Container start error") {
 			break
 		}
 	}
@@ -881,7 +876,7 @@ func (d *Docker) ContainerStop(containerID string, timeout *time.Duration) *ux.S
 		defer cancel()
 
 		err := d.Client.ContainerStop(ctx, containerID, timeout)
-		if d.inspectError(err,"container stop error") {
+		if d.inspectError(err, "container stop error") {
 			break
 		}
 	}
@@ -909,7 +904,7 @@ func (d *Docker) ContainerRemove(containerID string, options *types.ContainerRem
 		defer cancel()
 
 		err := d.Client.ContainerRemove(ctx, containerID, *options)
-		if d.inspectError(err,"container remove error") {
+		if d.inspectError(err, "container remove error") {
 			break
 		}
 	}
@@ -935,7 +930,7 @@ func (d *Docker) ContainerLogs(containerID string, options types.ContainerLogsOp
 
 		// Replace this ID with a container that really exists
 		out, err := d.Client.ContainerLogs(ctx, containerID, options)
-		if d.inspectError(err,"container logs error") {
+		if d.inspectError(err, "container logs error") {
 			break
 		}
 
@@ -965,31 +960,36 @@ func (d *Docker) ContainerCommit() *ux.State {
 		//noinspection GoDeferInLoop
 		defer cancel()
 
-		createResp, err := d.Client.ContainerCreate(ctx, &container.Config{
-			Image: "alpine",
-			Cmd:   []string{"touch", "/helloworld"},
-		}, nil, nil, "")
-		if d.inspectError(err,"container create error") {
+		createResp, err := d.Client.ContainerCreate(ctx,
+			&container.Config{
+				Image: "alpine",
+				Cmd:   []string{"touch", "/helloworld"},
+			},
+			nil,
+			nil,
+			nil, // TODO verify nil is ok
+			"")
+		if d.inspectError(err, "container create error") {
 			break
 		}
 
 		err = d.Client.ContainerStart(ctx, createResp.ID, types.ContainerStartOptions{})
-		if d.inspectError(err,"container start error") {
+		if d.inspectError(err, "container start error") {
 			break
 		}
 
 		statusCh, errCh := d.Client.ContainerWait(ctx, createResp.ID, container.WaitConditionNotRunning)
 		select {
-			case err := <-errCh:
-				if err != nil {
-					//response.State.SetError("gear stop error: %s", err)
-					break
-				}
-			case <-statusCh:
+		case err := <-errCh:
+			if err != nil {
+				//response.State.SetError("gear stop error: %s", err)
+				break
+			}
+		case <-statusCh:
 		}
 
 		commitResp, err := d.Client.ContainerCommit(ctx, createResp.ID, types.ContainerCommitOptions{Reference: "helloworld"})
-		if d.inspectError(err,"container commit error") {
+		if d.inspectError(err, "container commit error") {
 			break
 		}
 
@@ -1019,7 +1019,7 @@ func (d *Docker) ContainerInspect(containerID string) (*types.ContainerJSON, *ux
 
 		var err error
 		ret, err = d.Client.ContainerInspect(ctx, containerID)
-		if d.inspectError(err,"container inspect error") {
+		if d.inspectError(err, "container inspect error") {
 			break
 		}
 
@@ -1048,8 +1048,14 @@ func (d *Docker) ContainerCreate(config *container.Config, hostConfig *container
 
 		//var resp container.ContainerCreateCreatedBody
 		var err error
-		resp, err = d.Client.ContainerCreate(ctx, config, hostConfig, netConfig, containerName)
-		if d.inspectError(err,"error creating container") {
+		resp, err = d.Client.ContainerCreate(ctx,
+			config,
+			hostConfig,
+			netConfig,
+			nil, // TODO verify nil is ok
+			containerName,
+		)
+		if d.inspectError(err, "error creating container") {
 			break
 		}
 
@@ -1063,7 +1069,6 @@ func (d *Docker) ContainerCreate(config *container.Config, hostConfig *container
 
 	return resp, d.State
 }
-
 
 // ******************************************************************************** //
 
@@ -1087,7 +1092,7 @@ func (d *Docker) NetworkList(name string) *ux.State {
 		df.Add("name", name)
 
 		d.Networks, err = d.Client.NetworkList(ctx, types.NetworkListOptions{Filters: df})
-		if d.inspectError(err,"error listing networks") {
+		if d.inspectError(err, "error listing networks") {
 			break
 		}
 
@@ -1117,7 +1122,7 @@ func (d *Docker) NetworkCreate(name string, options types.NetworkCreate) *ux.Sta
 		defer cancel()
 
 		resp, err := d.Client.NetworkCreate(ctx, name, options)
-		if d.inspectError(err,"error creating network") {
+		if d.inspectError(err, "error creating network") {
 			break
 		}
 
@@ -1130,4 +1135,9 @@ func (d *Docker) NetworkCreate(name string, options types.NetworkCreate) *ux.Sta
 	}
 
 	return d.State
+}
+
+func _close(c io.Closer) {
+	_ = c.Close()
+
 }
