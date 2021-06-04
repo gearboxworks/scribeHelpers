@@ -18,9 +18,9 @@ replace github.com/gearboxworks/scribeHelpers/toolPrompt => ../toolPrompt
 
 replace github.com/gearboxworks/scribeHelpers/toolTypes => ../toolTypes
 
-//replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../toolNetwork
+replace github.com/gearboxworks/scribeHelpers/toolExec => ../toolExec
 
-//replace github.com/gearboxworks/scribeHelpers/toolExec => ../toolExec
+replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../toolNetwork
 
 require (
 	github.com/Microsoft/hcsshim v0.8.17 // indirect
@@ -32,6 +32,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.9.0
+	github.com/gearboxworks/scribeHelpers/toolNetwork v0.0.0-00010101000000-000000000000
 	github.com/gearboxworks/scribeHelpers/toolPath v0.0.0
 	github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0
 	github.com/gearboxworks/scribeHelpers/ux v0.0.0
