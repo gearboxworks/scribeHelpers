@@ -463,8 +463,8 @@ func (d *Docker) Pull(user string, name string, version string) *ux.State {
 			break
 		}
 
-		//goland:noinspection GoDeferInLoop
-		defer _close(out)
+		//goland:noinspection GoDeferInLoop,GoUnhandledErrorResult
+		defer out.Close()
 
 		ux.PrintflnNormal("Pulling Gear %s:%s.", name, version)
 		dj := json.NewDecoder(out)
@@ -533,7 +533,7 @@ func (d *Docker) ImageBuild(buildContext io.Reader, options types.ImageBuildOpti
 			break
 		}
 		//goland:noinspection GoDeferInLoop
-		defer _close(out.Body)
+		defer out.Body.Close()
 
 		ux.PrintflnNormal("Building image")
 		termFd, isTerm := term.GetFdInfo(os.Stderr)
@@ -1135,8 +1135,4 @@ func (d *Docker) NetworkCreate(name string, options types.NetworkCreate) *ux.Sta
 	}
 
 	return d.State
-}
-
-func _close(c io.Closer) {
-	_ = c.Close()
 }
