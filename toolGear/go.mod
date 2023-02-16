@@ -23,11 +23,10 @@ replace github.com/gearboxworks/scribeHelpers/toolExec => ../toolExec
 replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../toolNetwork
 
 require (
-	github.com/Microsoft/hcsshim v0.8.17 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
 	//github.com/cakturk/go-netstat v0.0.0-20200220111822-e5b49efee7a5
 	github.com/cavaliercoder/grab v2.0.0+incompatible
-	github.com/containerd/containerd v1.5.2 // indirect
+	github.com/containerd/containerd v1.5.18 // indirect
 	github.com/docker/docker v20.10.6+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/dustin/go-humanize v1.0.0
@@ -48,9 +47,8 @@ require (
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/pkg/sftp v1.11.0
-	github.com/sirupsen/logrus v1.8.1 // indirect
 	go.mongodb.org/mongo-driver v1.3.4 // indirect
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
-	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
+	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 )
