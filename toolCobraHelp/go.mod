@@ -13,14 +13,9 @@ replace github.com/gearboxworks/scribeHelpers/toolPrompt => ../toolPrompt
 replace github.com/gearboxworks/scribeHelpers/toolTypes => ../toolTypes
 
 require (
-	github.com/gearboxworks/scribeHelpers/toolPath v0.0.0-20200621234507-ba6f08c6b68d
-	github.com/gearboxworks/scribeHelpers/toolPrompt v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0-20200621234507-ba6f08c6b68d
-	github.com/gearboxworks/scribeHelpers/toolTypes v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/gearboxworks/scribeHelpers/ux v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9 // indirect
-	golang.org/x/sys v0.0.0-20200620081246-981b61492c35 // indirect
-	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/crypto v0.1.0 // indirect
 )
