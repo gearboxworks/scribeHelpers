@@ -28,7 +28,7 @@ require (
 	//github.com/cakturk/go-netstat v0.0.0-20200220111822-e5b49efee7a5
 	github.com/cavaliercoder/grab v2.0.0+incompatible
 	github.com/containerd/containerd v1.5.2 // indirect
-	github.com/docker/docker v20.10.6+incompatible
+	github.com/docker/docker v20.10.24+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.9.0
@@ -40,7 +40,6 @@ require (
 	github.com/go-openapi/strfmt v0.19.5 // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mitchellh/mapstructure v1.3.1
